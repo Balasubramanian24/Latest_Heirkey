@@ -1,10 +1,10 @@
-import Header from "@/web/components/Header";
-import HeroSection from "@/web/components/HeroSection";
-import FeatureSection from "@/web/components/FeatureSection";
-import HowItWorksSection from "@/web/components/HowItWorksSection";
-import TestimonialSection from "@/web/components/TestimonialSection";
-import ContactSection from "@/web/components/ContactSection";
-import Footer from "@/web/components/Footer";
+import Header from "@/web/components/LandingPage/Header";
+import HeroSection from "@/web/components/LandingPage/HeroSection";
+import FeatureSection from "@/web/components/LandingPage/FeatureSection";
+import HowItWorksSection from "@/web/components/LandingPage/HowItWorksSection";
+import TestimonialSection from "@/web/components/LandingPage/TestimonialSection";
+import ContactSection from "@/web/components/LandingPage/ContactSection";
+import Footer from "@/web/components/LandingPage/Footer";
 
 export default function WebLandingPage() {
   return (
