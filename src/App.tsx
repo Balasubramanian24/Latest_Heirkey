@@ -1,7 +1,8 @@
 import useMediaQuery from "use-media";
 import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
 import WebLandingPage from "./web/WebLandingPage";
-import MobileLandingPage from "./mobile/MobileLandingPage";
+import WebSplashPage from "@/web/components/auth/WebSplashPage";
+
 
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -10,7 +11,7 @@ export default function App() {
     return (
       <Router>
         <Routes>
-          <Route path="/" element={<MobileLandingPage />} />
+
         </Routes>
       </Router>
     );
@@ -20,6 +21,7 @@ export default function App() {
     <Router> 
       <Routes>
         <Route path="/" element={<WebLandingPage />} />
+        <Route path="/auth/get-started" element={<WebSplashPage/>} />
       </Routes>
     </Router>
   );
