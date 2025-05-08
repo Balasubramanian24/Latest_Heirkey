@@ -4,11 +4,11 @@ import Hero from "@/assets/webappimage/LandingPage/Hero.jpg"
 
 export default function HeroSection() {
   return (
-    <section
+    <div
       className="relative w-full h-screen bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${Hero})` }}
     >
-      <div className="absolute inset-0 bg-opacity-50" />
+      <div className="absolute inset-0 bg-black/40"></div>
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center text-white">
         <h1 className="text-5xl md:text-6xl font-bold mb-4">Heirkey</h1>
@@ -23,6 +23,6 @@ export default function HeroSection() {
           <Button className="bg-[#2BCFD5] hover:bg-[#2BCFD5]">Sign up</Button>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

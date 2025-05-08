@@ -8,16 +8,14 @@ import Footer from "@/web/components/Footer";
 
 export default function WebLandingPage() {
   return (
-    <main className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <Header />
-
       <HeroSection />
       <FeatureSection />
       <HowItWorksSection />
       <TestimonialSection />
       <ContactSection />
-
       <Footer />
-    </main>
+    </div>
   );
 }
