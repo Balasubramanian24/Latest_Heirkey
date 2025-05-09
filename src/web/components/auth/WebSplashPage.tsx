@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Link } from "lucide-react";
 import Splash from "@/assets/webappimage/AuthImages/Splash.jpg"
 import Header from "../LandingPage/Header";
 import Footer from "../LandingPage/Footer";
@@ -31,7 +31,9 @@ export default function SplashPage() {
 
           <div className="flex gap-4">
             <Button variant="outline">Learn more</Button>
+            <Link to="/signup">
             <Button className="bg-[#2BCFD5] text-white hover:bg-[#25b6ba]">Get started</Button>
+            </Link>
           </div>
         </div>
 
