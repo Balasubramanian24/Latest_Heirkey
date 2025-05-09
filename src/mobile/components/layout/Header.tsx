@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -26,6 +26,13 @@ export default function Header({
 
   const currentLogo = location.pathname.startsWith('/dashboard') ? logoTwo : logoOne;
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-colors duration-200 ${
@@ -34,12 +41,12 @@ export default function Header({
           : 'bg-white text-secondary-900 border-b border-border shadow-sm'
       }`}
     >
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-4 md:py-5 flex items-center justify-between">
         <Link to="/" className="flex items-center">
           <img
             src={currentLogo}
             alt="HeirKey Logo"
-            className="h-10 w-auto object-contain"
+            className="h-12 md:h-14 w-auto object-contain"
           />
         </Link>
 
