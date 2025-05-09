@@ -19,12 +19,10 @@ export default function Header() {
           <NavigationMenu>
             <NavigationMenuList className="gap-5">
 
-              {/* About */}
               <NavigationMenuItem>
                 <Link to="/about" className="hover:underline">About</Link>
               </NavigationMenuItem>
 
-              {/* Plans Dropdown */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger
                   className="hover:bg-[#274877] hover:underline flex items-center bg-transparent rounded-none shadow-none focus:bg-[#274877] data-[state=open]:bg-[#274877] data-[state=open]:rounded-md"
@@ -40,7 +38,6 @@ export default function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Blog Dropdown */}
                 <NavigationMenuItem>
                     <NavigationMenuTrigger className="hover:bg-[#274877] hover:underline flex items-center bg-transparent rounded-none shadow-none focus:bg-[#274877] data-[state=open]:bg-[#274877] data-[state=open]:rounded-md">
                   Blog
@@ -54,7 +51,6 @@ export default function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Contact */}
               <NavigationMenuItem>
                 <Link to="/contact" className="hover:underline">Contact</Link>
               </NavigationMenuItem>
@@ -63,7 +59,6 @@ export default function Header() {
           </NavigationMenu>
         </div>
 
-        {/* Call to Action Buttons */}
         <div className="hidden md:flex gap-4">
           <Button variant="secondary" className="bg-white text-[#1F4168] hover:bg-gray-200">
             Directory

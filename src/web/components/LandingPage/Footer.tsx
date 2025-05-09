@@ -1,4 +1,4 @@
-import logoFooter from "@/assets/webappimage/logo/logoFooter.png"; 
+import logoFooter from "@/assets/webappimage/logo/logoFooter.png";
 
 const footerLinks = [
   {
@@ -68,7 +68,6 @@ const Footer = () => {
     <div className="bg-white border-t">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-6 gap-8">
-          {/* Retail Section */}
           <div>
             <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">retail</h4>
             <ul className="space-y-2">
@@ -83,8 +82,6 @@ const Footer = () => {
               <li><a href="#" className="text-gray-800 hover:underline">Releases</a></li>
             </ul>
           </div>
-    
-          {/* Dynamic Footer Sections */}
           {footerLinks.map((section, idx) => (
             <div key={idx}>
               <h4 className="text-xs font-semibold text-gray-700 uppercase mb-4">{section.heading}</h4>
@@ -106,7 +103,7 @@ const Footer = () => {
           ))}
         </div>
       </div>
-    
+
       <div className="border-t">
         <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row justify-between items-center">
           <img src={logoFooter} alt="Heirkey Logo" className="h-10 w-auto mb-4 sm:mb-0" />

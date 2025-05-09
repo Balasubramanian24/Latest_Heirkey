@@ -6,8 +6,7 @@ export default function HowItWorksSection() {
   const [isPlaying, setIsPlaying] = useState(false)
 
   return (
-    <section className="bg-white py-16 px-4 md:px-8 lg:px-16 space-y-16">
-      {/* How HeirKey Helps */}
+    <div className="bg-white py-16 px-4 md:px-8 lg:px-16 space-y-16">
       <div className="max-w-5xl mx-auto text-left">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           How Heirkey can Help Your Family.
@@ -24,7 +23,6 @@ export default function HowItWorksSection() {
         </p>
       </div>
 
-      {/* Why Heirkey Video */}
       <div className="max-w-5xl mx-auto">
         <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-7">Why Heirkey</h3>
         <div className="relative w-full overflow-hidden rounded-lg shadow-lg">
@@ -47,6 +45,6 @@ export default function HowItWorksSection() {
           )}
         </div>
       </div>
-    </section>
+    </div>
   )
 }
