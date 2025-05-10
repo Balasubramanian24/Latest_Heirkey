@@ -75,7 +75,7 @@ export default function VerificationForm() {
                     key={index}
                     maxLength={1}
                     inputMode="numeric"
-                    className="w-14 h-14 text-center text-2xl font-medium border-2 border-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg"
+                    className="w-14 h-14 font-bold text-[#22BBCC] text-center text-3xl focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-lg border-2 border-[#22BBCC] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-purple-500"
                     ref={(el) => void (inputsRef.current[index] = el)}
                     onChange={(e) => handleChange(e, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
