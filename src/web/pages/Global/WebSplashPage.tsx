@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import Splash from "@/assets/webappimage/AuthImages/Splash.jpg"
-import Header from "../LandingPage/Header";
-import Footer from "../LandingPage/Footer";
+import Header from "@/web/components/Layout/Header";
+import Footer from "@/web/components/Layout/Footer";
 
-export default function SplashPage() {
+export default function WebSplashPage() {
   return (
     <>
       <Header />

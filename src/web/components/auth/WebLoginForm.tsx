@@ -1,11 +1,11 @@
 import { useState } from "react";
-import Header from "@/web/components/LandingPage/Header";
-import Footer from "@/web/components/LandingPage/Footer";
-import Register from "@/web/components/pages/Register";
-import Login from "@/web/components/pages/Login";
-import LoginImage from "@/assets/webappimage/AuthImages/LoginImage.jpg"; // adjust your image path
+import Header from "@/web/components/Layout/Header";
+import Footer from "@/web/components/Layout/Footer";
+import Register from "@/web/pages/AuthPages/WebRegister";
+import Login from "@/web/pages/AuthPages/WebLogin";
+import LoginImage from "@/assets/webappimage/AuthImages/LoginImage.jpg"; 
 
-export default function AuthLogin() {
+export default function WebLoginForm() {
   const [isRegister, setIsRegister] = useState(false);
 
   return (

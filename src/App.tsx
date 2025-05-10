@@ -13,10 +13,14 @@ import ForgetPassword from "./mobile/components/auth/ForgetPassword";
 import VerificationForm from "./mobile/components/auth/VerificationForm";
 
 // Web imports
-import WebLandingPage from "./web/WebLandingPage";
-import WebSplashPage from "@/web/components/pages/WebSplashPage";
-import AuthLogin from "./web/components/auth/AuthLogin";
-import AuthRegister from "./web/components/auth/AuthRegister";
+import WebLandingPage from "@/web/WebLandingPage";
+import WebSplashPage from "@/web/pages/Global/WebSplashPage";
+import WebLogin from "@/web/components/auth/WebLoginForm";
+import WebRegister from "@/web/components/auth/WebRegisterForm";
+import WebVerificationForm from "./web/components/auth/WebVerificationForm";
+import WebResetPassword from "./web/components/auth/WebResetPassword";
+import WebForgetPassword from "./web/components/auth/WebForgetPassword";
+import WebUserProfile from "./web/components/auth/WebUserProfile";
 
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -31,7 +35,7 @@ export default function App() {
             <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
             <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
             <Route path="/auth/register" element={<Layout><RegisterPage /></Layout>} />
-            <Route path="/auth/UserProfile" element={<Layout><UserProfile /></Layout>} />
+            <Route path="/auth/user-profile" element={<Layout><UserProfile /></Layout>} />
             <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
@@ -41,8 +45,12 @@ export default function App() {
           <>
             <Route path="/" element={<WebLandingPage />} />
             <Route path="/auth/get-started" element={<WebSplashPage />} />
-            <Route path="/auth/login" element={<AuthLogin />} />
-            <Route path="/auth/register" element={<AuthRegister />} />
+            <Route path="/auth/login" element={<WebLogin />} />
+            <Route path="/auth/register" element={<WebRegister />} />
+            <Route path="/auth/verify" element={<WebVerificationForm />} />
+            <Route path="/auth/resetpassword" element={<WebResetPassword />} />
+            <Route path="/auth/forgetpassword" element={<WebForgetPassword />} />
+            <Route path="/auth/user-profile" element={<WebUserProfile />} />
           </>
         )}
       </Routes>
