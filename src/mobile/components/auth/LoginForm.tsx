@@ -60,7 +60,7 @@ export default function LoginForm() {
 
             <Button
               type="button"
-              onClick={() => navigate('/auth/UserProfile')}
+              onClick={() => navigate('/auth/user-profile')}
               className="w-full bg-[#2BCFD5] hover:bg-[#2BCFD5] text-white py-3 md:py-4 rounded-md text-base"
             >
               Log in
