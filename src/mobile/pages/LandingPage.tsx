@@ -59,8 +59,8 @@ export default function LandingPage() {
         user={null}
         handleLogout={() => {}}
       />
-      <div className="w-full flex flex-col items-center px-4 py-32 mx-auto">
-        <h1 className="text-5xl font-bold text-white text-left w-full">Heirkey</h1>
+      <div className="py-4 px-4 ">
+        <h1 className="text-5xl font-semibold text-white text-left w-full">Heirkey</h1>
         <h2 className="text-3xl font-semibold text-white text-left w-full mt-2">Lock In your Legacy.</h2>
         <p className="text-lg text-white/80 text-left w-full mt-4 mb-8">
           Heirkey is a digital organizational tool for you and your heirs
@@ -87,18 +87,30 @@ export default function LandingPage() {
         </Button>
 
         {showVideo ? (
-          <video
-            ref={videoRef}
-            src={HeirkeyVideo}
-            autoPlay
-            onClick={handleVideoClick}
-            className="w-full h-[400px] rounded-lg shadow-md object-cover mt-4 cursor-pointer"
-          />
+          <div className="relative w-full h-[300px] rounded-lg shadow-md mt-4">
+            <video
+              ref={videoRef}
+              src={HeirkeyVideo}
+              autoPlay
+              onClick={handleVideoClick}
+              className="w-full h-full rounded-lg object-cover cursor-pointer"
+            />
+            {!isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                <img
+                  src={landingImage}
+                  alt="Video Cover"
+                  className="w-full h-full rounded-lg object-cover opacity-50"
+                />
+                <Play className="h-12 w-12 text-white absolute" />
+              </div>
+            )}
+          </div>
         ) : (
           <img
             src={landingImage}
             alt="Heirkey Demo"
-            className="w-full h-[400px] rounded-lg shadow-md object-cover mt-4"
+            className="w-full h-[300px] rounded-lg shadow-md object-cover mt-4"
           />
         )}
       </div>
