@@ -12,9 +12,9 @@ export default function WebRegisterForm() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <div className="flex-grow flex flex-col md:flex-row items-center justify-center md:px-20 py-24 gap-12 bg-white">
-        <div className="w-full md:w-1/2 max-w-md">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-md p-6">
+      <div className="flex-grow flex flex-col md:flex-row items-stretch justify-center md:px-20 py-24 gap-12 bg-white">
+        <div className="w-full md:w-1/2 max-w-md flex flex-col justify-center">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-md p-6 min-h-[500px] flex flex-col justify-center">
             <div className="flex justify-center mb-6">
               <button
                 onClick={() => setIsRegister(true)}
@@ -42,11 +42,11 @@ export default function WebRegisterForm() {
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 flex justify-center">
+        <div className="w-full md:w-1/2 flex justify-center items-center">
           <img
             src={LoginImage}
             alt="Smiling elderly couple"
-            className="object-cover max-w-[400px] shadow-lg"
+            className="object-cover max-w-[400px] h-[500px] rounded-xl shadow-lg"
           />
         </div>
       </div>

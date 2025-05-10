@@ -21,6 +21,7 @@ import WebVerificationForm from "./web/components/auth/WebVerificationForm";
 import WebResetPassword from "./web/components/auth/WebResetPassword";
 import WebForgetPassword from "./web/components/auth/WebForgetPassword";
 import WebUserProfile from "./web/components/auth/WebUserProfile";
+import WebLayout from "./web/components/Layout/WebLayout";
 
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -43,14 +44,14 @@ export default function App() {
         ) : ( 
           // Web routes
           <>
-            <Route path="/" element={<WebLandingPage />} />
-            <Route path="/auth/get-started" element={<WebSplashPage />} />
-            <Route path="/auth/login" element={<WebLogin />} />
-            <Route path="/auth/register" element={<WebRegister />} />
-            <Route path="/auth/verify" element={<WebVerificationForm />} />
-            <Route path="/auth/resetpassword" element={<WebResetPassword />} />
-            <Route path="/auth/forgetpassword" element={<WebForgetPassword />} />
-            <Route path="/auth/user-profile" element={<WebUserProfile />} />
+            <Route path="/" element={<WebLayout><WebLandingPage /></WebLayout>} />
+            <Route path="/auth/get-started" element={<WebLayout><WebSplashPage /></WebLayout>} />
+            <Route path="/auth/login" element={<WebLayout><WebLogin /></WebLayout>} />
+            <Route path="/auth/register" element={<WebLayout><WebRegister /></WebLayout>} />
+            <Route path="/auth/verify" element={<WebLayout><WebVerificationForm /></WebLayout>} />
+            <Route path="/auth/resetpassword" element={<WebLayout><WebResetPassword /></WebLayout>} />
+            <Route path="/auth/forgetpassword" element={<WebLayout><WebForgetPassword /></WebLayout>} />
+            <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
           </>
         )}
       </Routes>

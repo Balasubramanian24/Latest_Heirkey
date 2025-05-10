@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"; 
 import { FcGoogle } from "react-icons/fc";
+import { Link } from "react-router-dom";
 
 export default function WebLogin() {
   return (
@@ -20,6 +21,14 @@ export default function WebLogin() {
           placeholder="Enter your password"
           className="w-full mt-1 p-2 border rounded-md text-sm"
         />
+        <div className="mt-2 text-right">
+          <Link
+            to="/auth/forgetpassword"
+            className="text-sm text-[#2BCFD5] hover:text-[#22BBCC] hover:underline transition-colors duration-200"
+          >
+            Forgot your password?
+          </Link>
+        </div>
       </div>
 
       <Button className="w-full bg-[#2BCFD5] hover:bg-[#25b6ba] text-white text-sm">
@@ -35,7 +44,9 @@ export default function WebLogin() {
 
       <p className="text-center text-sm mt-4">
         Don't have an account?{" "}
-        <span className="text-[#2BCFD5] cursor-pointer">Sign up</span>
+        <Link to="/auth/register">
+          <span className="text-[#2BCFD5] cursor-pointer">Sign up</span>
+        </Link>
       </p>
     </form>
   );

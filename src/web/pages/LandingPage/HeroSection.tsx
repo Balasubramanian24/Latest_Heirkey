@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { Link } from "react-router-dom"
 import { CirclePlay } from "lucide-react"
 import Hero from "@/assets/webappimage/LandingPage/Hero.jpg"
 
@@ -20,7 +21,9 @@ export default function HeroSection() {
           <Button variant="outline" className="bg-white text-black hover:bg-gray-100 w-40">
             <CirclePlay className="inline-block mr-1 w-5 h-5" /> Demo
           </Button>
-          <Button className="bg-[#2BCFD5] hover:bg-[#2BCFD5] w-40">Sign up</Button>
+          <Link to="/auth/get-started">
+            <Button className="bg-[#2BCFD5] hover:bg-[#2BCFD5] w-40">Sign up</Button>
+          </Link>
         </div>
       </div>
     </div>

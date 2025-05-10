@@ -56,7 +56,7 @@ const footerLinks = [
       { label: "Email", href: "#" },
       { label: "Facebook", href: "#" },
       { label: "Instagram", href: "#" },
-      { label: "Other Socails", href: "#" },
+      { label: "Other Socials", href: "#" },
       { label: "Cell Phone", href: "#" },
     ],
   },

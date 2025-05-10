@@ -2,15 +2,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
-import Header from '../Layout/Header';
+import Header from '@/web/components/Layout/Header';
+import SearchPanel from '@/web/pages/Global/SearchPanel';
 
 export default function WebUserProfile() {
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#f8f9fb]">
       <Header />
-      
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl w-full space-y-8">
+      <div className="max-w-7xl mx-auto py-8 px-4 flex flex-col lg:flex-row gap-8">
+        {/* Left: Profile Form */}
+        <div className="flex-1">
           <div className="bg-white rounded-2xl shadow-sm p-8">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">
@@ -98,6 +99,10 @@ export default function WebUserProfile() {
               </div>
             </form>
           </div>
+        </div>
+        {/* Right: Search Panel */}
+        <div className="w-full lg:w-[400px] flex-shrink-0">
+          <SearchPanel />
         </div>
       </div>
     </div>

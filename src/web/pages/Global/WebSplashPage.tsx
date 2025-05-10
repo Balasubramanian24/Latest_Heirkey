@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import Splash from "@/assets/webappimage/AuthImages/Splash.jpg"
 import Header from "@/web/components/Layout/Header";
 import Footer from "@/web/components/Layout/Footer";
@@ -33,9 +34,11 @@ export default function WebSplashPage() {
             <Button variant="outline" className="text-sm px-6 py-2">
               Learn more
             </Button>
-            <Button className="bg-[#2BCFD5] hover:bg-[#25b6ba] text-white text-sm px-6 py-2">
-              Get started
-            </Button>
+            <Link to="/auth/register">
+              <Button className="bg-[#2BCFD5] hover:bg-[#25b6ba] text-white text-sm px-6 py-2">
+                Get started
+              </Button>
+            </Link>
           </div>
         </div>
 
