@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
-import AuthHeader from "@/mobile/components/auth/AuthHeader";
+import AuthHeader from "@/mobile/components/header/gradiantHeader";
 
 export default function SplashPage() {
     return (

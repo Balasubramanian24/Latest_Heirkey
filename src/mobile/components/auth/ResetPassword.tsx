@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import AuthHeader from './AuthHeader';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import AuthHeader from '../header/gradiantHeader';
 
 const resetPasswordSchema = z
   .object({
@@ -47,94 +48,92 @@ export default function ResetPassword() {
   }, [newPassword, confirmPassword, trigger]);
 
   const onSubmit = (data: ResetPasswordFormValues) => {
-    console.log('Submitted values:', data); // Replace with API call
+    console.log('Submitted values:', data); // Replace with actual API call
   };
 
   return (
-    <div className="bg-white flex flex-col justify-center items-center px-0 py-0 sm:px-6 lg:px-8">
-      <div className="w-full md:max-w-xl lg:max-w-2xl mx-auto">
-        <AuthHeader title="Reset Password" />
+    <>
+    <AuthHeader title="Reset Password" />
+    <div className="bg-white flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto">
 
-        <div className="w-full pt-6 px-6 md:px-10 py-8">
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-semibold text-[#1F2668]">
-              Reset your password
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Enter a new password and confirm it.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Input
-                type="password"
-                placeholder="Enter new password"
-                {...register('newPassword')}
-                className={errors.newPassword ? 'border-red-500' : ''}
-              />
-              {errors.newPassword && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.newPassword.message}
-                </p>
-              )}
+        <Card className="w-full mt-6 shadow-md">
+          <CardHeader>
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-[#1F2668]">
+                Reset your password
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Enter a new password and confirm it.
+              </p>
             </div>
+          </CardHeader>
 
-            <div>
-              <Input
-                type="password"
-                placeholder="Confirm new password"
-                {...register('confirmPassword')}
-                className={errors.confirmPassword ? 'border-red-500' : ''}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-gray-500">
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                  hasValidPassword 
-                    ? 'border-green-500 bg-green-500' 
-                    : 'border-gray-300'
-                }`}>
-                  {hasValidPassword && (
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  )}
-                </div>
-                <span className={hasValidPassword ? "text-green-500" : ""}>
-                  Must be at least 8 characters and one special character
-                </span>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Enter new password"
+                  {...register('newPassword')}
+                  className={`w-full p-3 text-base ${errors.newPassword ? 'border-red-500' : ''}`}
+                />
+                {errors.newPassword && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.newPassword.message}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center gap-2 text-gray-500">
-                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                  passwordsMatch 
-                    ? 'border-green-500 bg-green-500' 
-                    : 'border-gray-300'
-                }`}>
-                  {passwordsMatch && (
-                    <div className="w-2 h-2 rounded-full bg-white" />
-                  )}
-                </div>
-                <span className={passwordsMatch ? "text-green-500" : ""}>
-                  Passwords must match
-                </span>
-              </div>
-            </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-[#2BCFD5] hover:bg-[#22BBCC]"
-              disabled={!isValid}
-            >
-              Reset Password
-            </Button>
-          </form>
-        </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  {...register('confirmPassword')}
+                  className={`w-full p-3 text-base ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    hasValidPassword ? 'border-green-500 bg-green-500' : 'border-gray-300'
+                  }`}>
+                    {hasValidPassword && <div className="w-2 h-2 rounded-full bg-white" />}
+                  </div>
+                  <span className={hasValidPassword ? 'text-green-500' : ''}>
+                    Must be at least 8 characters and one special character
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-500">
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                    passwordsMatch ? 'border-green-500 bg-green-500' : 'border-gray-300'
+                  }`}>
+                    {passwordsMatch && <div className="w-2 h-2 rounded-full bg-white" />}
+                  </div>
+                  <span className={passwordsMatch ? 'text-green-500' : ''}>
+                    Passwords must match
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-[#2BCFD5] hover:bg-[#22BBCC] py-3 text-base text-white"
+                disabled={!isValid}
+              >
+                Reset Password
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
+    </>
   );
 }
