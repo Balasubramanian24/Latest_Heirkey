@@ -1,6 +1,6 @@
 import { useState } from "react"
 import VideoThumbnail from "@/assets/webappimage/LandingPage/VideoThumbnail.jpg"
-import HeirkeyVideo from "@/assets/webappimage/video/HeirkeyVideo.mp4"
+import HeirkeyVideo from "@/assets/heirkeyvideo/HeirkeyVideo.mp4"
 
 export default function HowItWorksSection() {
   const [isPlaying, setIsPlaying] = useState(false)

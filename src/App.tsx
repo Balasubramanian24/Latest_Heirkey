@@ -1,5 +1,18 @@
 import useMediaQuery from "use-media";
 import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+
+// Mobile imports
+import Layout from "./mobile/components/layout/Layout";
+import LandingPage from "./mobile/pages/LandingPage";
+import LoginPage from "./mobile/pages/AuthPages/LoginPage";
+import SplashPage from "./mobile/pages/Global/SplashPage";
+import RegisterPage from "./mobile/pages/AuthPages/RegisterPage";
+import ResetPassword from "./mobile/components/auth/ResetPassword";
+import UserProfile from "./mobile/components/auth/UserProfile";
+import ForgetPassword from "./mobile/components/auth/ForgetPassword";
+import VerificationForm from "./mobile/components/auth/VerificationForm";
+
+// Web imports
 import WebLandingPage from "./web/WebLandingPage";
 import WebSplashPage from "@/web/components/pages/WebSplashPage";
 import AuthLogin from "./web/components/auth/AuthLogin";
@@ -8,27 +21,31 @@ import AuthRegister from "./web/components/auth/AuthRegister";
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  if (isMobile) {
-    return (
-      <Router>
-        <Routes>
-
-        </Routes>
-      </Router>
-    );
-  }
-
   return (
-    <Router> 
+    <Router>
       <Routes>
-        <Route path="/" element={<WebLandingPage />} />
-        <Route path="/auth/get-started" element={<WebSplashPage/>} />
-        <Route path="/auth/login" element={<AuthLogin/>} />
-        <Route path="/auth/register" element={<AuthRegister/>} />
+        {isMobile ? (
+          // Mobile routes
+          <>
+            <Route path="/" element={<LandingPage />}/>
+            <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
+            <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
+            <Route path="/auth/register" element={<Layout><RegisterPage /></Layout>} />
+            <Route path="/auth/UserProfile" element={<Layout><UserProfile /></Layout>} />
+            <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
+            <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
+            <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
+          </>
+        ) : (
+          // Web routes
+          <>
+            <Route path="/" element={<WebLandingPage />} />
+            <Route path="/auth/get-started" element={<WebSplashPage />} />
+            <Route path="/auth/login" element={<AuthLogin />} />
+            <Route path="/auth/register" element={<AuthRegister />} />
+          </>
+        )}
       </Routes>
     </Router>
   );
-
- 
 }
-
