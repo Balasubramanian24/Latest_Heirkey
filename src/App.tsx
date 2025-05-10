@@ -35,7 +35,7 @@ export default function App() {
             <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
             <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
             <Route path="/auth/register" element={<Layout><RegisterPage /></Layout>} />
-            <Route path="/auth/userprofile" element={<Layout><UserProfile /></Layout>} />
+            <Route path="/auth/user-profile" element={<Layout><UserProfile /></Layout>} />
             <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
