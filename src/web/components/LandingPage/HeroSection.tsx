@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { PlayIcon } from "lucide-react"
+import { CirclePlay } from "lucide-react"
 import Hero from "@/assets/webappimage/LandingPage/Hero.jpg"
 
 export default function HeroSection() {
@@ -17,10 +17,10 @@ export default function HeroSection() {
           Heirkey is a digital organizational tool for you and your heirs.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button variant="outline" className="bg-white text-black hover:bg-gray-100">
-            <PlayIcon className="w-4 h-4" /> Demo
+          <Button variant="outline" className="bg-white text-black hover:bg-gray-100 w-40">
+            <CirclePlay className="inline-block mr-1 w-5 h-5" /> Demo
           </Button>
-          <Button className="bg-[#2BCFD5] hover:bg-[#2BCFD5]">Sign up</Button>
+          <Button className="bg-[#2BCFD5] hover:bg-[#2BCFD5] w-40">Sign up</Button>
         </div>
       </div>
     </div>
