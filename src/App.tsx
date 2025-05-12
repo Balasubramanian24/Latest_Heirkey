@@ -11,6 +11,7 @@ import ResetPassword from "./mobile/components/auth/ResetPassword";
 import UserProfile from "./mobile/components/auth/UserProfile";
 import ForgetPassword from "./mobile/components/auth/ForgetPassword";
 import VerificationForm from "./mobile/components/auth/VerificationForm";
+import DashboardPage from "./mobile/pages/Dashboard/DashboardPage";
 
 // Web imports
 import WebLandingPage from "@/web/WebLandingPage";
@@ -31,6 +32,7 @@ export default function App() {
         {isMobile ? (
           // Mobile routes
           <>
+           
             <Route path="/" element={<LandingPage />}/>
             <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
             <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
@@ -39,6 +41,7 @@ export default function App() {
             <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
+            <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
           </>
         ) : ( 
           // Web routes
