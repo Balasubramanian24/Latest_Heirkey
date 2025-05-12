@@ -1,9 +1,11 @@
-import Header from './Header';
+import AppHeader from './AppHeader';
+import SubHeader from './SubHeader';
 
-export default function WebLayout({ children }: { children: React.ReactNode }) {
+export default function WebLayout({ children, subHeaderTitle }: { children: React.ReactNode, subHeaderTitle?: string }) {
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      <Header />
+      <AppHeader />
+      {subHeaderTitle && <SubHeader title={subHeaderTitle} />}
       <main className="pt-20">
         {children}
       </main>

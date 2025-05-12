@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Header from "@/web/components/Layout/Header";
+import WebLayout from "@/web/components/Layout/WebLayout";
 import Footer from "@/web/components/Layout/Footer";
 import Register from "@/web/pages/AuthPages/WebRegister";
 import Login from "@/web/pages/AuthPages/WebLogin";
@@ -9,9 +9,7 @@ export default function WebLoginForm() {
   const [isRegister, setIsRegister] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <Header />
-
+    <WebLayout subHeaderTitle="Sign Up or Login">
       <div className="flex-grow flex flex-col md:flex-row items-center justify-center md:px-20 py-24 gap-12 bg-white">
         <div className="w-full md:w-1/2 max-w-md">
           <div className="bg-white border border-gray-200 rounded-xl shadow-md p-6">
@@ -52,6 +50,6 @@ export default function WebLoginForm() {
       </div>
 
       <Footer />
-    </div>
+    </WebLayout>
   );
 }

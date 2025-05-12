@@ -60,7 +60,6 @@ export default function WebRegister() {
         />
       </div>
 
-      {/* Password Requirements */}
       <div className="space-y-2 text-sm bg-gray-50 p-4 rounded-lg">
         <div className="flex items-center gap-2">
           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${

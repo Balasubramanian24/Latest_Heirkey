@@ -44,8 +44,8 @@ export default function App() {
         ) : ( 
           // Web routes
           <>
-            <Route path="/" element={<WebLayout><WebLandingPage /></WebLayout>} />
-            <Route path="/auth/get-started" element={<WebLayout><WebSplashPage /></WebLayout>} />
+            <Route path="/" element={<WebLandingPage />} />
+            <Route path="/auth/get-started" element={<WebSplashPage />} />
             <Route path="/auth/login" element={<WebLayout><WebLogin /></WebLayout>} />
             <Route path="/auth/register" element={<WebLayout><WebRegister /></WebLayout>} />
             <Route path="/auth/verify" element={<WebLayout><WebVerificationForm /></WebLayout>} />

@@ -2,15 +2,14 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import Splash from "@/assets/webappimage/AuthImages/Splash.jpg"
-import Header from "@/web/components/Layout/Header";
+import LandingHeader from "@/web/components/Layout/LandingHeader";
 import Footer from "@/web/components/Layout/Footer";
 
 export default function WebSplashPage() {
   return (
     <>
-      <Header />
+      <LandingHeader />
       <section className="bg-white px-6 py-20 md:px-28 flex flex-col-reverse md:flex-row items-center justify-between gap-10">
-        {/* Text Content */}
         <div className="w-full md:w-1/2 max-w-xl">
           <h1 className="text-4xl md:text-4xl font-semibold text-gray-900 mb-6 leading-snug">
             Protect your legacy, <br />
