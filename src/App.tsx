@@ -21,7 +21,7 @@ import WebResetPassword from "./web/components/auth/WebResetPassword";
 import WebForgetPassword from "./web/components/auth/WebForgetPassword";
 import WebUserProfile from "./web/components/auth/WebUserProfile";
 import WebLayout from "./web/components/Layout/WebLayout";
-
+import Dashboard from "./web/pages/Dashboard/Dashboard";
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -51,6 +51,7 @@ export default function App() {
             <Route path="/auth/resetpassword" element={<WebLayout><WebResetPassword /></WebLayout>} />
             <Route path="/auth/forgetpassword" element={<WebLayout><WebForgetPassword /></WebLayout>} />
             <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
+            <Route path="/dashboard" element={<WebLayout><Dashboard /></WebLayout>} />
           </>
         )}
       </Routes>
