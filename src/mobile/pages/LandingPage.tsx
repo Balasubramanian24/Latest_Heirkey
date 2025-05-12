@@ -3,7 +3,7 @@ import { Play, Pause } from 'lucide-react';
 import landingImage from '@/assets/mobileimage/global/landingImage.png';
 import { useNavigate } from 'react-router-dom';
 import HeirkeyVideo from "@/assets/heirkeyvideo/HeirkeyVideo.mp4"
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Header from '@/mobile/components/layout/Header';
 
 export default function LandingPage() {
@@ -12,12 +12,12 @@ export default function LandingPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.body.style.overflow = 'hidden';
+  //   return () => {
+  //     document.body.style.overflow = '';
+  //   };
+  // }, []);
 
   const handleGetStarted = () => {
     navigate('/auth/get-started');
