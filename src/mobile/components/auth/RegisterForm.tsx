@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent} from '@/components/ui/card';
 import google from '@/assets/mobileimage/global/google.svg';
 import AuthHeader from '../header/gradiantHeader';
 import { useState } from 'react';
@@ -42,15 +42,10 @@ export default function RegisterForm() {
       </div>
 
       {/* Card Container */}
-      <Card className="w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto p-4 md:p-6 shadow-md">
-        <CardHeader>
-          <h1 className="text-2xl md:text-3xl font-semibold text-center">
-            Sign up
-          </h1>
-        </CardHeader>
+      <Card className="w-full max-w-sm md:max-w-xl lg:max-w-2xl mx-auto p-4 md:p-6 shadow-md">
 
-        <CardContent>
-          <form className="space-y-4">
+        <CardContent className='mt-7'>
+          <form className="space-y-5">
             <Input
               placeholder="Enter your username"
               className="w-full p-3 text-base"

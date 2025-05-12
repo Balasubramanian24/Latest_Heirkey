@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent} from '@/components/ui/card';
 import google from '@/assets/mobileimage/global/google.svg';
 import AuthHeader from '../header/gradiantHeader';
 
@@ -27,13 +27,10 @@ export default function LoginForm() {
         </Link>
       </div>
 
-      <Card className="w-full max-w-md md:max-w-xl lg:max-w-2xl mx-auto p-4 md:p-6 shadow-md">
-        <CardHeader>
-          <h1 className="text-2xl md:text-3xl font-semibold text-center">Login</h1>
-        </CardHeader>
+      <Card className="w-full max-w-sm md:max-w-xl lg:max-w-2xl mx-auto p-4 md:p-6 shadow-md">
 
-        <CardContent>
-          <form className="space-y-4">
+        <CardContent className='mt-7'>
+          <form className="space-y-5">
             <div>
               <Input
                 type="email"
