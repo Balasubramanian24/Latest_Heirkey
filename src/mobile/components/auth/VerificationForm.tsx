@@ -49,7 +49,7 @@ export default function VerificationForm() {
 
   return (
     <>
-    <AuthHeader title="Join Us" />
+    <AuthHeader title="Verify Email" />
     <div className="flex flex-col items-center justify-center px-4">
       <Card className="w-full max-w-md mt-8 shadow-lg">
         <CardHeader className="text-center">

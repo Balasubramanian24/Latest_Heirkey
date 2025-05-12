@@ -42,7 +42,7 @@ export default function ForgetPassword() {
                 onClick={() => navigate('/auth/resetpassword')}
                 className="w-full bg-[#2BCFD5] text-white py-3 text-base"
               >
-                Fetch Reset Link
+                Send Reset Link
               </Button>
             </form>
           </CardContent>
