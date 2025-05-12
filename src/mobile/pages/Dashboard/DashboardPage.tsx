@@ -2,44 +2,49 @@ import { motion } from 'framer-motion';
 import CategoryCard from '@/mobile/components/dashboard/CategoryCard';
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 
-
+import homeImg from '@/assets/category/home.jpg'
+import documentsImg from '@/assets/category/documents.jpg'
+import willImg from '@/assets/category/will.jpg'
+import funeralImg from '@/assets/category/funeral.jpg'
+import contactImg from '@/assets/category/contact.jpg'
+import socialMediaImg from '@/assets/category/socialMedia.jpg'
 
 const categories = [
   {
     id: 'home-instructions',
     name: 'Home Instructions',
     description: 'Instructions for your home and pets.',
-    imageUrl: 'https://images.pexels.com/photos/3243/pen-calendar-to-do-checklist.jpg',
+    imageUrl: homeImg,
   },
   {
     id: 'home-documents',
     name: 'Home Documents',
     description: 'Important documents for your home.',
-    imageUrl: 'https://images.pexels.com/photos/3184394/pexels-photo-3184394.jpeg',
+    imageUrl: documentsImg,
   },
   {
     id: 'will-location',
     name: 'Will Location',
     description: 'Where your will is stored.',
-    imageUrl: 'https://images.pexels.com/photos/618158/pexels-photo-618158.jpeg',
+    imageUrl: willImg,
   },
   {
     id: 'funeral-arrangements',
     name: 'Funeral Arrangements',
     description: 'Your funeral preferences.',
-    imageUrl: 'https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg',
+    imageUrl: funeralImg,
   },
   {
     id: 'important-contacts',
     name: 'Important Contacts',
     description: 'People to contact in case of emergency.',
-    imageUrl: 'https://images.pexels.com/photos/3184395/pexels-photo-3184395.jpeg',
+    imageUrl: contactImg,
   },
   {
     id: 'social-media-phone',
     name: 'Social Media and Phone',
     description: 'Your social media and phone details.',
-    imageUrl: 'https://images.pexels.com/photos/3184405/pexels-photo-3184405.jpeg',
+    imageUrl: socialMediaImg,
   },
 ];
 
