@@ -45,7 +45,7 @@ export default function WebSplashPage() {
           <img
             src={Splash}
             alt="Legacy protection"
-            className="object-cover w-full max-w-md h-auto shadow-xl"
+            className="object-cover w-full max-w-md h-auto shadow-xl rounded-xl shadow-gray-300"
           />
         </div>
       </section>

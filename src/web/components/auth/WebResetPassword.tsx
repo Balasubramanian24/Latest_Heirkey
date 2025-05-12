@@ -97,7 +97,7 @@ export default function WebResetPassword() {
                 </div>
               </div>
 
-              <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
+              <div className="space-y-3 p-4 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
                     hasValidPassword 

@@ -15,8 +15,7 @@ import VerificationForm from "./mobile/components/auth/VerificationForm";
 // Web imports
 import WebLandingPage from "@/web/WebLandingPage";
 import WebSplashPage from "@/web/pages/Global/WebSplashPage";
-import WebLogin from "@/web/components/auth/WebLoginForm";
-import WebRegister from "@/web/components/auth/WebRegisterForm";
+import WebAuthForm from "@/web/components/auth/WebAuthForm";
 import WebVerificationForm from "./web/components/auth/WebVerificationForm";
 import WebResetPassword from "./web/components/auth/WebResetPassword";
 import WebForgetPassword from "./web/components/auth/WebForgetPassword";
@@ -46,8 +45,8 @@ export default function App() {
           <>
             <Route path="/" element={<WebLandingPage />} />
             <Route path="/auth/get-started" element={<WebSplashPage />} />
-            <Route path="/auth/login" element={<WebLayout><WebLogin /></WebLayout>} />
-            <Route path="/auth/register" element={<WebLayout><WebRegister /></WebLayout>} />
+            <Route path="/auth/register" element={<WebAuthForm initialMode="register" />} />
+            <Route path="/auth/login" element={<WebAuthForm initialMode="login" />} />
             <Route path="/auth/verify" element={<WebLayout><WebVerificationForm /></WebLayout>} />
             <Route path="/auth/resetpassword" element={<WebLayout><WebResetPassword /></WebLayout>} />
             <Route path="/auth/forgetpassword" element={<WebLayout><WebForgetPassword /></WebLayout>} />

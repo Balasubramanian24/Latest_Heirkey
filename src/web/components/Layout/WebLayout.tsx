@@ -6,7 +6,7 @@ export default function WebLayout({ children, subHeaderTitle }: { children: Reac
     <div className="min-h-screen bg-[#f8f9fb]">
       <AppHeader />
       {subHeaderTitle && <SubHeader title={subHeaderTitle} />}
-      <main className="pt-20">
+      <main className="pt-20 bg-white">
         {children}
       </main>
     </div>
