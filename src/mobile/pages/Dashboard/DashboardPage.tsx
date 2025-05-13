@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import CategoryCard from '@/mobile/components/dashboard/CategoryCard';
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 
-import homeImg from '@/assets/category/home.jpg'
-import documentsImg from '@/assets/category/documents.jpg'
-import willImg from '@/assets/category/will.jpg'
-import funeralImg from '@/assets/category/funeral.jpg'
-import contactImg from '@/assets/category/contact.jpg'
-import socialMediaImg from '@/assets/category/socialMedia.jpg'
+import homeImg from '@/assets/global/category/home.jpg'
+import documentsImg from '@/assets/global/category/document.jpg'
+import willImg from '@/assets/global/category/will.jpg'
+import funeralImg from '@/assets/global/category/funeral.jpg'
+import contactImg from '@/assets/global/category/contact.jpg'
+import socialMediaImg from '@/assets/global/category/socialMedia.jpg'
 
 const categories = [
   {

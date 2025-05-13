@@ -1,0 +1,177 @@
+import { Link } from 'react-router-dom';
+import { Avatar } from '@radix-ui/react-avatar';
+import { Progress } from '@/components/ui/progress';
+import { CheckCircle2 } from 'lucide-react';
+import AppHeader from '@/web/components/Layout/AppHeader';
+import Footer from '@/web/components/Layout/Footer';
+import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
+import homeInstructionsData from '@/data/homeIntsructions.json';
+import SearchPanel from '@/web/pages/Global/SearchPanel';
+
+
+interface SubCategory {
+  id: string;
+  title: string;
+  questionsCount: number;
+}
+
+// Define subcategories
+const subcategories: SubCategory[] = [
+  {
+    id: '101',
+    title: 'Pets',
+    questionsCount: homeInstructionsData['101']?.length || 0
+  },
+  {
+    id: '102',
+    title: 'Trash',
+    questionsCount: homeInstructionsData['102']?.length || 0
+  },
+  {
+    id: '103',
+    title: 'Other',
+    questionsCount: homeInstructionsData['103']?.length || 0
+  },
+  {
+    id: '104',
+    title: 'Security',
+    questionsCount: homeInstructionsData['104']?.length || 0
+  }
+];
+
+const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
+  // This would come from your user's data in a real implementation
+  const completedQuestions = 0;
+  const completionPercentage = subcategory.questionsCount > 0 
+    ? Math.round((completedQuestions / subcategory.questionsCount) * 100) 
+    : 0;
+  
+  return (
+    <Link to={`/home-instructions/${subcategory.title.toLowerCase()}`} className="block">
+      <div className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium text-[#183153]">{subcategory.title}</h3>
+            <span className="text-sm text-blue-500">
+              {completedQuestions}/{subcategory.questionsCount} questions
+            </span>
+          </div>
+          <Progress 
+            value={completionPercentage} 
+            className="h-1.5 mb-2" 
+          />
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+const HomeInstructions = () => {
+  const user = {
+    name: 'Francis Nixon',
+    email: 'fnixon35@hotmail.com',
+  };
+
+  // Calculate overall progress
+  const progressStats = (() => {
+    const totalQuestions = Object.values(homeInstructionsData).reduce(
+      (sum, questions) => sum + questions.length, 0
+    );
+    
+    // In a real app, you'd get this from your backend
+    const answeredQuestions = 0;
+    
+    const completionPercentage = totalQuestions > 0 
+      ? Math.round((answeredQuestions / totalQuestions) * 100) 
+      : 0;
+    
+    return {
+      totalQuestions,
+      answeredQuestions,
+      completionPercentage
+    };
+  })();
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <AppHeader />
+      
+      {/* Header with gradient background */}
+      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-1">Home Instructions</h1>
+              <Link to="/dashboard" className="flex items-center text-sm hover:underline">
+                <span className="mr-1">←</span> Back Home
+              </Link>
+            </div>
+            <div className="flex items-center">
+              <div className="text-right mr-4">
+                <div className="font-semibold">{user.name}</div>
+                <div className="text-sm opacity-80">{user.email}</div>
+              </div>
+              <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
+                <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+              </Avatar>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main content */}
+      <div className="flex-1 container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left column - Categories */}
+          <div className="md:col-span-2">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              {/* Overall progress bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-sm font-medium text-gray-700">Overall progress</h3>
+                  <span className="text-sm text-gray-500">
+                    {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
+                  </span>
+                </div>
+                <Progress 
+                  value={progressStats.completionPercentage} 
+                  className="h-2" 
+                />
+                {progressStats.completionPercentage === 100 && (
+                  <div className="mt-2 text-center">
+                    <span className="inline-flex items-center text-sm text-green-600 font-medium">
+                      <CheckCircle2 className="h-4 w-4 mr-1" /> All questions completed!
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">How to Understand Topics</span></h2>
+              <p className="text-gray-600 mb-6">
+                Each topic below is a part of your home documents, with questions to help you provide important 
+                information for you and your loved ones. Click on a category to answer questions at your own pace—
+                we'll save everything for you.
+              </p>
+              
+              {/* Subcategory cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                {subcategories.map(subcategory => (
+                  <SubCategoryCard key={subcategory.id} subcategory={subcategory} />
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Right column - Search panel */}
+          <div>
+            <SearchPanel />
+          </div>
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default HomeInstructions; 
