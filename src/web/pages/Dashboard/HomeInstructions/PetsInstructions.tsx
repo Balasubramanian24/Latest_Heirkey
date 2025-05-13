@@ -11,11 +11,12 @@ import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
-import { 
-  Question, 
-  QuestionItem, 
-  buildValidationSchema, 
-  generateInitialValues, 
+import userInputService from '@/services/userInputService';
+import {
+  Question,
+  QuestionItem,
+  buildValidationSchema,
+  generateInitialValues,
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
@@ -23,7 +24,7 @@ import {
 const PetsInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const navigate = useNavigate();
-  
+
   const user = {
     name: 'Francis Nixon',
     email: 'fnixon35@hotmail.com',
@@ -37,11 +38,58 @@ const PetsInstructions = () => {
   }, []);
 
   // Handle form submission
-  const handleSubmit = (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
-    console.log('Saving pet instructions:', values);
-    // Here you would save the data to your backend
-    setSubmitting(false);
-    navigate('/home-instructions');
+  const handleSubmit = async (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
+    try {
+      console.log('Saving pet instructions:', values);
+
+      // Format the answers for the backend - we'll use a different approach with sections
+
+      // Group answers by section
+      const answersBySection = questions
+        .reduce((sections: Record<string, any[]>, question) => {
+          if (!sections[question.sectionId]) {
+            sections[question.sectionId] = [];
+          }
+
+          const answer = values[question.id];
+          if (answer) {
+            sections[question.sectionId].push({
+              index: sections[question.sectionId].length,
+              questionId: '000000000000000000000001', // Placeholder MongoDB ObjectId
+              originalQuestionId: question.id, // Store our original question ID
+              question: question.text,
+              type: question.type,
+              answer
+            });
+          }
+
+          return sections;
+        }, {});
+
+      // Format data for API
+      const userData = {
+        userId: '000000000000000000000001', // Placeholder MongoDB ObjectId - replace with actual user ID
+        categoryId: '000000000000000000000002', // Placeholder MongoDB ObjectId - replace with actual category ID
+        subCategoryId: '000000000000000000000003', // Placeholder MongoDB ObjectId - replace with actual subcategory ID
+        originalSubCategoryId: '101', // Our manual subcategory ID for pets
+        answersBySection: Object.entries(answersBySection).map(([sectionId, answers]) => ({
+          sectionId: '000000000000000000000004', // Placeholder MongoDB ObjectId
+          originalSectionId: sectionId, // Store our original section ID
+          isCompleted: true,
+          answers
+        }))
+      };
+
+      // Save to backend
+      await userInputService.createUserInput(userData);
+
+      setSubmitting(false);
+      navigate('/home-instructions');
+    } catch (error) {
+      console.error('Error saving pet instructions:', error);
+      setSubmitting(false);
+      // Handle error (show error message, etc.)
+    }
   };
 
   // If no questions loaded yet, return loading state
@@ -55,7 +103,7 @@ const PetsInstructions = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <AppHeader />
-      
+
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8">
         <div className="container mx-auto px-4">
@@ -78,7 +126,7 @@ const PetsInstructions = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Main content */}
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -93,7 +141,7 @@ const PetsInstructions = () => {
                 {({ values, isSubmitting, isValid, dirty, setValues }) => {
                   const progressStats = calculateProgress(questions, values);
                   const prevValuesRef = useRef<Record<string, any>>({});
-                  
+
                   // Watch for changes to parent questions and reset dependent questions
                   useEffect(() => {
                     // Only process if values have changed
@@ -102,7 +150,7 @@ const PetsInstructions = () => {
                       prevValuesRef.current = { ...values };
                     }
                   }, [values, setValues, questions]);
-                  
+
                   return (
                     <Form>
                       {/* Progress bar */}
@@ -113,9 +161,9 @@ const PetsInstructions = () => {
                             {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
                           </span>
                         </div>
-                        <Progress 
-                          value={progressStats.completionPercentage} 
-                          className="h-2" 
+                        <Progress
+                          value={progressStats.completionPercentage}
+                          className="h-2"
                         />
                         {progressStats.completionPercentage === 100 && (
                           <div className="mt-2 text-center">
@@ -125,24 +173,24 @@ const PetsInstructions = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">Filling in Your Pet Information</span></h2>
                       <p className="text-gray-600 mb-6">
                         Please provide information about your pets below. This will help your loved ones understand important details about your furry friends.
                       </p>
-                      
+
                       <div className="mt-4">
                         {questions
                           .sort((a, b) => a.order - b.order)
                           .map(question => (
-                            <QuestionItem 
-                              key={question.id} 
-                              question={question} 
+                            <QuestionItem
+                              key={question.id}
+                              question={question}
                               values={values}
                             />
                           ))
                         }
-                        
+
                         <div className="mt-8 flex justify-end">
                           <Button
                             type="submit"
@@ -159,17 +207,17 @@ const PetsInstructions = () => {
               </Formik>
             </div>
           </div>
-          
+
           {/* Right column - Search panel */}
           <div>
             <SearchPanel />
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
 };
 
-export default PetsInstructions; 
+export default PetsInstructions;
