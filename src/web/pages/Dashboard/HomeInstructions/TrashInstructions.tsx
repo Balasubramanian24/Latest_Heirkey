@@ -106,16 +106,16 @@ const TrashInstructions = () => {
   const initialValues = generateInitialValues(questions);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
 
       {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8">
+      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-1">Home Instructions: Trash</h1>
-              <Link to="/home-instructions" className="flex items-center text-sm hover:underline">
+              <Link to="/dashboard" className="flex items-center text-sm hover:underline">
                 <span className="mr-1">←</span> Back to Categories
               </Link>
             </div>

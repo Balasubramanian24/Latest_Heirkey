@@ -1,5 +1,5 @@
 import useMediaQuery from "use-media";
-import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+import { Routes, Route, BrowserRouter as Router, useParams } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import GoogleAuthCallback from "./components/auth/GoogleAuthCallback";
@@ -26,11 +26,22 @@ import WebForgetPassword from "./web/components/auth/WebForgetPassword";
 import WebUserProfile from "./web/components/auth/WebUserProfile";
 import WebLayout from "./web/components/Layout/WebLayout";
 import Dashboard from "./web/pages/Dashboard/Dashboard";
-import HomeInstructions from "./web/pages/Dashboard/HomeInstructions/HomeInstructions";
 import PetsInstructions from "./web/pages/Dashboard/HomeInstructions/PetsInstructions";
 import TrashInstructions from "./web/pages/Dashboard/HomeInstructions/TrashInstructions";
 import OtherInstructions from "./web/pages/Dashboard/HomeInstructions/OtherInstructions";
 import SecurityInstructions from "./web/pages/Dashboard/HomeInstructions/SecurityInstructions";
+import HomeInstructions from "./web/pages/Dashboard/HomeInstructions/HomeInstructions";
+import CategoryStartup from "./web/pages/Global/CategoryStartup";
+
+function CategoryStartupWrapper() {
+  const { categoryName } = useParams();
+  return <CategoryStartup category={categoryName} />;
+}
+
+function HomeInstructionsWrapper() {
+  const { categoryName } = useParams();
+  return <HomeInstructions category={categoryName} />;
+}
 
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -68,11 +79,14 @@ export default function App() {
             <Route path="/dashboard" element={<ProtectedRoute><WebLayout><Dashboard /></WebLayout></ProtectedRoute>} />
             <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
             <Route path="/dashboard" element={<WebLayout><Dashboard /></WebLayout>} />
-            <Route path="/home-instructions" element={<HomeInstructions />} />
-            <Route path="/home-instructions/pets" element={<PetsInstructions />} />
-            <Route path="/home-instructions/trash" element={<TrashInstructions />} />
-            <Route path="/home-instructions/other" element={<OtherInstructions />} />
-            <Route path="/home-instructions/security" element={<SecurityInstructions />} />
+            
+            <Route path="/category/:categoryName" element={<CategoryStartupWrapper />} />
+            <Route path="/category/:categoryName/info" element={<HomeInstructionsWrapper />} />
+            <Route path="/category/:categoryName/pets" element={<PetsInstructions />} />
+            <Route path="/category/:categoryName/trash" element={<TrashInstructions />} />
+            <Route path="/category/:categoryName/other" element={<OtherInstructions />} />
+            <Route path="/category/:categoryName/security" element={<SecurityInstructions />} />
+
           </>
         )}
       </Routes>
