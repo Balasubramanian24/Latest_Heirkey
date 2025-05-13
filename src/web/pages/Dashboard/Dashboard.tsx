@@ -52,44 +52,44 @@ const Dashboard = () => {
       title: 'Home Instructions',
       imageSrc: home,
       questionCount: '0/5 questions',
-      path: '/home-instructions'
+      path: '/category/homeinstructions'
     },
     {
       title: 'Home Documents',
       imageSrc: documents,
       questionCount: '0/26 questions',
-      path: '/home-documents'
+      path: '/category/homedocuments'
     },
     {
       title: 'Will Location',
       imageSrc: will,
       questionCount: '0/3 questions',
-      path: '/will-location'
+      path: '/category/willlocation'
     },
     {
       title: 'Funeral Arrangements',
       imageSrc: funeral,
       questionCount: '0/12',
-      path: '/funeral-arrangements'
+      path: '/category/funeralarrangements'
     },
     {
       title: 'Important Contacts',
       imageSrc: contact,
       questionCount: '0/12',
-      path: '/important-contacts'
+      path: '/category/importantcontacts'
     },
     {
       title: 'Social Media',
       imageSrc: socialMedia,
       questionCount: '0/12',
-      path: '/social-media'
+      path: '/category/socialmedia'
     }
   ]
 
   return (
     <div className="flex flex-col">
       <AppHeader />
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8">
+      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
