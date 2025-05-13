@@ -12,6 +12,8 @@ import UserProfile from "./mobile/components/auth/UserProfile";
 import ForgetPassword from "./mobile/components/auth/ForgetPassword";
 import VerificationForm from "./mobile/components/auth/VerificationForm";
 import DashboardPage from "./mobile/pages/Dashboard/DashboardPage";
+import CategoryConfirmPage from "./mobile/pages/categoryconfirm/categoryconfirm";
+
 
 // Web imports
 import WebLandingPage from "@/web/WebLandingPage";
@@ -42,6 +44,9 @@ export default function App() {
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
             <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
+            <Route path="/categoryconfirm" element={<Layout><CategoryConfirmPage /></Layout>} />
+
+
           </>
         ) : ( 
           // Web routes
