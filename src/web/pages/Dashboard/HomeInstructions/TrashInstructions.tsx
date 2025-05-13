@@ -89,7 +89,7 @@ const TrashInstructions = () => {
       await userInputService.createUserInput(userData);
 
       setSubmitting(false);
-      navigate('/home-instructions');
+      navigate('/homeinstructions');
     } catch (error) {
       console.error('Error saving trash instructions:', error);
       setSubmitting(false);

@@ -91,7 +91,7 @@ const PetsInstructions = () => {
       await userInputService.createUserInput(userData);
 
       setSubmitting(false);
-      navigate('/home-instructions');
+      navigate('/homeinstructions');
     } catch (error) {
       console.error('Error saving pet instructions:', error);
       setSubmitting(false);
