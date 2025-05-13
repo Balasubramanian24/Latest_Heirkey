@@ -13,6 +13,12 @@ import ForgetPassword from "./mobile/components/auth/ForgetPassword";
 import VerificationForm from "./mobile/components/auth/VerificationForm";
 import DashboardPage from "./mobile/pages/Dashboard/DashboardPage";
 import CategoryConfirmPage from "./mobile/pages/categoryconfirm/categoryconfirm";
+import HomeInstructionsPage from '@/mobile/pages/HomeInstructions/HomeInstructionsPage';
+import PetsInstructionsPage from '@/mobile/pages/HomeInstructions/PetsInstructionsPage';
+import TrashInstructionsPage from '@/mobile/pages/HomeInstructions/TrashInstructionsPage';
+import OtherInstructionsPage from "./mobile/pages/HomeInstructions/OtherInstructionsPage";
+import SecurityInstructionsPage from "./mobile/pages/HomeInstructions/SecurityInstructionsPage";
+
 
 
 // Web imports
@@ -51,10 +57,12 @@ export default function App() {
 
             <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
             <Route path="/categoryconfirm" element={<Layout><CategoryConfirmPage /></Layout>} />
-
+            <Route path="/home-instructions" element={<Layout><HomeInstructionsPage /></Layout>} />
+            <Route path="/home-instructions/pets" element={<Layout><PetsInstructionsPage /></Layout>} />
+            <Route path="/home-instructions/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
+            <Route path="/home-instructions/other" element={<Layout><OtherInstructionsPage /></Layout>} />
+            <Route path="/home-instructions/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
             
-
-
           </>
         ) : ( 
           // Web routes

@@ -16,7 +16,7 @@ const CategoryConfirmCard: React.FC<CategoryConfirmCardProps> = ({
   return (
     <>
     <div className="max-w-md mx-auto space-y-4 px-4">
-    <Card className="shadow-md bg-gray-200 rounded-xl mt-4">
+    <Card className="shadow-md bg-gray-50 rounded-xl mt-4">
       <CardContent className="pt-6 px-6 pb-4 space-y-3">
         <h2 className="text-base font-semibold text-purple-700">
           How to Add Your Information
@@ -25,7 +25,7 @@ const CategoryConfirmCard: React.FC<CategoryConfirmCardProps> = ({
           Now, you are about to enter details about your home, life, and essential information to be passed on to your family members. Each section has several questions. Fill out as much as you can/like. You can always come back to fill out more information later.
         </p>
 
-        <hr className="border-t border-black mt-4" />
+        <hr className="border-t border-gray-5 mt-4" />
       </CardContent>
     </Card>
 
