@@ -26,6 +26,12 @@ import WebForgetPassword from "./web/components/auth/WebForgetPassword";
 import WebUserProfile from "./web/components/auth/WebUserProfile";
 import WebLayout from "./web/components/Layout/WebLayout";
 import Dashboard from "./web/pages/Dashboard/Dashboard";
+import HomeInstructions from "./web/pages/Dashboard/HomeInstructions/HomeInstructions";
+import PetsInstructions from "./web/pages/Dashboard/HomeInstructions/PetsInstructions";
+import TrashInstructions from "./web/pages/Dashboard/HomeInstructions/TrashInstructions";
+import OtherInstructions from "./web/pages/Dashboard/HomeInstructions/OtherInstructions";
+import SecurityInstructions from "./web/pages/Dashboard/HomeInstructions/SecurityInstructions";
+
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -60,6 +66,13 @@ export default function App() {
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
             <Route path="/auth/user-profile" element={<ProtectedRoute><WebLayout><WebUserProfile /></WebLayout></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><WebLayout><Dashboard /></WebLayout></ProtectedRoute>} />
+            <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
+            <Route path="/dashboard" element={<WebLayout><Dashboard /></WebLayout>} />
+            <Route path="/home-instructions" element={<HomeInstructions />} />
+            <Route path="/home-instructions/pets" element={<PetsInstructions />} />
+            <Route path="/home-instructions/trash" element={<TrashInstructions />} />
+            <Route path="/home-instructions/other" element={<OtherInstructions />} />
+            <Route path="/home-instructions/security" element={<SecurityInstructions />} />
           </>
         )}
       </Routes>

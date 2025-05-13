@@ -32,13 +32,13 @@ const authService = {
   // Login user
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await api.post('/auth/login', credentials);
-    return response.data;
+    return response.data as AuthResponse;
   },
 
   // Register user
   register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
     const response = await api.post('/auth/register', credentials);
-    return response.data;
+    return response.data as AuthResponse;
   },
 
   // Logout user
@@ -55,25 +55,25 @@ const authService = {
   // Get current user profile
   getProfile: async (): Promise<User> => {
     const response = await api.get('/auth/profile');
-    return response.data.user;
+    return response.data as User;
   },
 
   // Reset password request
   forgotPassword: async (email: string): Promise<{ message: string }> => {
     const response = await api.post('/auth/forget-password', { email });
-    return response.data;
+    return response.data as { message: string };
   },
 
   // Reset password with token
   resetPassword: async (token: string, password: string): Promise<{ message: string }> => {
     const response = await api.post(`/auth/reset-password/${token}`, { password });
-    return response.data;
+    return response.data as { message: string };
   },
 
   // Update user profile
   updateProfile: async (userData: Partial<User>): Promise<User> => {
     const response = await api.put('/auth/profile', userData);
-    return response.data.user;
+    return response.data as User;
   },
 
   // Update profile image
@@ -83,7 +83,7 @@ const authService = {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data.user;
+    return response.data as User;
   },
 };
 

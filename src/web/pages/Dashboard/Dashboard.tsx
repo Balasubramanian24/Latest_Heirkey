@@ -3,14 +3,13 @@ import { Avatar } from '@radix-ui/react-avatar'
 import AppHeader from '@/web/components/Layout/AppHeader'
 import Footer from '@/web/components/Layout/Footer'
 import SearchPanel from '@/web/pages/Global/SearchPanel'
-
-// Import images
-import homeImg from '@/assets/category/home.jpg'
-import documentsImg from '@/assets/category/documents.jpg'
-import willImg from '@/assets/category/will.jpg'
-import funeralImg from '@/assets/category/funeral.jpg'
-import contactImg from '@/assets/category/contact.jpg'
-import socialMediaImg from '@/assets/category/socialMedia.jpg'
+import home from '@/assets/global/category/home.jpg'
+import documents from '@/assets/global/category/document.jpg'
+import will from '@/assets/global/category/will.jpg'
+import funeral from '@/assets/global/category/funeral.jpg'
+import contact from '@/assets/global/category/contact.jpg'
+import socialMedia from '@/assets/global/category/socialMedia.jpg'
+import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg'
 
 const CategoryCard = ({ 
   title, 
@@ -51,37 +50,37 @@ const Dashboard = () => {
   const categories = [
     {
       title: 'Home Instructions',
-      imageSrc: homeImg,
+      imageSrc: home,
       questionCount: '0/5 questions',
       path: '/home-instructions'
     },
     {
       title: 'Home Documents',
-      imageSrc: documentsImg,
+      imageSrc: documents,
       questionCount: '0/26 questions',
       path: '/home-documents'
     },
     {
       title: 'Will Location',
-      imageSrc: willImg,
+      imageSrc: will,
       questionCount: '0/3 questions',
       path: '/will-location'
     },
     {
       title: 'Funeral Arrangements',
-      imageSrc: funeralImg,
+      imageSrc: funeral,
       questionCount: '0/12',
       path: '/funeral-arrangements'
     },
     {
       title: 'Important Contacts',
-      imageSrc: contactImg,
+      imageSrc: contact,
       questionCount: '0/12',
       path: '/important-contacts'
     },
     {
       title: 'Social Media',
-      imageSrc: socialMediaImg,
+      imageSrc: socialMedia,
       questionCount: '0/12',
       path: '/social-media'
     }
@@ -90,7 +89,7 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col">
       <AppHeader />
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8 mt-20">
+      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
@@ -105,13 +104,12 @@ const Dashboard = () => {
                 <div className="text-sm opacity-80">{user.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
               </Avatar>
             </div>
           </div>
         </div>
       </div>
-
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
