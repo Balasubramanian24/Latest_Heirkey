@@ -1,5 +1,8 @@
 import useMediaQuery from "use-media";
 import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import GoogleAuthCallback from "./components/auth/GoogleAuthCallback";
 
 // Mobile imports
 import Layout from "./mobile/components/layout/Layout";
@@ -28,22 +31,23 @@ export default function App() {
 
   return (
     <Router>
-      <Routes>
-        {isMobile ? (
+      <AuthProvider>
+        <Routes>
+          {isMobile ? (
           // Mobile routes
           <>
-           
+
             <Route path="/" element={<LandingPage />}/>
             <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
             <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
             <Route path="/auth/register" element={<Layout><RegisterPage /></Layout>} />
-            <Route path="/auth/user-profile" element={<Layout><UserProfile /></Layout>} />
+            <Route path="/auth/user-profile" element={<ProtectedRoute><Layout><UserProfile /></Layout></ProtectedRoute>} />
             <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
-            <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
           </>
-        ) : ( 
+        ) : (
           // Web routes
           <>
             <Route path="/" element={<WebLandingPage />} />
@@ -53,11 +57,13 @@ export default function App() {
             <Route path="/auth/verify" element={<WebLayout><WebVerificationForm /></WebLayout>} />
             <Route path="/auth/resetpassword" element={<WebLayout><WebResetPassword /></WebLayout>} />
             <Route path="/auth/forgetpassword" element={<WebLayout><WebForgetPassword /></WebLayout>} />
-            <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
-            <Route path="/dashboard" element={<WebLayout><Dashboard /></WebLayout>} />
+            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
+            <Route path="/auth/user-profile" element={<ProtectedRoute><WebLayout><WebUserProfile /></WebLayout></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><WebLayout><Dashboard /></WebLayout></ProtectedRoute>} />
           </>
         )}
       </Routes>
+      </AuthProvider>
     </Router>
   );
 }
