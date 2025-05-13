@@ -11,7 +11,8 @@ import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
-import userInputService from '@/services/userInputService';
+import userInputService, { generateObjectId } from '@/services/userInputService';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Question,
   QuestionItem,
@@ -24,10 +25,12 @@ import {
 const SecurityInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const user = {
-    name: 'Francis Nixon',
-    email: 'fnixon35@hotmail.com',
+  // Fallback user info if not authenticated
+  const userInfo = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+    email: user?.email || 'guest@example.com',
   };
 
   // Initialize questions from JSON data
@@ -42,6 +45,12 @@ const SecurityInstructions = () => {
     try {
       console.log('Saving security instructions:', values);
 
+      // Check if user is authenticated
+      if (!user || !user.id) {
+        console.error('User not authenticated');
+        throw new Error('You must be logged in to save answers');
+      }
+
       // Group answers by section
       const answersBySection = questions
         .reduce((sections: Record<string, any[]>, question) => {
@@ -53,7 +62,6 @@ const SecurityInstructions = () => {
           if (answer) {
             sections[question.sectionId].push({
               index: sections[question.sectionId].length,
-              questionId: '000000000000000000000001', // Placeholder MongoDB ObjectId
               originalQuestionId: question.id, // Store our original question ID
               question: question.text,
               type: question.type,
@@ -66,12 +74,11 @@ const SecurityInstructions = () => {
 
       // Format data for API
       const userData = {
-        userId: '000000000000000000000001', // Placeholder MongoDB ObjectId - replace with actual user ID
-        categoryId: '000000000000000000000002', // Placeholder MongoDB ObjectId - replace with actual category ID
-        subCategoryId: '000000000000000000000003', // Placeholder MongoDB ObjectId - replace with actual subcategory ID
+        userId: user.id, // Use actual user ID from auth context
+        categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+        subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
         originalSubCategoryId: '104', // Our manual subcategory ID for security
         answersBySection: Object.entries(answersBySection).map(([sectionId, answers]) => ({
-          sectionId: '000000000000000000000004', // Placeholder MongoDB ObjectId
           originalSectionId: sectionId, // Store our original section ID
           isCompleted: true,
           answers
@@ -114,11 +121,11 @@ const SecurityInstructions = () => {
             </div>
             <div className="flex items-center">
               <div className="text-right mr-4">
-                <div className="font-semibold">{user.name}</div>
-                <div className="text-sm opacity-80">{user.email}</div>
+                <div className="font-semibold">{userInfo.name}</div>
+                <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+                <img src={avatar} alt={userInfo.name} className="w-full h-full object-cover" />
               </Avatar>
             </div>
           </div>
