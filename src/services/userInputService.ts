@@ -29,6 +29,7 @@ interface SectionAnswers {
 interface UserInputData {
   userId: string; // MongoDB ObjectId
   categoryId: string; // MongoDB ObjectId - required by backend
+  originalCategoryId: string; // Our manual category ID (1, 2, etc.)
   subCategoryId: string; // MongoDB ObjectId - required by backend
   originalSubCategoryId: string; // Our manual subcategory ID (101, 102, etc.)
   answersBySection: SectionAnswers[];

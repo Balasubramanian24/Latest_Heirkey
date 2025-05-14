@@ -81,6 +81,7 @@ const TrashInstructions = () => {
       const userData = {
         userId: user.id, // Use actual user ID from auth context
         categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+        originalCategoryId: '1', // Our manual category ID for Home Instructions
         subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
         originalSubCategoryId: '102', // Our manual subcategory ID for trash
         answersBySection: Object.entries(answersBySection).map(([sectionId, answers]) => ({
@@ -123,7 +124,7 @@ const TrashInstructions = () => {
         }}
       />
       <SubCategoryTabs />
-      
+
       <div className="container mx-auto px-6">
         <SubCategoryTitle
           category="Trash"

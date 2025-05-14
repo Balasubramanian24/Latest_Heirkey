@@ -97,6 +97,7 @@ export default function TrashInstructionsPage() {
               const userData = {
                 userId: user.id, // Use actual user ID from auth context
                 categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                originalCategoryId: '1', // Our manual category ID for Home Instructions
                 subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                 originalSubCategoryId: '102', // Our manual subcategory ID for trash
                 answersBySection: [{
