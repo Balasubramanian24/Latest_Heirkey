@@ -60,6 +60,7 @@ export default function UserProfile() {
       // TODO: Implement profile update using authService
       // For now, just show a success message
       setSuccess('Profile updated successfully!');
+      navigate('/dashboard');
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
       setError(errorMessage);

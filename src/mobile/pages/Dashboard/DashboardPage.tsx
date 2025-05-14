@@ -12,37 +12,37 @@ import socialMediaImg from '@/assets/global/category/socialMedia.jpg'
 
 const categories = [
   {
-    id: 'home-instructions',
+    id: 'homeinstructions',
     name: 'Home Instructions',
     description: 'Instructions for your home and pets.',
     imageUrl: homeImg,
   },
   {
-    id: 'home-documents',
+    id: 'homedocuments',
     name: 'Home Documents',
     description: 'Important documents for your home.',
     imageUrl: documentsImg,
   },
   {
-    id: 'will-location',
+    id: 'willlocation',
     name: 'Will Location',
     description: 'Where your will is stored.',
     imageUrl: willImg,
   },
   {
-    id: 'funeral-arrangements',
+    id: 'funeralarrangements',
     name: 'Funeral Arrangements',
     description: 'Your funeral preferences.',
     imageUrl: funeralImg,
   },
   {
-    id: 'important-contacts',
+    id: 'importantcontacts',
     name: 'Important Contacts',
     description: 'People to contact in case of emergency.',
     imageUrl: contactImg,
   },
   {
-    id: 'social-media-phone',
+    id: 'socialmediaphone',
     name: 'Social Media and Phone',
     description: 'Your social media and phone details.',
     imageUrl: socialMediaImg,
@@ -50,24 +50,19 @@ const categories = [
 ];
 
 const questionCounts = {
-  'home-instructions': 15,
-  'home-documents': 20,
-  'will-location': 3,
-  'funeral-arrangements': 0,
-  'important-contacts': 0,
-  'social-media-phone': 0,
+  'homeinstructions': 15,
+  'homedocuments': 20,
+  'willlocation': 3,
+  'funeralarrangements': 0,
+  'importantcontacts': 0,
+  'socialmediaphone': 0,
 };
 
 export default function DashboardPage() {
   const navigate = useNavigate();
 
   const handleCategoryClick = (categoryId: string, categoryName: string) => {
-    navigate('/categoryconfirm', { 
-      state: { 
-        categoryId,
-        categoryName 
-      }
-    });
+    navigate(`/category/${categoryName.toLowerCase().replace(/\s+/g, '')}`);
   };
 
   return (

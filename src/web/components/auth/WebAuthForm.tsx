@@ -6,10 +6,14 @@ import Register from "@/web/pages/AuthPages/WebRegister";
 import Login from "@/web/pages/AuthPages/WebLogin";
 import LoginImage from "@/assets/webappimage/AuthImages/LoginImage.jpg";
 
-export default function WebAuthForm() {
+interface WebAuthFormProps {
+  initialMode?: 'register' | 'login';
+}
+
+export default function WebAuthForm({ initialMode }: WebAuthFormProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isRegister, setIsRegister] = useState(location.pathname.includes('/register'));
+  const [isRegister, setIsRegister] = useState(initialMode === 'register' || location.pathname.includes('/register'));
 
   useEffect(() => {
     const path = location.pathname;

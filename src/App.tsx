@@ -21,6 +21,7 @@ import PetsInstructionsPage from '@/mobile/pages/HomeInstructions/PetsInstructio
 import TrashInstructionsPage from '@/mobile/pages/HomeInstructions/TrashInstructionsPage';
 import OtherInstructionsPage from "./mobile/pages/HomeInstructions/OtherInstructionsPage";
 import SecurityInstructionsPage from "./mobile/pages/HomeInstructions/SecurityInstructionsPage";
+import HomeInstructionsReviewPage from "./mobile/pages/HomeInstructions/HomeInstructionsReviewPage";
 
 
 
@@ -63,7 +64,6 @@ export default function App() {
           {isMobile ? (
           // Mobile routes
           <>
-
             <Route path="/" element={<LandingPage />}/>
             <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
             <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
@@ -72,16 +72,18 @@ export default function App() {
             <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
+            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
 
-            {/* <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} /> */}
-            <Route path="/categoryconfirm" element={<ProtectedRoute><Layout><CategoryConfirmPage /></Layout></ProtectedRoute>} />
-            <Route path="/home-instructions" element={<ProtectedRoute><Layout><HomeInstructionsPage /></Layout></ProtectedRoute>} />
-            <Route path="/home-instructions/pets" element={<ProtectedRoute><Layout><PetsInstructionsPage /></Layout></ProtectedRoute  >} />
-            <Route path="/home-instructions/trash" element={<ProtectedRoute><Layout><TrashInstructionsPage /></Layout></ProtectedRoute>} />
-            <Route path="/home-instructions/other" element={<ProtectedRoute><Layout><OtherInstructionsPage /></Layout></ProtectedRoute>} />
-            <Route path="/home-instructions/security" element={<ProtectedRoute><Layout><SecurityInstructionsPage /></Layout></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
             
+            <Route path="/category/:categoryName" element={<Layout><CategoryConfirmPage /></Layout>} />
+            <Route path="/category/:categoryName/info" element={<Layout><HomeInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/pets" element={<Layout><PetsInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/other" element={<Layout><OtherInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
+            
+            <Route path="/category/:categoryName/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
           </>
         ) : (
           // Web routes
