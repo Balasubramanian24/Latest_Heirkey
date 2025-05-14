@@ -79,6 +79,8 @@ export default function App() {
             <Route path="/home-instructions/other" element={<Layout><OtherInstructionsPage /></Layout>} />
             <Route path="/home-instructions/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
 
+            
+            <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
           </>
         ) : (
           // Web routes
