@@ -13,11 +13,11 @@ import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
 import userInputService, { generateObjectId } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Question,
-  QuestionItem,
-  buildValidationSchema,
-  generateInitialValues,
+import { 
+  Question, 
+  QuestionItem, 
+  buildValidationSchema, 
+  generateInitialValues, 
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';

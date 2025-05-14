@@ -6,7 +6,9 @@ import questionsData from "@/data/homeIntsructions.json";
 import { Question } from "@/mobile/components/HomeInstructions/FormFields";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
-
+import userInputService, { generateObjectId } from '@/services/userInputService';
+import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 
 // Utility: get visible questions based on dependencies
@@ -41,7 +43,9 @@ const initialValues = {
 export default function PetsInstructionsPage() {
   const allQuestions = questionsData["101"];
   const [step, setStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Validation (simple example, expand as needed)
   function validate(values: Record<string, any>) {
@@ -95,12 +99,62 @@ export default function PetsInstructionsPage() {
         </div>
 
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Formik
           initialValues={initialValues}
           validate={validate}
-          onSubmit={values => {
-            console.log("Pets Instructions Submitted", values);
-            navigate("/home-instructions/trash");
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              console.log("Pets Instructions Submitted", values);
+
+              // Check if user is authenticated
+              if (!user || !user.id) {
+                console.error('User not authenticated');
+                setError('You must be logged in to save answers');
+                return;
+              }
+
+              // Format the answers for the backend
+              const answers = Object.entries(values)
+                .filter(([_, value]) => value !== "") // Filter out empty answers
+                .map(([key, value], index) => {
+                  const question = (allQuestions as Question[]).find(q => q.id === key);
+                  return {
+                    index,
+                    originalQuestionId: key,
+                    question: question?.text || key,
+                    type: question?.type || "text",
+                    answer: value
+                  };
+                });
+
+              // Format data for API
+              const userData = {
+                userId: user.id, // Use actual user ID from auth context
+                categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                originalSubCategoryId: '101', // Our manual subcategory ID for pets
+                answersBySection: [{
+                  originalSectionId: '101A', // Store our original section ID
+                  isCompleted: true,
+                  answers
+                }]
+              };
+
+              // Save to backend
+              await userInputService.createUserInput(userData);
+
+              navigate("/home-instructions/trash");
+            } catch (err: any) {
+              console.error('Error saving pet instructions:', err);
+              setError(err.message || 'Failed to save your answers. Please try again.');
+              setSubmitting(false);
+            }
           }}
         >
           {({ values, isSubmitting }) => {
