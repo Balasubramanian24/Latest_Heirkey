@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import CategoryCard from '@/mobile/components/dashboard/CategoryCard';
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 
@@ -58,6 +59,17 @@ const questionCounts = {
 };
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (categoryId: string, categoryName: string) => {
+    navigate('/categoryconfirm', { 
+      state: { 
+        categoryId,
+        categoryName 
+      }
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -85,7 +97,7 @@ export default function DashboardPage() {
                   questionCount={questionCounts[category.id as keyof typeof questionCounts] || 0}
                   isCompleted={questionCounts[category.id as keyof typeof questionCounts] > 0}
                   index={idx}
-                  onClick={() => {}}
+                  onClick={() => handleCategoryClick(category.id, category.name)}
                 />
               ))}
             </div>
