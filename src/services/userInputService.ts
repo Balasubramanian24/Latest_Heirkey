@@ -27,8 +27,10 @@ interface SectionAnswers {
 }
 
 interface UserInputData {
+  _id?: string; // MongoDB ObjectId for the document
   userId: string; // MongoDB ObjectId
   categoryId: string; // MongoDB ObjectId - required by backend
+  originalCategoryId: string; // Our manual category ID (1, 2, etc.)
   subCategoryId: string; // MongoDB ObjectId - required by backend
   originalSubCategoryId: string; // Our manual subcategory ID (101, 102, etc.)
   answersBySection: SectionAnswers[];
@@ -55,11 +57,44 @@ const userInputService = {
     return response.data;
   },
 
+  // Get user inputs for a specific subcategory
+  getUserInputsBySubcategory: async (userId: string, originalCategoryId: string, originalSubCategoryId: string) => {
+    const response = await userInputService.getUserInputsByUserAndCategory(userId, originalCategoryId);
+
+    // Ensure we have an array to work with
+    const allUserInputs = Array.isArray(response) ? response : [];
+
+    // Filter for the specific subcategory
+    return allUserInputs.filter((input: UserInputData) =>
+      input.originalSubCategoryId === originalSubCategoryId
+    );
+  },
+
   // Update user input
   updateUserInput: async (id: string, data: Partial<UserInputData>) => {
     const response = await api.patch(`/user-inputs/${id}`, data);
     return response.data;
   }
+};
+
+// Helper function to convert user input data to form values
+export const convertUserInputToFormValues = (userInput: UserInputData): Record<string, string> => {
+  if (!userInput || !userInput.answersBySection) {
+    return {};
+  }
+
+  const formValues: Record<string, string> = {};
+
+  // Process all sections and their answers
+  userInput.answersBySection.forEach((section: SectionAnswers) => {
+    section.answers.forEach((answer: Answer) => {
+      if (answer.originalQuestionId && answer.answer) {
+        formValues[answer.originalQuestionId] = answer.answer;
+      }
+    });
+  });
+
+  return formValues;
 };
 
 export default userInputService;

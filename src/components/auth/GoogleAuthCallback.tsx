@@ -52,13 +52,9 @@ export default function GoogleAuthCallback() {
         setUser(userData);
 
         // Redirect to dashboard or profile completion if needed
-        console.log('Navigating to', userData.isNewUser ? '/auth/user-profile' : '/dashboard');
-        if (userData.isNewUser) {
-          navigate('/auth/user-profile');
-        } else {
-          // Force a page reload to ensure the auth state is properly updated
-          window.location.href = '/dashboard';
-        }
+        console.log('Navigating to user profile page');
+        // Force a page reload to ensure the auth state is properly updated
+        window.location.href = '/auth/user-profile';
       } catch (err) {
         console.error('Error processing Google auth callback:', err);
         setError('Failed to process authentication response');

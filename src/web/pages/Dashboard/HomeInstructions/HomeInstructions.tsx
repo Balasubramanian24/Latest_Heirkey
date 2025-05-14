@@ -7,6 +7,7 @@ import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 interface SubCategory {
@@ -65,13 +66,16 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
 };
 
 const HomeInstructions = ({ category }: { category?: string }) => {
-  const user = {
-    name: 'Francis Nixon',
-    email: 'fnixon35@hotmail.com',
-  };
-
+  const { user } = useAuth();
   const params = useParams();
   const categoryName = category || params.categoryName;
+
+  // Fallback user info if not authenticated
+  const userInfo = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+    email: user?.email || 'guest@example.com',
+    avatar: user?.image || avatar
+  };
 
   // Calculate overall progress
   const progressStats = (() => {
@@ -109,11 +113,19 @@ const HomeInstructions = ({ category }: { category?: string }) => {
             </div>
             <div className="flex items-center">
               <div className="text-right mr-4">
-                <div className="font-semibold">{user.name}</div>
-                <div className="text-sm opacity-80">{user.email}</div>
+                <div className="font-semibold">{userInfo.name}</div>
+                <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+                <img 
+                  src={userInfo.avatar} 
+                  alt={userInfo.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = avatar; // Fallback to default avatar
+                  }}
+                />
               </Avatar>
             </div>
           </div>

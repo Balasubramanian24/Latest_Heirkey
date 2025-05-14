@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Formik, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { Avatar } from '@radix-ui/react-avatar';
@@ -11,36 +11,104 @@ import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
-import userInputService, { generateObjectId } from '@/services/userInputService';
+import userInputService, { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Question,
   QuestionItem,
   buildValidationSchema,
   generateInitialValues,
-  calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
+import ScrollToQuestion from '@/web/components/HomeInstructions/ScrollToQuestion';
 import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
 import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
+import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
+import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
+import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
 
 const SecurityInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [existingInputId, setExistingInputId] = useState<string | null>(null);
+  const [existingCategoryId, setExistingCategoryId] = useState<string | null>(null);
+  const [existingSubCategoryId, setExistingSubCategoryId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+
+  // Get the questionId from URL query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const targetQuestionId = queryParams.get('questionId');
 
   // Fallback user info if not authenticated
   const userInfo = {
     name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
     email: user?.email || 'guest@example.com',
+    avatar,
   };
 
-  // Initialize questions from JSON data
+  // Initialize questions from JSON data and fetch saved answers
   useEffect(() => {
-    if (homeInstructionsData['104']) {
-      setQuestions(homeInstructionsData['104'] as Question[]);
+    const fetchData = async () => {
+      setIsLoading(true);
+
+      // Set questions from JSON data
+      if (homeInstructionsData['104']) {
+        setQuestions(homeInstructionsData['104'] as Question[]);
+      }
+
+      // Fetch saved answers if user is authenticated
+      if (user && user.id) {
+        try {
+          // Fetch user inputs for this subcategory
+          const userInputs = await userInputService.getUserInputsBySubcategory(user.id, '1', '104');
+
+          if (userInputs && userInputs.length > 0) {
+            // Get the first user input
+            const userInput = userInputs[0];
+
+            // Convert to form values
+            const formValues = convertUserInputToFormValues(userInput);
+            setSavedAnswers(formValues);
+
+            // Store the existing record IDs
+            setExistingInputId(userInput._id);
+            setExistingCategoryId(userInput.categoryId);
+            setExistingSubCategoryId(userInput.subCategoryId);
+
+            console.log('Loaded saved answers:', formValues);
+            console.log('Existing record ID:', userInput._id);
+          }
+        } catch (error) {
+          console.error('Error fetching saved answers:', error);
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [user]);
+
+  // Scroll to the target question if specified in URL
+  useEffect(() => {
+    if (!isLoading && targetQuestionId) {
+      // Use setTimeout to ensure the DOM has been updated
+      setTimeout(() => {
+        const element = document.getElementById(`question-${targetQuestionId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add a highlight effect
+          element.classList.add('bg-yellow-100');
+          setTimeout(() => {
+            element.classList.remove('bg-yellow-100');
+          }, 2000);
+        }
+      }, 500);
     }
-  }, []);
+  }, [isLoading, targetQuestionId]);
 
   // Handle form submission
   const handleSubmit = async (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
@@ -74,24 +142,58 @@ const SecurityInstructions = () => {
           return sections;
         }, {});
 
-      // Format data for API
-      const userData = {
-        userId: user.id, // Use actual user ID from auth context
-        categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-        subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-        originalSubCategoryId: '104', // Our manual subcategory ID for security
-        answersBySection: Object.entries(answersBySection).map(([sectionId, answers]) => ({
-          originalSectionId: sectionId, // Store our original section ID
-          isCompleted: true,
-          answers
-        }))
-      };
+      // Format answers data
+      const formattedAnswersBySection = Object.entries(answersBySection).map(([sectionId, answers]) => ({
+        originalSectionId: sectionId, // Store our original section ID
+        isCompleted: true,
+        answers
+      }));
 
-      // Save to backend
-      await userInputService.createUserInput(userData);
+      // Check if we're updating an existing record or creating a new one
+      if (existingInputId) {
+        console.log('Updating existing record:', existingInputId);
+
+        try {
+          // Update existing record
+          await userInputService.updateUserInput(existingInputId, {
+            answersBySection: formattedAnswersBySection
+          });
+          console.log('Successfully updated record');
+        } catch (error) {
+          console.error('Error updating record:', error);
+          // If PATCH fails, fall back to creating a new record
+          console.log('Falling back to creating a new record');
+          setExistingInputId(null);
+        }
+      }
+
+      if (!existingInputId) {
+        console.log('Creating new record');
+
+        // Format data for API
+        const userData = {
+          userId: user.id, // Use actual user ID from auth context
+          categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+          originalCategoryId: '1', // Our manual category ID for Home Instructions
+          subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+          originalSubCategoryId: '104', // Our manual subcategory ID for security
+          answersBySection: formattedAnswersBySection
+        };
+
+        // Save to backend
+        const result = await userInputService.createUserInput(userData);
+
+        // Store the new record ID for future updates
+        if (result && typeof result === 'object') {
+          const typedResult = result as { _id: string; categoryId: string; subCategoryId: string };
+          setExistingInputId(typedResult._id);
+          setExistingCategoryId(typedResult.categoryId);
+          setExistingSubCategoryId(typedResult.subCategoryId);
+        }
+      }
 
       setSubmitting(false);
-      navigate('/homeinstructions');
+      navigate('/category/homeinstructions/review');
     } catch (error) {
       console.error('Error saving security instructions:', error);
       setSubmitting(false);
@@ -100,38 +202,30 @@ const SecurityInstructions = () => {
   };
 
   // If no questions loaded yet, return loading state
-  if (questions.length === 0) {
-    return <div>Loading...</div>;
+  if (questions.length === 0 || isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   const validationSchema = buildValidationSchema(questions, Yup);
-  const initialValues = generateInitialValues(questions);
+
+  // Merge generated initial values with saved answers
+  const baseInitialValues = generateInitialValues(questions);
+  const initialValues = { ...baseInitialValues, ...savedAnswers };
 
   return (
     <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
-
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-1">Home Instructions: Security</h1>
-              <Link to="/dashboard" className="flex items-center text-sm hover:underline">
-                <span className="mr-1">←</span> Back to Categories
-              </Link>
-            </div>
-            <div className="flex items-center">
-              <div className="text-right mr-4">
-                <div className="font-semibold">{userInfo.name}</div>
-                <div className="text-sm opacity-80">{userInfo.email}</div>
-              </div>
-              <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt={userInfo.name} className="w-full h-full object-cover" />
-              </Avatar>
-            </div>
-          </div>
-        </div>
+      <SubCategoryHeader
+        title="Home Instructions"
+        backTo="/dashboard"
+        user={userInfo}
+      />
+      <SubCategoryTabs />
+      <div className="container mx-auto px-6">
+        <SubCategoryTitle
+          category="Security"
+          description="These files contain questions to help you record your details so they're easy to find later."
+        />
       </div>
 
       {/* Main content */}
@@ -146,31 +240,44 @@ const SecurityInstructions = () => {
                 onSubmit={handleSubmit}
               >
                 {({ values, isSubmitting, isValid, dirty, setValues }) => {
-                  const progressStats = calculateProgress(questions, values);
-                  const prevValuesRef = useRef<Record<string, any>>({});
+                  // Handle dependent answers when values change
+                  // We use a simple comparison instead of useEffect and useRef
+                  // to avoid React Hook errors inside render props
+                  const handleDependentFields = () => {
+                    handleDependentAnswers(values, questions, setValues);
+                  };
 
-                  // Watch for changes to parent questions and reset dependent questions
-                  useEffect(() => {
-                    // Only process if values have changed
-                    if (JSON.stringify(prevValuesRef.current) !== JSON.stringify(values)) {
-                      handleDependentAnswers(values, questions, setValues);
-                      prevValuesRef.current = { ...values };
-                    }
-                  }, [values, setValues, questions]);
+                  // Call once when component renders
+                  if (Object.keys(values).length > 0) {
+                    setTimeout(handleDependentFields, 0);
+                  }
 
                   return (
                     <Form>
                       <div className="mt-4">
-                        {questions
-                          .sort((a, b) => a.order - b.order)
-                          .map(question => (
-                            <QuestionItem
-                              key={question.id}
-                              question={question}
-                              values={values}
-                            />
-                          ))
-                        }
+                        <ScrollToQuestion questions={questions}>
+                          {(refs) => (
+                            <>
+                              {questions
+                                .sort((a, b) => a.order - b.order)
+                                .map(question => (
+                                  <div
+                                    key={question.id}
+                                    id={`question-${question.id}`}
+                                    ref={(el: HTMLDivElement | null) => {
+                                      refs[question.id] = el;
+                                    }}
+                                  >
+                                    <QuestionItem
+                                      question={question}
+                                      values={values}
+                                    />
+                                  </div>
+                                ))
+                              }
+                            </>
+                          )}
+                        </ScrollToQuestion>
                         <div className="mt-8 flex justify-end">
                           <Button
                             type="submit"
@@ -187,7 +294,7 @@ const SecurityInstructions = () => {
                         <SubCategoryFooterNav
                           leftLabel="Other"
                           leftTo="/category/homeinstructions/other"
-                          rightLabel="Category Review"
+                          rightLabel="Review"
                           rightTo="/category/homeinstructions/review"
                         />
                       </div>
