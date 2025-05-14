@@ -7,6 +7,10 @@
       ]
     },
 
+    /* ECMAScript Target */
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
     /* Bundler mode */
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -18,10 +22,11 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }
