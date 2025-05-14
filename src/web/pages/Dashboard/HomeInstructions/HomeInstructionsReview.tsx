@@ -1,12 +1,6 @@
 import CategoryReviewPage from '@/web/components/Category/CategoryReviewPage';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-
-// Example user info (replace with real user data as needed)
-const user = {
-  name: 'Francis Nixon',
-  email: 'fnixon35@hotmail.com',
-  avatar,
-};
+import { useAuth } from '@/contexts/AuthContext';
 
 // Example topics (replace with real answers from state/context)
 const topics = [
@@ -16,13 +10,22 @@ const topics = [
 ];
 
 export default function HomeInstructionsReview() {
+  const { user } = useAuth();
+
+  // Fallback user info if not authenticated
+  const userInfo = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+    email: user?.email || 'guest@example.com',
+    avatar: user?.image || avatar
+  };
+
   return (
     <CategoryReviewPage
       categoryTitle="Home Instructions"
       infoTitle="How to edit your information"
       infoDescription="Now, you are about to enter details about your home, life, and essential information to be passed on to your family members. Each section has several questions. Fill out as much as you can/like. You can always come back to fill out more information later."
       topics={topics}
-      user={user}
+      user={userInfo}
       onPrint={() => window.print()}
     />
   );

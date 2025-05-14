@@ -38,7 +38,7 @@ export default function WebRegister() {
         firstName: firstName || undefined,
         lastName: lastName || undefined
       });
-      navigate("/dashboard");
+      navigate("/auth/user-profile");
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
     }
