@@ -3,6 +3,10 @@ import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
 import Footer from "@/mobile/components/layout/Footer";
 import { useNavigate } from "react-router-dom";
+import userInputService, { generateObjectId } from '@/services/userInputService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const securityQuestions = questionsData["104"];
 
@@ -13,6 +17,8 @@ const initialValues = {
 
 export default function SecurityInstructionsPage() {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Tab routes
   const tabRoutes: Record<string, string> = {
@@ -51,6 +57,12 @@ export default function SecurityInstructionsPage() {
           })}
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Formik
           initialValues={initialValues}
           validate={values => {
@@ -60,9 +72,54 @@ export default function SecurityInstructionsPage() {
             if (values.s2 && values.s2.length > 275) errors.s2 = "Maximum 275 characters";
             return errors;
           }}
-          onSubmit={values => {
-            console.log("Security Instructions Submitted", values);
-            // navigate to next section if needed
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              console.log("Security Instructions Submitted", values);
+
+              // Check if user is authenticated
+              if (!user || !user.id) {
+                console.error('User not authenticated');
+                setError('You must be logged in to save answers');
+                return;
+              }
+
+              // Format the answers for the backend
+              const answers = Object.entries(values)
+                .filter(([_, value]) => value !== "") // Filter out empty answers
+                .map(([key, value], index) => {
+                  const question = securityQuestions.find(q => q.id === key);
+                  return {
+                    index,
+                    originalQuestionId: key,
+                    question: question?.text || key,
+                    type: question?.type || "text",
+                    answer: value
+                  };
+                });
+
+              // Format data for API
+              const userData = {
+                userId: user.id, // Use actual user ID from auth context
+                categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                originalSubCategoryId: '104', // Our manual subcategory ID for security
+                answersBySection: [{
+                  originalSectionId: '104A', // Store our original section ID
+                  isCompleted: true,
+                  answers
+                }]
+              };
+
+              // Save to backend
+              await userInputService.createUserInput(userData);
+
+              // Navigate back to home instructions
+              navigate("/home-instructions");
+            } catch (err: any) {
+              console.error('Error saving security instructions:', err);
+              setError(err.message || 'Failed to save your answers. Please try again.');
+              setSubmitting(false);
+            }
           }}
         >
           {({ values, isSubmitting, setFieldValue }) => (

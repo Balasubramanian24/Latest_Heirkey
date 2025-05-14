@@ -3,6 +3,10 @@ import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
 import Footer from "@/mobile/components/layout/Footer";
 import { useNavigate } from "react-router-dom";
+import userInputService, { generateObjectId } from '@/services/userInputService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const otherQuestions = questionsData["103"];
 
@@ -12,6 +16,8 @@ const initialValues = {
 
 export default function OtherInstructionsPage() {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Tab routes
   const tabRoutes: Record<string, string> = {
@@ -50,6 +56,12 @@ export default function OtherInstructionsPage() {
           })}
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Formik
           initialValues={initialValues}
           validate={values => {
@@ -59,9 +71,53 @@ export default function OtherInstructionsPage() {
             }
             return errors;
           }}
-          onSubmit={values => {
-            console.log("Other Instructions Submitted", values);
-            navigate("/home-instructions/security");
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              console.log("Other Instructions Submitted", values);
+
+              // Check if user is authenticated
+              if (!user || !user.id) {
+                console.error('User not authenticated');
+                setError('You must be logged in to save answers');
+                return;
+              }
+
+              // Format the answers for the backend
+              const answers = Object.entries(values)
+                .filter(([_, value]) => value !== "") // Filter out empty answers
+                .map(([key, value], index) => {
+                  const question = otherQuestions.find(q => q.id === key);
+                  return {
+                    index,
+                    originalQuestionId: key,
+                    question: question?.text || key,
+                    type: question?.type || "text",
+                    answer: value
+                  };
+                });
+
+              // Format data for API
+              const userData = {
+                userId: user.id, // Use actual user ID from auth context
+                categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                originalSubCategoryId: '103', // Our manual subcategory ID for other
+                answersBySection: [{
+                  originalSectionId: '103A', // Store our original section ID
+                  isCompleted: true,
+                  answers
+                }]
+              };
+
+              // Save to backend
+              await userInputService.createUserInput(userData);
+
+              navigate("/home-instructions/security");
+            } catch (err: any) {
+              console.error('Error saving other instructions:', err);
+              setError(err.message || 'Failed to save your answers. Please try again.');
+              setSubmitting(false);
+            }
           }}
         >
           {({ values, isSubmitting }) => (

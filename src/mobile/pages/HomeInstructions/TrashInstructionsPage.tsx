@@ -3,6 +3,10 @@ import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
 import { useNavigate } from "react-router-dom";
 import Footer from '@/mobile/components/layout/Footer';
+import userInputService, { generateObjectId } from '@/services/userInputService';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const trashQuestions = questionsData["102"];
 
@@ -12,6 +16,8 @@ const initialValues = {
 
 export default function TrashInstructionsPage() {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   return (
     <>
@@ -49,6 +55,12 @@ export default function TrashInstructionsPage() {
           })}
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Formik
           initialValues={initialValues}
           validate={values => {
@@ -56,9 +68,53 @@ export default function TrashInstructionsPage() {
             if (!values.t1) errors.t1 = "Required";
             return errors;
           }}
-          onSubmit={values => {
-            console.log("Pets Instructions Submitted", values);
-            navigate("/home-instructions/other");
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              console.log("Trash Instructions Submitted", values);
+
+              // Check if user is authenticated
+              if (!user || !user.id) {
+                console.error('User not authenticated');
+                setError('You must be logged in to save answers');
+                return;
+              }
+
+              // Format the answers for the backend
+              const answers = Object.entries(values)
+                .filter(([_, value]) => value !== "") // Filter out empty answers
+                .map(([key, value], index) => {
+                  const question = trashQuestions.find(q => q.id === key);
+                  return {
+                    index,
+                    originalQuestionId: key,
+                    question: question?.text || key,
+                    type: question?.type || "text",
+                    answer: value
+                  };
+                });
+
+              // Format data for API
+              const userData = {
+                userId: user.id, // Use actual user ID from auth context
+                categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                originalSubCategoryId: '102', // Our manual subcategory ID for trash
+                answersBySection: [{
+                  originalSectionId: '102A', // Store our original section ID
+                  isCompleted: true,
+                  answers
+                }]
+              };
+
+              // Save to backend
+              await userInputService.createUserInput(userData);
+
+              navigate("/home-instructions/other");
+            } catch (err: any) {
+              console.error('Error saving trash instructions:', err);
+              setError(err.message || 'Failed to save your answers. Please try again.');
+              setSubmitting(false);
+            }
           }}
         >
           {({ values, isSubmitting }) => (
