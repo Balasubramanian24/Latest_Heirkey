@@ -95,7 +95,7 @@ const OtherInstructions = () => {
       await userInputService.createUserInput(userData);
 
       setSubmitting(false);
-      navigate('/homeinstructions');
+      navigate('/category/homeinstructions/security');
     } catch (error) {
       console.error('Error saving other instructions:', error);
       setSubmitting(false);

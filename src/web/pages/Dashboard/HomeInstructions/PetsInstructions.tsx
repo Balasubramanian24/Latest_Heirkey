@@ -13,11 +13,11 @@ import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
 import userInputService, { generateObjectId } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Question, 
-  QuestionItem, 
-  buildValidationSchema, 
-  generateInitialValues, 
+import {
+  Question,
+  QuestionItem,
+  buildValidationSchema,
+  generateInitialValues,
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
@@ -44,10 +44,61 @@ const PetsInstructions = () => {
     }
   }, []);
 
-  const handleSubmit = (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
-    console.log('Saving pet instructions:', values);
-    setSubmitting(false);
-    navigate('/homeinstructions');
+  // Handle form submission
+  const handleSubmit = async (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
+    try {
+      console.log('Saving pet instructions:', values);
+
+      // Check if user is authenticated
+      if (!user || !user.id) {
+        console.error('User not authenticated');
+        throw new Error('You must be logged in to save answers');
+      }
+
+      // Group answers by section
+      const answersBySection = questions
+        .reduce((sections: Record<string, any[]>, question) => {
+          if (!sections[question.sectionId]) {
+            sections[question.sectionId] = [];
+          }
+
+          const answer = values[question.id];
+          if (answer) {
+            sections[question.sectionId].push({
+              index: sections[question.sectionId].length,
+              originalQuestionId: question.id, // Store our original question ID
+              question: question.text,
+              type: question.type,
+              answer
+            });
+          }
+
+          return sections;
+        }, {});
+
+      // Format data for API
+      const userData = {
+        userId: user.id, // Use actual user ID from auth context
+        categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+        subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+        originalSubCategoryId: '101', // Our manual subcategory ID for pets
+        answersBySection: Object.entries(answersBySection).map(([sectionId, answers]) => ({
+          originalSectionId: sectionId, // Store our original section ID
+          isCompleted: true,
+          answers
+        }))
+      };
+
+      // Save to backend
+      await userInputService.createUserInput(userData);
+
+      setSubmitting(false);
+      navigate('/category/homeinstructions/trash');
+    } catch (error) {
+      console.error('Error saving pet instructions:', error);
+      setSubmitting(false);
+      // Handle error (show error message, etc.)
+    }
   };
 
   if (questions.length === 0) {
@@ -76,7 +127,7 @@ const PetsInstructions = () => {
           description="These files contain questions to help you record your details so they're easy to find later."
         />
       </div>
-      
+
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left column - Questions */}
@@ -90,8 +141,8 @@ const PetsInstructions = () => {
                 {({ values, isSubmitting, isValid, dirty, setValues }) => {
                   const progressStats = calculateProgress(questions, values);
                   const prevValuesRef = useRef<Record<string, any>>({});
-                  
-                  
+
+
                   useEffect(() => {
                     if (JSON.stringify(prevValuesRef.current) !== JSON.stringify(values)) {
                       handleDependentAnswers(values, questions, setValues);
@@ -138,7 +189,7 @@ const PetsInstructions = () => {
               </Formik>
             </div>
           </div>
-          
+
           <div>
             <SearchPanel />
           </div>

@@ -95,7 +95,7 @@ const SecurityInstructions = () => {
       await userInputService.createUserInput(userData);
 
       setSubmitting(false);
-      navigate('/homeinstructions');
+      navigate('/category/homeinstructions/review');
     } catch (error) {
       console.error('Error saving security instructions:', error);
       setSubmitting(false);
@@ -180,7 +180,7 @@ const SecurityInstructions = () => {
                         <SubCategoryFooterNav
                           leftLabel="Other"
                           leftTo="/category/homeinstructions/other"
-                          rightLabel="Category Review"
+                          rightLabel="Review"
                           rightTo="/category/homeinstructions/review"
                         />
                       </div>
