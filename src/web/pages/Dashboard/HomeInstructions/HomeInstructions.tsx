@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Avatar } from '@radix-ui/react-avatar';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2 } from 'lucide-react';
@@ -47,30 +47,31 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
     : 0;
   
   return (
-    <Link to={`/home-instructions/${subcategory.title.toLowerCase()}`} className="block">
-      <div className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
-        <div className="p-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium text-[#183153]">{subcategory.title}</h3>
-            <span className="text-sm text-blue-500">
-              {completedQuestions}/{subcategory.questionsCount} questions
-            </span>
-          </div>
-          <Progress 
-            value={completionPercentage} 
-            className="h-1.5 mb-2" 
-          />
+    <div className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
+      <div className="p-4">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-medium text-[#183153]">{subcategory.title}</h3>
+          <span className="text-sm text-blue-500">
+            {completedQuestions}/{subcategory.questionsCount} questions
+          </span>
         </div>
+        <Progress 
+          value={completionPercentage} 
+          className="h-1.5 mb-2" 
+        />
       </div>
-    </Link>
+    </div>
   );
 };
 
-const HomeInstructions = () => {
+const HomeInstructions = ({ category }: { category?: string }) => {
   const user = {
     name: 'Francis Nixon',
     email: 'fnixon35@hotmail.com',
   };
+
+  const params = useParams();
+  const categoryName = category || params.categoryName;
 
   // Calculate overall progress
   const progressStats = (() => {
@@ -93,11 +94,11 @@ const HomeInstructions = () => {
   })();
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
       
       {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-8">
+      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
@@ -156,7 +157,9 @@ const HomeInstructions = () => {
               {/* Subcategory cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 {subcategories.map(subcategory => (
-                  <SubCategoryCard key={subcategory.id} subcategory={subcategory} />
+                  <Link key={subcategory.id} to={`/category/${categoryName}/${subcategory.title.toLowerCase()}`} className="block">
+                    <SubCategoryCard subcategory={subcategory} />
+                  </Link>
                 ))}
               </div>
             </div>

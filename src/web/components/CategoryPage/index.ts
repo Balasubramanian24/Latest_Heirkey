@@ -1,6 +1,0 @@
-export { default as CategoryPage } from './CategoryPage'
-export { default as CategoryHeader } from './CategoryHeader'
-export { default as CategoryTabs } from './CategoryTabs'
-export { default as CategoryInfo } from './CategoryInfo'
-export { default as CategoryContent } from './CategoryContent'
-export { default as CategoryAction } from './CategoryAction' 
