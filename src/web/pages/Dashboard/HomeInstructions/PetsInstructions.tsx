@@ -11,6 +11,8 @@ import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
+import userInputService, { generateObjectId } from '@/services/userInputService';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Question, 
   QuestionItem, 
@@ -27,10 +29,12 @@ import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
 const PetsInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const navigate = useNavigate();
-  
-  const user = {
-    name: 'Francis Nixon',
-    email: 'fnixon35@hotmail.com',
+  const { user } = useAuth();
+
+  // Fallback user info if not authenticated
+  const userInfo = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+    email: user?.email || 'guest@example.com',
   };
 
   useEffect(() => {
@@ -68,11 +72,11 @@ const PetsInstructions = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="font-semibold text-white">{user.name}</div>
-              <div className="text-sm text-white opacity-80">{user.email}</div>
+              <div className="font-semibold text-white">{user?.firstName} {user?.lastName}</div>
+              <div className="text-sm text-white opacity-80">{user?.email}</div>
             </div>
             <Avatar className="rounded-full w-16 h-16 bg-white overflow-hidden border-4 border-white shadow-md">
-              <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+              <img src={avatar} alt={`${user?.firstName} ${user?.lastName}`} className="w-full h-full object-cover" />
             </Avatar>
           </div>
         </div>
@@ -108,16 +112,16 @@ const PetsInstructions = () => {
                       prevValuesRef.current = { ...values };
                     }
                   }, [values, setValues, questions]);
-                  
+
                   return (
                     <Form>
                       <div className="mt-4">
                         {questions
                           .sort((a, b) => a.order - b.order)
                           .map(question => (
-                            <QuestionItem 
-                              key={question.id} 
-                              question={question} 
+                            <QuestionItem
+                              key={question.id}
+                              question={question}
                               values={values}
                             />
                           ))
@@ -154,10 +158,10 @@ const PetsInstructions = () => {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
 };
 
-export default PetsInstructions; 
+export default PetsInstructions;

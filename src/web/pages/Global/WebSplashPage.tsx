@@ -23,7 +23,7 @@ export default function WebSplashPage() {
               "Access to all features",
             ].map((text) => (
               <li key={text} className="flex items-center gap-3">
-                <CheckCircle className="text-teal-500 w-6 h-6" />
+                <CheckCircle className="text-[#2BCFD5] w-6 h-6" />
                 <span>{text}</span>
               </li>
             ))}

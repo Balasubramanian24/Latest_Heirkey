@@ -15,6 +15,14 @@ import UserProfile from "./mobile/components/auth/UserProfile";
 import ForgetPassword from "./mobile/components/auth/ForgetPassword";
 import VerificationForm from "./mobile/components/auth/VerificationForm";
 import DashboardPage from "./mobile/pages/Dashboard/DashboardPage";
+import CategoryConfirmPage from "./mobile/pages/categoryconfirm/categoryconfirm";
+import HomeInstructionsPage from '@/mobile/pages/HomeInstructions/HomeInstructionsPage';
+import PetsInstructionsPage from '@/mobile/pages/HomeInstructions/PetsInstructionsPage';
+import TrashInstructionsPage from '@/mobile/pages/HomeInstructions/TrashInstructionsPage';
+import OtherInstructionsPage from "./mobile/pages/HomeInstructions/OtherInstructionsPage";
+import SecurityInstructionsPage from "./mobile/pages/HomeInstructions/SecurityInstructionsPage";
+
+
 
 // Web imports
 import WebLandingPage from "@/web/WebLandingPage";
@@ -66,6 +74,15 @@ export default function App() {
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
             <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
+
+            {/* <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} /> */}
+            <Route path="/categoryconfirm" element={<ProtectedRoute><Layout><CategoryConfirmPage /></Layout></ProtectedRoute>} />
+            <Route path="/home-instructions" element={<ProtectedRoute><Layout><HomeInstructionsPage /></Layout></ProtectedRoute>} />
+            <Route path="/home-instructions/pets" element={<ProtectedRoute><Layout><PetsInstructionsPage /></Layout></ProtectedRoute  >} />
+            <Route path="/home-instructions/trash" element={<ProtectedRoute><Layout><TrashInstructionsPage /></Layout></ProtectedRoute>} />
+            <Route path="/home-instructions/other" element={<ProtectedRoute><Layout><OtherInstructionsPage /></Layout></ProtectedRoute>} />
+            <Route path="/home-instructions/security" element={<ProtectedRoute><Layout><SecurityInstructionsPage /></Layout></ProtectedRoute>} />
+            
           </>
         ) : (
           // Web routes
@@ -81,6 +98,7 @@ export default function App() {
             <Route path="/auth/user-profile" element={<ProtectedRoute><WebLayout><WebUserProfile /></WebLayout></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><WebLayout><Dashboard /></WebLayout></ProtectedRoute>} />
             <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
+
             <Route path="/dashboard" element={<WebLayout><Dashboard /></WebLayout>} />
             
             <Route path="/category/:categoryName" element={<CategoryStartupWrapper />} />
