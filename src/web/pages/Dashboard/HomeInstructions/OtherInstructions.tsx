@@ -23,6 +23,9 @@ import {
 } from '@/web/components/HomeInstructions/FormFields';
 import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
 import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
+import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
+import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
+import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
 
 const OtherInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -33,6 +36,7 @@ const OtherInstructions = () => {
   const userInfo = {
     name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
     email: user?.email || 'guest@example.com',
+    avatar,
   };
 
   // Initialize questions from JSON data
@@ -110,28 +114,17 @@ const OtherInstructions = () => {
   return (
     <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
-
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-1">Home Instructions: Other</h1>
-              <Link to="/dashboard" className="flex items-center text-sm hover:underline">
-                <span className="mr-1">←</span> Back to Categories
-              </Link>
-            </div>
-            <div className="flex items-center">
-              <div className="text-right mr-4">
-                <div className="font-semibold">{userInfo.name}</div>
-                <div className="text-sm opacity-80">{userInfo.email}</div>
-              </div>
-              <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt={userInfo.name} className="w-full h-full object-cover" />
-              </Avatar>
-            </div>
-          </div>
-        </div>
+      <SubCategoryHeader
+        title="Home Instructions"
+        backTo="/dashboard"
+        user={userInfo}
+      />
+      <SubCategoryTabs />
+      <div className="container mx-auto px-6">
+        <SubCategoryTitle
+          category="Other"
+          description="These files contain questions to help you record your details so they're easy to find later."
+        />
       </div>
 
       {/* Main content */}
