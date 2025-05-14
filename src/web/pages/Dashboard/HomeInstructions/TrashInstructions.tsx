@@ -19,6 +19,8 @@ import {
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
+import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
+import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
 
 const TrashInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -105,32 +107,6 @@ const TrashInstructions = () => {
                   
                   return (
                     <Form>
-                      {/* Progress bar */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-sm font-medium text-gray-700">Trash information progress</h3>
-                          <span className="text-sm text-gray-500">
-                            {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
-                          </span>
-                        </div>
-                        <Progress 
-                          value={progressStats.completionPercentage} 
-                          className="h-2" 
-                        />
-                        {progressStats.completionPercentage === 100 && (
-                          <div className="mt-2 text-center">
-                            <span className="inline-flex items-center text-sm text-green-600 font-medium">
-                              <CheckCircle2 className="h-4 w-4 mr-1" /> All questions completed!
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">Filling in Your Trash Information</span></h2>
-                      <p className="text-gray-600 mb-6">
-                        Please provide information about your trash collection schedule below. This will help your loved ones know when to put the trash out.
-                      </p>
-                      
                       <div className="mt-4">
                         {questions
                           .sort((a, b) => a.order - b.order)
@@ -142,7 +118,6 @@ const TrashInstructions = () => {
                             />
                           ))
                         }
-                        
                         <div className="mt-8 flex justify-end">
                           <Button
                             type="submit"
@@ -152,6 +127,16 @@ const TrashInstructions = () => {
                             Save trash information
                           </Button>
                         </div>
+                        <GoodToKnowBox
+                        title="Filling in Your Trash Information"
+                        description="Please provide information about your trash collection schedule below. This will help your loved ones know when to put the trash out."
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="Pets"
+                          leftTo="/category/homeinstructions/pets"
+                          rightLabel="Other"
+                          rightTo="/category/homeinstructions/other"
+                        />
                       </div>
                     </Form>
                   );
@@ -159,8 +144,6 @@ const TrashInstructions = () => {
               </Formik>
             </div>
           </div>
-          
-          {/* Right column - Search panel */}
           <div>
             <SearchPanel />
           </div>

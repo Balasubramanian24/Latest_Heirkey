@@ -19,6 +19,10 @@ import {
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
+import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
+import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
+import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
+import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
 
 const PetsInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -29,22 +33,18 @@ const PetsInstructions = () => {
     email: 'fnixon35@hotmail.com',
   };
 
-  // Initialize questions from JSON data
   useEffect(() => {
     if (homeInstructionsData['101']) {
       setQuestions(homeInstructionsData['101'] as Question[]);
     }
   }, []);
 
-  // Handle form submission
   const handleSubmit = (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
     console.log('Saving pet instructions:', values);
-    // Here you would save the data to your backend
     setSubmitting(false);
     navigate('/homeinstructions');
   };
 
-  // If no questions loaded yet, return loading state
   if (questions.length === 0) {
     return <div>Loading...</div>;
   }
@@ -55,31 +55,38 @@ const PetsInstructions = () => {
   return (
     <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
-      
-      {/* Header with gradient background */}
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
+      {/* Gradient Header */}
+      <div className="w-full bg-gradient-to-r from-[#183153] to-[#1ccfc9] py-7 px-0 mb-0">
+        <div className="container mx-auto flex items-center justify-between px-6">
+          <div>
+            <div className="text-3xl font-bold text-white mb-1">Home Instructions</div>
             <div>
-              <h1 className="text-3xl font-bold mb-1">Home Instructions: Pets</h1>
-              <Link to="/dashboard" className="flex items-center text-sm hover:underline">
-                <span className="mr-1">←</span> Back to Categories
+              <Link to="/dashboard" className="text-white text-base opacity-90 hover:underline flex items-center">
+                <span className="mr-1">←</span> Back Home
               </Link>
             </div>
-            <div className="flex items-center">
-              <div className="text-right mr-4">
-                <div className="font-semibold">{user.name}</div>
-                <div className="text-sm opacity-80">{user.email}</div>
-              </div>
-              <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
-              </Avatar>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className="font-semibold text-white">{user.name}</div>
+              <div className="text-sm text-white opacity-80">{user.email}</div>
             </div>
+            <Avatar className="rounded-full w-16 h-16 bg-white overflow-hidden border-4 border-white shadow-md">
+              <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+            </Avatar>
           </div>
         </div>
       </div>
+      {/* Tabs */}
+      <SubCategoryTabs />
+      {/* Title & Description */}
+      <div className="container mx-auto px-6">
+        <SubCategoryTitle
+          category="Pets"
+          description="These files contain questions to help you record your details so they're easy to find later."
+        />
+      </div>
       
-      {/* Main content */}
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left column - Questions */}
@@ -94,9 +101,8 @@ const PetsInstructions = () => {
                   const progressStats = calculateProgress(questions, values);
                   const prevValuesRef = useRef<Record<string, any>>({});
                   
-                  // Watch for changes to parent questions and reset dependent questions
+                  
                   useEffect(() => {
-                    // Only process if values have changed
                     if (JSON.stringify(prevValuesRef.current) !== JSON.stringify(values)) {
                       handleDependentAnswers(values, questions, setValues);
                       prevValuesRef.current = { ...values };
@@ -105,32 +111,6 @@ const PetsInstructions = () => {
                   
                   return (
                     <Form>
-                      {/* Progress bar */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-sm font-medium text-gray-700">Pet information progress</h3>
-                          <span className="text-sm text-gray-500">
-                            {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
-                          </span>
-                        </div>
-                        <Progress 
-                          value={progressStats.completionPercentage} 
-                          className="h-2" 
-                        />
-                        {progressStats.completionPercentage === 100 && (
-                          <div className="mt-2 text-center">
-                            <span className="inline-flex items-center text-sm text-green-600 font-medium">
-                              <CheckCircle2 className="h-4 w-4 mr-1" /> All questions completed!
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">Filling in Your Pet Information</span></h2>
-                      <p className="text-gray-600 mb-6">
-                        Please provide information about your pets below. This will help your loved ones understand important details about your furry friends.
-                      </p>
-                      
                       <div className="mt-4">
                         {questions
                           .sort((a, b) => a.order - b.order)
@@ -142,7 +122,6 @@ const PetsInstructions = () => {
                             />
                           ))
                         }
-                        
                         <div className="mt-8 flex justify-end">
                           <Button
                             type="submit"
@@ -152,6 +131,16 @@ const PetsInstructions = () => {
                             Save pet information
                           </Button>
                         </div>
+                        <GoodToKnowBox
+                          title="Filling in Your Pet Information"
+                          description="Please provide information about your pets below. This will help your loved ones understand important details about your furry friends."
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="All topics"
+                          leftTo="/category/homeinstructions/info"
+                          rightLabel="Trash"
+                          rightTo="/category/homeinstructions/trash"
+                        />
                       </div>
                     </Form>
                   );
@@ -160,7 +149,6 @@ const PetsInstructions = () => {
             </div>
           </div>
           
-          {/* Right column - Search panel */}
           <div>
             <SearchPanel />
           </div>
