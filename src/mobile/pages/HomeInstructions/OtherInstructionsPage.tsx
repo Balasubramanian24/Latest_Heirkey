@@ -2,7 +2,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
 import Footer from "@/mobile/components/layout/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import userInputService, { generateObjectId } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from "react";
@@ -16,6 +16,7 @@ const initialValues = {
 
 export default function OtherInstructionsPage() {
   const navigate = useNavigate();
+  const { categoryName } = useParams();
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
@@ -112,7 +113,7 @@ export default function OtherInstructionsPage() {
               // Save to backend
               await userInputService.createUserInput(userData);
 
-              navigate("/homeinstructions/security");
+              navigate(`/category/${categoryName}/security`);
             } catch (err: any) {
               console.error('Error saving other instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');

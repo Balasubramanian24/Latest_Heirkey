@@ -21,6 +21,7 @@ import PetsInstructionsPage from '@/mobile/pages/HomeInstructions/PetsInstructio
 import TrashInstructionsPage from '@/mobile/pages/HomeInstructions/TrashInstructionsPage';
 import OtherInstructionsPage from "./mobile/pages/HomeInstructions/OtherInstructionsPage";
 import SecurityInstructionsPage from "./mobile/pages/HomeInstructions/SecurityInstructionsPage";
+import HomeInstructionsReviewPage from "./mobile/pages/HomeInstructions/HomeInstructionsReviewPage";
 
 
 
@@ -82,7 +83,7 @@ export default function App() {
             <Route path="/category/:categoryName/other" element={<Layout><OtherInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
             
-            <Route path="/category/homeinstructions/review" element={<Layout><HomeInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
           </>
         ) : (
           // Web routes

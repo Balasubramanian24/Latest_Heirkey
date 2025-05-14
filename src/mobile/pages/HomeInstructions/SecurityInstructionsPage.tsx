@@ -135,7 +135,7 @@ export default function SecurityInstructionsPage() {
                 navigate(`/category/${categoryName}/review`);
               } else {
                 // Fallback to old route if categoryName not available
-                navigate("/homeinstructions/review");
+                navigate(`/homeinstructions/review`);
               }
             } catch (err: any) {
               console.error('Error saving security instructions:', err);

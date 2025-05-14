@@ -34,7 +34,7 @@ const CategoryReviewPage = ({
   const [infoVisible, setInfoVisible] = useState(true);
 
   return (
-    <Layout>
+    <>
       {/* Category Header */}
       <div className="w-full bg-gradient-to-r from-[#4b4e7a] to-[#3ed6c5] py-6 px-4">
         <div className="flex flex-col mb-2">
@@ -116,7 +116,7 @@ const CategoryReviewPage = ({
           </div>
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

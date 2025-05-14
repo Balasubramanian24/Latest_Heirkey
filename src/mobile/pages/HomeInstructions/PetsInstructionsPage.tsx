@@ -1,6 +1,6 @@
 // PetsStepperForm.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import questionsData from "@/data/homeIntsructions.json";
 import { Question } from "@/mobile/components/HomeInstructions/FormFields";
@@ -46,6 +46,7 @@ export default function PetsInstructionsPage() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { categoryName } = useParams();
 
   // Validation (simple example, expand as needed)
   function validate(values: Record<string, any>) {
@@ -149,7 +150,7 @@ export default function PetsInstructionsPage() {
               // Save to backend
               await userInputService.createUserInput(userData);
 
-              navigate("/homeinstructions/trash");
+              navigate(`/category/${categoryName}/trash`);
             } catch (err: any) {
               console.error('Error saving pet instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');

@@ -1,7 +1,7 @@
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Footer from '@/mobile/components/layout/Footer';
 import userInputService, { generateObjectId } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,7 @@ const initialValues = {
 
 export default function TrashInstructionsPage() {
   const navigate = useNavigate();
+  const { categoryName } = useParams();
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
@@ -109,7 +110,7 @@ export default function TrashInstructionsPage() {
               // Save to backend
               await userInputService.createUserInput(userData);
 
-              navigate("/homeinstructions/other");
+              navigate(`/category/${categoryName}/other`);
             } catch (err: any) {
               console.error('Error saving trash instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');
