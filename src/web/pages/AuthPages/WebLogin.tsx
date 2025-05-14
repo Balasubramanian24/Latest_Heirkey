@@ -19,7 +19,7 @@ export default function WebLogin() {
 
     try {
       await login({ email, password });
-      navigate("/dashboard");
+      navigate("/auth/user-profile");
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.");
     }

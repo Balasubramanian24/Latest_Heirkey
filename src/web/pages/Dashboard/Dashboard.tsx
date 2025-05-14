@@ -10,6 +10,7 @@ import funeral from '@/assets/global/category/funeral.jpg'
 import contact from '@/assets/global/category/contact.jpg'
 import socialMedia from '@/assets/global/category/socialMedia.jpg'
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg'
+import { useAuth } from '@/contexts/AuthContext'
 
 const CategoryCard = ({ 
   title, 
@@ -39,12 +40,14 @@ const CategoryCard = ({
   )
 }
 
-
 const Dashboard = () => {
-  const user = {
-    name: 'Francis Nixon',
-    email: 'fnixon35@hotmail.com',
-    avatar: '/heirkey.svg'
+  const { user } = useAuth();
+  
+  // Fallback user info if not authenticated
+  const userInfo = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+    email: user?.email || 'guest@example.com',
+    avatar: user?.image || avatar
   }
   
   const categories = [
@@ -100,11 +103,19 @@ const Dashboard = () => {
             </div>
             <div className="flex items-center">
               <div className="text-right mr-4">
-                <div className="font-semibold">{user.name}</div>
-                <div className="text-sm opacity-80">{user.email}</div>
+                <div className="font-semibold">{userInfo.name}</div>
+                <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt={user.name} className="w-full h-full object-cover" />
+                <img 
+                  src={userInfo.avatar} 
+                  alt={userInfo.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = avatar; // Fallback to default avatar
+                  }}
+                />
               </Avatar>
             </div>
           </div>

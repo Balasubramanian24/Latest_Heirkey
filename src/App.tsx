@@ -96,9 +96,7 @@ export default function App() {
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
             <Route path="/auth/user-profile" element={<ProtectedRoute><WebLayout><WebUserProfile /></WebLayout></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><WebLayout><Dashboard /></WebLayout></ProtectedRoute>} />
-            <Route path="/auth/user-profile" element={<WebLayout><WebUserProfile /></WebLayout>} />
 
-            <Route path="/dashboard" element={<WebLayout><Dashboard /></WebLayout>} />
             
             <Route path="/category/:categoryName" element={<CategoryStartupWrapper />} />
             <Route path="/category/:categoryName/info" element={<HomeInstructionsWrapper />} />

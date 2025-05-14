@@ -9,15 +9,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, LogOut } from 'lucide-react';
+import authService from '@/services/authService';
 
 export default function WebUserProfile() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, setUser } = useAuth();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [email, setEmail] = useState(user?.email || '');
   const [username, setUsername] = useState(user?.username || '');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(user?.image || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,10 +57,30 @@ export default function WebUserProfile() {
     setSuccess(null);
 
     try {
-      // TODO: Implement profile update using authService
-      // For now, just show a success message
+      // First update the profile image if changed
+      if (profileImage) {
+        const formData = new FormData();
+        formData.append('image', profileImage);
+        const updatedUser = await authService.updateProfileImage(formData);
+        setUser(updatedUser);
+      }
+
+      // Then update the profile information
+      const updatedUser = await authService.updateProfile({
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        username: username || undefined
+      });
+
+      
+      setUser(updatedUser);
       setSuccess('Profile updated successfully!');
+      
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     } catch (err: unknown) {
+      console.error('Profile update error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
       setError(errorMessage);
     } finally {

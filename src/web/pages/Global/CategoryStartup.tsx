@@ -6,9 +6,18 @@ import AppHeader from '@/web/components/Layout/AppHeader';
 import { Avatar } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg'
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CategoryStartup({ category = 'Topic' }: { category?: string }) {
   const [showInfo, setShowInfo] = useState(true);
+  const { user } = useAuth();
+
+  // Fallback user info if not authenticated
+  const userInfo = {
+    name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+    email: user?.email || 'guest@example.com',
+    avatar: user?.image || avatar
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f5f5]">
@@ -24,11 +33,19 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
             </div>
             <div className="flex items-center">
               <div className="text-right mr-4">
-                <div className="font-semibold">Francis Nixon</div>
-                <div className="text-sm opacity-80">fnixon36y@hotmail.com</div>
+                <div className="font-semibold">{userInfo.name}</div>
+                <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img src={avatar} alt="Francis Nixon" className="w-full h-full object-cover" />
+                <img 
+                  src={userInfo.avatar} 
+                  alt={userInfo.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = avatar; // Fallback to default avatar
+                  }}
+                />
               </Avatar>
             </div>
           </div>
