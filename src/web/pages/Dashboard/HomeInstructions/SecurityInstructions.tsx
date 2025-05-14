@@ -21,6 +21,8 @@ import {
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
+import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
+import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
 
 const SecurityInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -158,32 +160,6 @@ const SecurityInstructions = () => {
 
                   return (
                     <Form>
-                      {/* Progress bar */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-sm font-medium text-gray-700">Security information progress</h3>
-                          <span className="text-sm text-gray-500">
-                            {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
-                          </span>
-                        </div>
-                        <Progress
-                          value={progressStats.completionPercentage}
-                          className="h-2"
-                        />
-                        {progressStats.completionPercentage === 100 && (
-                          <div className="mt-2 text-center">
-                            <span className="inline-flex items-center text-sm text-green-600 font-medium">
-                              <CheckCircle2 className="h-4 w-4 mr-1" /> All questions completed!
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">Home Security Details</span></h2>
-                      <p className="text-gray-600 mb-6">
-                        Please provide information about your home security system below. This will help your loved ones understand how to secure your home.
-                      </p>
-
                       <div className="mt-4">
                         {questions
                           .sort((a, b) => a.order - b.order)
@@ -195,7 +171,6 @@ const SecurityInstructions = () => {
                             />
                           ))
                         }
-
                         <div className="mt-8 flex justify-end">
                           <Button
                             type="submit"
@@ -205,6 +180,16 @@ const SecurityInstructions = () => {
                             Save security information
                           </Button>
                         </div>
+                        <GoodToKnowBox
+                          title="Home Security Details"
+                          description="Please provide information about your home security system below. This will help your loved ones understand how to secure your home."
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="Other"
+                          leftTo="/category/homeinstructions/other"
+                          rightLabel="Category Review"
+                          rightTo="/category/homeinstructions/review"
+                        />
                       </div>
                     </Form>
                   );

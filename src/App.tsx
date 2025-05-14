@@ -40,6 +40,9 @@ import OtherInstructions from "./web/pages/Dashboard/HomeInstructions/OtherInstr
 import SecurityInstructions from "./web/pages/Dashboard/HomeInstructions/SecurityInstructions";
 import HomeInstructions from "./web/pages/Dashboard/HomeInstructions/HomeInstructions";
 import CategoryStartup from "./web/pages/Global/CategoryStartup";
+import CategoryReviewPage from "./web/components/Category/CategoryReviewPage";
+import HomeInstructionsReview from "./web/pages/Dashboard/HomeInstructions/HomeInstructionsReview";
+
 
 function CategoryStartupWrapper() {
   const { categoryName } = useParams();
@@ -105,6 +108,8 @@ export default function App() {
             <Route path="/category/:categoryName/trash" element={<TrashInstructions />} />
             <Route path="/category/:categoryName/other" element={<OtherInstructions />} />
             <Route path="/category/:categoryName/security" element={<SecurityInstructions />} />
+
+            <Route path="/category/homeinstructions/review" element={<HomeInstructionsReview />} />
 
           </>
         )}

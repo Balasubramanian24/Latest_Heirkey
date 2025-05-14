@@ -39,14 +39,14 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
         <div className="flex-1">
           <div className="flex gap-2 mb-6">
             {[...Array(8)].map((_, i) => (
-              <Button key={i} variant={i === 0 ? 'default' : 'outline'} className="rounded-full px-6 py-2 text-sm font-medium">
+              <Button key={i} variant={i === 0 ? 'default' : 'outline'} className="rounded-none px-6 py-2 text-sm font-medium">
                 Topic
               </Button>
             ))}
           </div>
 
           <h2 className="text-2xl font-bold mb-2">
-            Category: <span className="text-[#1ccfc9]">{category}</span>
+            Category: <span className="text-[#1ccfc9]">{category.toUpperCase().replace(' ', ' ')}</span>
           </h2>
 
           {showInfo && (

@@ -21,6 +21,8 @@ import {
   calculateProgress,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
+import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
+import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
 
 const OtherInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -158,32 +160,6 @@ const OtherInstructions = () => {
 
                   return (
                     <Form>
-                      {/* Progress bar */}
-                      <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-sm font-medium text-gray-700">Other information progress</h3>
-                          <span className="text-sm text-gray-500">
-                            {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
-                          </span>
-                        </div>
-                        <Progress
-                          value={progressStats.completionPercentage}
-                          className="h-2"
-                        />
-                        {progressStats.completionPercentage === 100 && (
-                          <div className="mt-2 text-center">
-                            <span className="inline-flex items-center text-sm text-green-600 font-medium">
-                              <CheckCircle2 className="h-4 w-4 mr-1" /> All questions completed!
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">Additional Home Information</span></h2>
-                      <p className="text-gray-600 mb-6">
-                        Please provide any other important information about your home that doesn't fit in the other categories.
-                      </p>
-
                       <div className="mt-4">
                         {questions
                           .sort((a, b) => a.order - b.order)
@@ -195,7 +171,6 @@ const OtherInstructions = () => {
                             />
                           ))
                         }
-
                         <div className="mt-8 flex justify-end">
                           <Button
                             type="submit"
@@ -205,6 +180,16 @@ const OtherInstructions = () => {
                             Save other information
                           </Button>
                         </div>
+                        <GoodToKnowBox
+                          title="Additional Home Information"
+                          description="Please provide any other important information about your home that doesn't fit in the other categories."
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="Trash"
+                          leftTo="/category/homeinstructions/trash"
+                          rightLabel="Security"
+                          rightTo="/category/homeinstructions/security"
+                        />
                       </div>
                     </Form>
                   );
@@ -212,8 +197,6 @@ const OtherInstructions = () => {
               </Formik>
             </div>
           </div>
-
-          {/* Right column - Search panel */}
           <div>
             <SearchPanel />
           </div>

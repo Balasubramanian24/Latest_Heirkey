@@ -15,7 +15,7 @@
       "required": true,
       "sectionId": "101A",
       "order": 2,
-      "options": ["Nil", "1", "2", "3", "4", "5", "More than 5"],
+      "options": ["1", "2", "3", "4", "5", "More than 5"],
       "dependsOn": {
         "questionId": "q1",
         "value": "yes"
