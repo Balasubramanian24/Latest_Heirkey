@@ -43,7 +43,7 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
   return (
     <div
       className="cursor-pointer"
-      onClick={() => navigate(`/home-instructions/${subcategory.title.toLowerCase()}`)}
+      onClick={() => navigate(`/category/homeinstructions/${subcategory.title.toLowerCase()}`)}
     >
       <Card className="bg-white rounded-xl shadow-sm border border-gray-100">
         <CardContent className="p-4">

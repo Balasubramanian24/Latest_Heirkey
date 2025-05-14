@@ -2,7 +2,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
 import Footer from "@/mobile/components/layout/Footer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import userInputService, { generateObjectId } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from "react";
@@ -17,15 +17,32 @@ const initialValues = {
 
 export default function SecurityInstructionsPage() {
   const navigate = useNavigate();
+  const { categoryName } = useParams<{ categoryName: string }>();
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Tab routes
+  // Tab routes using the category param
   const tabRoutes: Record<string, string> = {
-    Pets: "/home-instructions/pets",
-    Trash: "/home-instructions/trash",
-    Other: "/home-instructions/other",
-    Security: "/home-instructions/security",
+    Pets: `/category/${categoryName}/pets`,
+    Trash: `/category/${categoryName}/trash`,
+    Other: `/category/${categoryName}/other`,
+    Security: `/category/${categoryName}/security`,
+  };
+
+  // Fallback routes in case categoryName is undefined
+  const fallbackTabRoutes: Record<string, string> = {
+    Pets: "/homeinstructions/pets",
+    Trash: "/homeinstructions/trash",
+    Other: "/homeinstructions/other",
+    Security: "/homeinstructions/security",
+  };
+
+  // Use dynamic routes if categoryName is available, otherwise use fallback
+  const getTabRoute = (tab: string) => {
+    if (categoryName) {
+      return tabRoutes[tab];
+    }
+    return fallbackTabRoutes[tab];
   };
 
   return (
@@ -48,7 +65,7 @@ export default function SecurityInstructionsPage() {
                 }
                 disabled={isActive}
                 onClick={() => {
-                  if (!isActive) navigate(tabRoutes[tab]);
+                  if (!isActive) navigate(getTabRoute(tab));
                 }}
               >
                 {tab}
@@ -113,8 +130,13 @@ export default function SecurityInstructionsPage() {
               // Save to backend
               await userInputService.createUserInput(userData);
 
-              // Navigate back to home instructions
-              navigate("/home-instructions");
+              // Navigate to the review page with dynamic category
+              if (categoryName) {
+                navigate(`/category/${categoryName}/review`);
+              } else {
+                // Fallback to old route if categoryName not available
+                navigate("/homeinstructions/review");
+              }
             } catch (err: any) {
               console.error('Error saving security instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');

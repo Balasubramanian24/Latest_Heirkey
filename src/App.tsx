@@ -40,7 +40,6 @@ import OtherInstructions from "./web/pages/Dashboard/HomeInstructions/OtherInstr
 import SecurityInstructions from "./web/pages/Dashboard/HomeInstructions/SecurityInstructions";
 import HomeInstructions from "./web/pages/Dashboard/HomeInstructions/HomeInstructions";
 import CategoryStartup from "./web/pages/Global/CategoryStartup";
-import CategoryReviewPage from "./web/components/Category/CategoryReviewPage";
 import HomeInstructionsReview from "./web/pages/Dashboard/HomeInstructions/HomeInstructionsReview";
 
 
@@ -64,7 +63,6 @@ export default function App() {
           {isMobile ? (
           // Mobile routes
           <>
-
             <Route path="/" element={<LandingPage />}/>
             <Route path="/auth/get-started" element={<Layout><SplashPage /></Layout>} />
             <Route path="/auth/login" element={<Layout><LoginPage /></Layout>} />
@@ -73,17 +71,18 @@ export default function App() {
             <Route path="/auth/resetpassword" element={<Layout><ResetPassword /></Layout>} />
             <Route path="/auth/forgetpassword" element={<Layout><ForgetPassword /></Layout>} />
             <Route path="/auth/verify" element={<Layout><VerificationForm /></Layout>} />
+            <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
-            <Route path="/categoryconfirm" element={<Layout><CategoryConfirmPage /></Layout>} />
-            <Route path="/home-instructions" element={<Layout><HomeInstructionsPage /></Layout>} />
-            <Route path="/home-instructions/pets" element={<Layout><PetsInstructionsPage /></Layout>} />
-            <Route path="/home-instructions/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
-            <Route path="/home-instructions/other" element={<Layout><OtherInstructionsPage /></Layout>} />
-            <Route path="/home-instructions/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
-
             
-            <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
+            <Route path="/category/:categoryName" element={<Layout><CategoryConfirmPage /></Layout>} />
+            <Route path="/category/:categoryName/info" element={<Layout><HomeInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/pets" element={<Layout><PetsInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/other" element={<Layout><OtherInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
+            
+            <Route path="/category/homeinstructions/review" element={<Layout><HomeInstructionsPage /></Layout>} />
           </>
         ) : (
           // Web routes

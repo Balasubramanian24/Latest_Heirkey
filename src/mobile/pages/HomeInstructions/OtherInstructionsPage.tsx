@@ -21,10 +21,10 @@ export default function OtherInstructionsPage() {
 
   // Tab routes
   const tabRoutes: Record<string, string> = {
-    Pets: "/home-instructions/pets",
-    Trash: "/home-instructions/trash",
-    Other: "/home-instructions/other",
-    Security: "/home-instructions/security",
+    Pets: "/homeinstructions/pets",
+    Trash: "/homeinstructions/trash",
+    Other: "/homeinstructions/other",
+    Security: "/homeinstructions/security",
   };
 
   return (
@@ -112,7 +112,7 @@ export default function OtherInstructionsPage() {
               // Save to backend
               await userInputService.createUserInput(userData);
 
-              navigate("/home-instructions/security");
+              navigate("/homeinstructions/security");
             } catch (err: any) {
               console.error('Error saving other instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');

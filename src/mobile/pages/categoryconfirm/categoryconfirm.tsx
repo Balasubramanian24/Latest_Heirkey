@@ -24,7 +24,7 @@ const CategoryConfirmPage = () => {
         <CategoryConfirmCard
           onStart={handleStart}
           onBack={handleBack}
-          categoryLabel={categoryName || "Selected Category"}
+          category={categoryName || "Selected Category"}
         />
       <Footer />
     </div>

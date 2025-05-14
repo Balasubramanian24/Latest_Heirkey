@@ -71,10 +71,10 @@ export default function PetsInstructionsPage() {
           {["Pets", "Trash", "Other", "Security"].map(tab => {
             // Map tab names to their routes
             const tabRoutes: Record<string, string> = {
-              Pets: "/home-instructions/pets",
-              Trash: "/home-instructions/trash",
-              Other: "/home-instructions/other",
-              Security: "/home-instructions/security",
+              Pets: "/homeinstructions/pets",
+              Trash: "/homeinstructions/trash",
+              Other: "/homeinstructions/other",
+              Security: "/homeinstructions/security",
             };
             const isActive = tab === "Pets";
             return (
@@ -149,7 +149,7 @@ export default function PetsInstructionsPage() {
               // Save to backend
               await userInputService.createUserInput(userData);
 
-              navigate("/home-instructions/trash");
+              navigate("/homeinstructions/trash");
             } catch (err: any) {
               console.error('Error saving pet instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');
@@ -172,7 +172,7 @@ export default function PetsInstructionsPage() {
                 };
                 console.log("petFields", petFields);
                 localStorage.setItem("petsInstructions", JSON.stringify(petFields));
-                navigate("/home-instructions/trash");
+                navigate("/homeinstructions/trash");
               }
             }, [values.q1, navigate]);
 
