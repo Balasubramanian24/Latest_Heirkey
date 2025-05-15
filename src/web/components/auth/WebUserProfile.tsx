@@ -72,10 +72,10 @@ export default function WebUserProfile() {
         username: username || undefined
       });
 
-      
+
       setUser(updatedUser);
       setSuccess('Profile updated successfully!');
-      
+
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -117,15 +117,18 @@ export default function WebUserProfile() {
               <h2 className="text-2xl font-bold text-gray-900">
                 Profile Settings
               </h2>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50"
-                onClick={handleLogout}
-                disabled={isLoading}
-              >
-                <LogOut size={16} />
-                Logout
-              </Button>
+              <div className="flex flex-col items-end">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={handleLogout}
+                  disabled={isLoading}
+                >
+                  <LogOut size={16} />
+                  Logout
+                </Button>
+                <span className="text-xs text-gray-500 mt-1">Also available in settings menu</span>
+              </div>
             </div>
 
             {error && (

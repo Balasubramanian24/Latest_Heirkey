@@ -5,9 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import HeirkeyVideo from "@/assets/heirkeyvideo/HeirkeyVideo.mp4"
 import { useState, useRef } from 'react';
 import Header from '@/mobile/components/layout/Header';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const [showVideo, setShowVideo] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -54,10 +56,10 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#1F4168]">
       <Header
         isLandingPage={true}
-        isAuthenticated={false}
-        showAuthButtons={true}
-        user={null}
-        handleLogout={() => {}}
+        isAuthenticated={isAuthenticated}
+        showAuthButtons={!isAuthenticated}
+        user={user}
+        handleLogout={logout}
       />
       <div className="py-4 px-4 ">
         <h1 className="text-5xl font-semibold text-white text-left w-full">Heirkey</h1>
