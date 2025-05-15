@@ -40,8 +40,8 @@ export default function TrashInstructionsPage() {
   const isLoading = useAppSelector(selectLoading);
   const reduxError = useAppSelector(selectError);
 
-  // Cast questions to the correct type
-  const typedQuestions = castToQuestionType(trashQuestions);
+  // Cast questions to the correct type - memoize to prevent recalculation on every render
+  const typedQuestions = useState(() => castToQuestionType(trashQuestions))[0];
 
   // Get the questionId from URL query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -59,15 +59,35 @@ export default function TrashInstructionsPage() {
     if (userInputs && userInputs.length > 0) {
       // Use the first matching record
       const userInput = userInputs[0];
-      if (userInput._id) {
-        setExistingInputId(userInput._id);
-      }
 
-      // Convert the saved answers to form values
-      const formValues = convertUserInputToFormValues(userInput);
-      setSavedAnswers(formValues);
+      // Only update state if we have a new ID or if formValues have changed
+      if (userInput._id && userInput._id !== existingInputId) {
+        setExistingInputId(userInput._id);
+
+        // Convert the saved answers to form values
+        const formValues = convertUserInputToFormValues(userInput);
+        setSavedAnswers(formValues);
+      } else if (!existingInputId && userInput._id) {
+        // First time setting the ID
+        setExistingInputId(userInput._id);
+
+        // Convert the saved answers to form values
+        const formValues = convertUserInputToFormValues(userInput);
+        setSavedAnswers(formValues);
+      }
     }
-  }, [userInputs]);
+  }, [userInputs, existingInputId]);
+
+  // Handle target question in a separate effect to avoid infinite loops
+  useEffect(() => {
+    if (targetQuestionId && typedQuestions.length > 0) {
+      // Find the question and scroll to it if needed
+      const questionElement = document.getElementById(`question-${targetQuestionId}`);
+      if (questionElement) {
+        questionElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [targetQuestionId]);
 
   if (isLoading) {
     return (
