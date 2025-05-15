@@ -1,24 +1,31 @@
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
-// import willInstructionsReviewData from '@/data/willInstructionsReview.json'; // Uncomment and use real data
+import willInstructionsData from "@/data/willInstructions.json";
 
-const reviewItems = [
-  {
-    label: "Will Location",
-    value: "Safe deposit box at ABC Bank",
-  },
-  {
-    label: "Executor Name",
-    value: "John Doe",
-  },
-  {
-    label: "Witnesses",
-    value: "Jane Smith, Bob Johnson",
-  },
-  // Add more review items as needed
-];
+// Mock answers for demonstration; replace with real data as needed
+const mockAnswers: Record<string, string> = {
+  w1: "Yes",
+  w2: "No",
+  w3: "Safe deposit box at ABC Bank",
+  w4: "Living room drawer",
+  w5: "Yes",
+  w6: "Attorney Smith, 555-1234",
+};
+
+const getReviewItems = () => {
+  // Flatten all location and legal questions
+  const questions = (willInstructionsData["105"] || []).filter(
+    q => ["105A", "105B", "105C"].includes(q.sectionId)
+  );
+  return questions.map(q => ({
+    label: q.text,
+    value: mockAnswers[q.id] || "No answer provided",
+  }));
+};
 
 const WillInstructionReviewPage = () => {
+  const reviewItems = getReviewItems();
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <GradiantHeader 
