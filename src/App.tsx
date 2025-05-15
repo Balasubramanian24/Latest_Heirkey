@@ -75,6 +75,15 @@ function CategoryInfoWrapper() {
   return <HomeInstructions category={categoryName} />;
 }
 
+// Wrapper for mobile info page
+function InfoPageWrapper() {
+  const { categoryName } = useParams();
+  if (categoryName === 'willlocation' || categoryName === 'willinstructions') {
+    return <WillInstructionsPage />;
+  }
+  return <HomeInstructionsPage />;
+}
+
 export default function App() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -98,7 +107,7 @@ export default function App() {
             <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
             
             <Route path="/category/:categoryName" element={<Layout><CategoryConfirmPage /></Layout>} />
-            <Route path="/category/:categoryName/info" element={<Layout><HomeInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/info" element={<Layout><InfoPageWrapper /></Layout>} />
             <Route path="/category/:categoryName/pets" element={<Layout><PetsInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/other" element={<Layout><OtherInstructionsPage /></Layout>} />
@@ -106,9 +115,9 @@ export default function App() {
             <Route path="/category/:categoryName/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
 
 
-            <Route path="/category/:categoryName/location" element={<LocationInstrucationsPage />} />
-            <Route path="/category/:categoryName/legal" element={<LegalInstructionsPage />} />
-            <Route path="/category/:categoryName/review" element={<WillInstructionsReviewPage />} />
+            <Route path="/category/:categoryName/location" element={<Layout><LocationInstrucationsPage /></Layout>} />
+            <Route path="/category/:categoryName/legal" element={<Layout><LegalInstructionsPage /></Layout>} />
+            <Route path="/category/:categoryName/review" element={<Layout><WillInstructionsReviewPage /></Layout>} />
           </>
         ) : (
           // Web routes

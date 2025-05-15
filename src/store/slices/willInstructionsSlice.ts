@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import userInputService from '../../services/userInputService';
-import homeInstructionsData from '../../data/homeIntsructions.json';
+import willInstructionsData from '../../data/willInstructions.json';
 
 // Define types for our state
 export interface SubCategory {
@@ -53,10 +53,11 @@ export interface UserInput {
   _id?: string;
 }
 
-interface HomeInstructionsState {
+interface WillInstructionsState {
   subcategories: SubCategory[];
   questions: Record<string, Question[]>;
   userInputs: UserInput[];
+  formValues: Record<string, any>; // Local form values for cross-page navigation
   loading: boolean;
   error: string | null;
   progressStats: {
@@ -67,19 +68,26 @@ interface HomeInstructionsState {
 }
 
 // Define initial state
-const initialState: HomeInstructionsState = {
+const initialState: WillInstructionsState = {
   subcategories: [
-    { id: '101', title: 'Pets', questionsCount: (homeInstructionsData['101'] || []).length },
-    { id: '102', title: 'Trash', questionsCount: (homeInstructionsData['102'] || []).length },
-    { id: '103', title: 'Other', questionsCount: (homeInstructionsData['103'] || []).length },
-    { id: '104', title: 'Security', questionsCount: (homeInstructionsData['104'] || []).length },
+    { 
+      id: '105-location', 
+      title: 'Location', 
+      questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0 
+    },
+    { 
+      id: '105-legal', 
+      title: 'Legal', 
+      questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0 
+    }
   ],
-  questions: homeInstructionsData,
+  questions: willInstructionsData,
   userInputs: [],
+  formValues: {}, // Initialize empty form values
   loading: false,
   error: null,
   progressStats: {
-    totalQuestions: Object.values(homeInstructionsData).reduce(
+    totalQuestions: Object.values(willInstructionsData).reduce(
       (sum, questions) => sum + questions.length, 0
     ),
     answeredQuestions: 0,
@@ -89,10 +97,10 @@ const initialState: HomeInstructionsState = {
 
 // Create async thunks
 export const fetchUserInputs = createAsyncThunk<UserInput[], string>(
-  'homeInstructions/fetchUserInputs',
+  'willInstructions/fetchUserInputs',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await userInputService.getUserInputsByCategory(userId, '1'); // '1' is the category ID for Home Instructions
+      const response = await userInputService.getUserInputsByCategory(userId, '2'); // '2' is the category ID for Will Instructions
       return response as UserInput[];
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user inputs';
@@ -102,7 +110,7 @@ export const fetchUserInputs = createAsyncThunk<UserInput[], string>(
 );
 
 export const saveUserInput = createAsyncThunk<UserInput, Omit<UserInput, '_id'>>(
-  'homeInstructions/saveUserInput',
+  'willInstructions/saveUserInput',
   async (userData: Omit<UserInput, '_id'>, { rejectWithValue }) => {
     try {
       const response = await userInputService.saveUserInput(userData);
@@ -118,7 +126,7 @@ export const updateUserInput = createAsyncThunk<
   UserInput,
   { id: string, userData: Omit<UserInput, '_id'> }
 >(
-  'homeInstructions/updateUserInput',
+  'willInstructions/updateUserInput',
   async ({ id, userData }: { id: string, userData: Omit<UserInput, '_id'> }, { rejectWithValue }) => {
     try {
       const response = await userInputService.updateUserInput(id, userData);
@@ -131,10 +139,13 @@ export const updateUserInput = createAsyncThunk<
 );
 
 // Create slice
-const homeInstructionsSlice = createSlice({
-  name: 'homeInstructions',
+const willInstructionsSlice = createSlice({
+  name: 'willInstructions',
   initialState,
   reducers: {
+    updateFormValues: (state, action: PayloadAction<Record<string, any>>) => {
+      state.formValues = { ...state.formValues, ...action.payload };
+    },
     updateProgressStats: (state) => {
       // Calculate total questions
       const totalQuestions = Object.values(state.questions).reduce(
@@ -245,53 +256,48 @@ const homeInstructionsSlice = createSlice({
   },
 });
 
-export const { updateProgressStats } = homeInstructionsSlice.actions;
+export const { updateFormValues, updateProgressStats } = willInstructionsSlice.actions;
 
 // Basic selectors
-export const selectHomeInstructionsState = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions;
+export const selectWillInstructionsState = (state: { willInstructions: WillInstructionsState }) =>
+  state.willInstructions;
 
 export const selectSubcategories = createSelector(
-  [selectHomeInstructionsState],
-  (homeInstructions) => homeInstructions.subcategories
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.subcategories
 );
 
 export const selectQuestions = createSelector(
-  [selectHomeInstructionsState],
-  (homeInstructions) => homeInstructions.questions
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.questions
 );
 
 export const selectUserInputs = createSelector(
-  [selectHomeInstructionsState],
-  (homeInstructions) => homeInstructions.userInputs
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.userInputs
+);
+
+export const selectFormValues = createSelector(
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.formValues
 );
 
 export const selectProgressStats = createSelector(
-  [selectHomeInstructionsState],
-  (homeInstructions) => homeInstructions.progressStats
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.progressStats
 );
-
-export const selectLoading = createSelector(
-  [selectHomeInstructionsState],
-  (homeInstructions) => homeInstructions.loading
-);
-
-export const selectError = createSelector(
-  [selectHomeInstructionsState],
-  (homeInstructions) => homeInstructions.error
-);
-
-// Memoized selectors with parameters
-export const selectSubcategoryById = (subcategoryId: string) =>
-  createSelector(
-    [selectSubcategories],
-    (subcategories) => subcategories.find(subcategory => subcategory.id === subcategoryId)
-  );
 
 export const selectQuestionsBySubcategoryId = (subcategoryId: string) =>
   createSelector(
     [selectQuestions],
-    (questions) => questions[subcategoryId] || []
+    (questions) => {
+      if (subcategoryId === '105-location') {
+        return questions['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B') || [];
+      } else if (subcategoryId === '105-legal') {
+        return questions['105']?.filter(q => q.sectionId === '105C') || [];
+      }
+      return [];
+    }
   );
 
 export const selectUserInputsBySubcategoryId = (subcategoryId: string) =>
@@ -300,4 +306,4 @@ export const selectUserInputsBySubcategoryId = (subcategoryId: string) =>
     (userInputs) => userInputs.filter(input => input.originalSubCategoryId === subcategoryId)
   );
 
-export default homeInstructionsSlice.reducer;
+export default willInstructionsSlice.reducer;

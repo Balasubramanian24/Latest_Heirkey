@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import CategoryReviewPage from '@/mobile/components/category/CategoryReviewPage';
 import { useNavigate, useParams } from 'react-router-dom';
-import questionsData from '@/data/homeIntsructions.json';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';

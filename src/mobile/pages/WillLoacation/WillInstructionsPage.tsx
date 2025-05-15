@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
@@ -66,14 +66,6 @@ const WillInstructionsPage = () => {
       />
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-md mx-auto space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-xl font-bold text-gray-900">
-              Select a Category
-            </h1>
-            <p className="text-sm text-gray-600">
-              Choose a category to add or update your will instructions
-            </p>
-          </div>
           <div className="space-y-4">
             {subcategories.map((subcategory) => (
               <SubCategoryCard 
