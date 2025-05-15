@@ -52,6 +52,7 @@ import CeremonyLocation from "./web/pages/Dashboard/FuneralArrangements/Ceremony
 import FuneralClergy from "./web/pages/Dashboard/FuneralArrangements/FuneralClergy";
 import FuneralNotification from "./web/pages/Dashboard/FuneralArrangements/FuneralNotification";
 import FuneralProceedings from "./web/pages/Dashboard/FuneralArrangements/FuneralProceedings";
+import FuneralArrangementReview from "./web/pages/Dashboard/FuneralArrangements/FuneralArrangementReview";
 
 function CategoryStartupWrapper() {
   const { categoryName } = useParams();
@@ -130,9 +131,10 @@ export default function App() {
 
             <Route path="/category/:categoryName/details" element={<FuneralDetails />} />
             <Route path="/category/:categoryName/ceremonylocation" element={<CeremonyLocation />} />
-            <Route path="/category/:categoryName/funeralclergy" element={<FuneralClergy />} />
-            <Route path="/category/:categoryName/funeralnotification" element={<FuneralNotification />} />
-            <Route path="/category/:categoryName/funeralproceedings" element={<FuneralProceedings />} />
+            <Route path="/category/:categoryName/clergy" element={<FuneralClergy />} />
+            <Route path="/category/:categoryName/notification" element={<FuneralNotification />} />
+            <Route path="/category/:categoryName/proceedings" element={<FuneralProceedings />} />
+            <Route path="/category/funeralarrangements/review" element={<FuneralArrangementReview />} />
           </>
         )}
       </Routes>

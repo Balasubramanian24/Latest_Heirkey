@@ -230,6 +230,7 @@ const OtherInstructions = () => {
       <SubCategoryTabs tabs={tabs} />
       <div className="container mx-auto px-6">
         <SubCategoryTitle
+          mainCategory="Home Instructions"
           category="Other"
           description="These files contain questions to help you record your details so they're easy to find later."
         />

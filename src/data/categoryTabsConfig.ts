@@ -10,10 +10,10 @@ export const categoryTabsConfig = {
     { label: 'Legal Representation', path: '/category/willinstructions/legal' },
   ],
   funeralarrangements: [
-    { label: 'Details', path: '/category/funeralarrangements/funeraldetails' },
+    { label: 'Details', path: '/category/funeralarrangements/details' },
     { label: 'Ceremony Location', path: '/category/funeralarrangements/ceremonylocation' },
-    { label: 'Clergy', path: '/category/funeralarrangements/funeralclergy' },
-    { label: 'Notifications', path: '/category/funeralarrangements/funeralnotification' },
-    { label: 'Proceedings', path: '/category/funeralarrangements/funeralproceedings' },
+    { label: 'Clergy', path: '/category/funeralarrangements/clergy' },
+    { label: 'Notifications', path: '/category/funeralarrangements/notification' },
+    { label: 'Proceedings', path: '/category/funeralarrangements/proceedings' },
   ],
 }; 
