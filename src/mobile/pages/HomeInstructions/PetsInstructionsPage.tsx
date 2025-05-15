@@ -28,6 +28,10 @@ import {
 function getVisibleQuestions(allQuestions: Question[], values: Record<string, any>) {
   return allQuestions.filter(q => {
     if (!q.dependsOn) return true;
+    // Only show questions that depend on q1="yes" when q1 is actually "yes"
+    if (q.dependsOn.questionId === "q1") {
+      return values[q.dependsOn.questionId] === q.dependsOn.value;
+    }
     return values[q.dependsOn.questionId] === q.dependsOn.value;
   });
 }
@@ -35,6 +39,11 @@ function getVisibleQuestions(allQuestions: Question[], values: Record<string, an
 
 // Utility: split questions into steps (as per your UI)
 function splitIntoSteps(questions: Question[]) {
+  // If q1 is "no", only show the first question
+  if (questions.length === 1) {
+    return [questions];
+  }
+  
   return [
     questions.filter(q => q.id === "q1" || q.id === "q2"),
     questions.filter(q => q.id === "q3" || q.id === "q4"),
@@ -288,30 +297,6 @@ export default function PetsInstructionsPage() {
           }}
         >
           {({ values, isSubmitting }) => {
-            // Watch for q1 === "no"
-            useEffect(() => {
-              if (values.q1 === "no") {
-                const petFields = {
-                  q1: "no",
-                  q2: null,
-                  q3: null,
-                  q4: null,
-                  q5: null,
-                  q6: null,
-                  q7: null,
-                };
-                console.log("petFields", petFields);
-                localStorage.setItem("petsInstructions", JSON.stringify(petFields));
-
-                // Use the dynamic route with categoryName
-                if (categoryName) {
-                  navigate(`/category/${categoryName}/trash`);
-                } else {
-                  navigate("/homeinstructions/trash");
-                }
-              }
-            }, [values.q1, navigate, categoryName]);
-
             // Dynamically get visible questions and steps
             const visibleQuestions = getVisibleQuestions(typedQuestions, values);
             const steps = splitIntoSteps(visibleQuestions);
