@@ -37,6 +37,12 @@ const SecurityInstructions = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const tabs = [
+    { label: 'Pets', path: '/category/homeinstructions/pets' },
+    { label: 'Trash', path: '/category/homeinstructions/trash' },
+    { label: 'Other', path: '/category/homeinstructions/other' },
+    { label: 'Security', path: '/category/homeinstructions/security' },
+  ];
 
   // Get the questionId from URL query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -220,7 +226,7 @@ const SecurityInstructions = () => {
         backTo="/dashboard"
         user={userInfo}
       />
-      <SubCategoryTabs />
+      <SubCategoryTabs tabs={tabs} />
       <div className="container mx-auto px-6">
         <SubCategoryTitle
           category="Security"

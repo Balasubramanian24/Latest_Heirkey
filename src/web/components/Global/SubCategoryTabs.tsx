@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 
-const tabs = [
-  { label: 'Pets', path: '/category/homeinstructions/pets' },
-  { label: 'Trash', path: '/category/homeinstructions/trash' },
-  { label: 'Other', path: '/category/homeinstructions/other' },
-  { label: 'Security', path: '/category/homeinstructions/security' },
-];
+interface Tab {
+  label: string;
+  path: string;
+}
 
-const SubCategoryTabs = () => {
+interface SubCategoryTabsProps {
+  tabs: Tab[];
+}
+
+const SubCategoryTabs = ({ tabs }: SubCategoryTabsProps) => {
   const location = useLocation();
 
   return (

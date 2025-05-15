@@ -7,6 +7,13 @@ import { Avatar } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg'
 import { useAuth } from '@/contexts/AuthContext';
+import { categoryTabsConfig } from '@/data/categoryTabsConfig';
+
+const categoryDisplayNames: Record<string, string> = {
+  homeinstructions: 'Home Instructions',
+  willinstructions: 'Will & Testament',
+  // Add more as needed
+};
 
 export default function CategoryStartup({ category = 'Topic' }: { category?: string }) {
   const [showInfo, setShowInfo] = useState(true);
@@ -19,6 +26,9 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
     avatar: user?.image || avatar
   }
 
+  const displayName = categoryDisplayNames[category.toLowerCase()] || category;
+  const subcategories = categoryTabsConfig[category.toLowerCase() as keyof typeof categoryTabsConfig] || [];
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f5f5]">
       <AppHeader />
@@ -26,7 +36,7 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-1">Topic</h1>
+              <h1 className="text-3xl font-bold mb-1">{displayName}</h1>
               <Link to="/" className="flex items-center text-sm hover:underline">
                 <span className="mr-1">←</span> Back Home
               </Link>
@@ -54,16 +64,23 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
 
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-8 flex flex-col md:flex-row gap-8">
         <div className="flex-1">
+          {/* Subcategory buttons */}
           <div className="flex gap-2 mb-6">
-            {[...Array(8)].map((_, i) => (
-              <Button key={i} variant={i === 0 ? 'default' : 'outline'} className="rounded-none px-6 py-2 text-sm font-medium">
-                Topic
+            {subcategories.length > 0 ? (
+              subcategories.map((sub: { label: string; path: string }, i: number) => (
+                <Button key={sub.label} variant={i === 0 ? 'default' : 'outline'} className="rounded-none px-6 py-2 text-sm font-medium">
+                  {sub.label}
+                </Button>
+              ))
+            ) : (
+              <Button variant="default" className="rounded-none px-6 py-2 text-sm font-medium">
+                {displayName}
               </Button>
-            ))}
+            )}
           </div>
 
           <h2 className="text-2xl font-bold mb-2">
-            Category: <span className="text-[#1ccfc9]">{category.toUpperCase().replace(' ', ' ')}</span>
+            Category: <span className="text-[#1ccfc9]">{displayName.toUpperCase().replace(' ', ' ')}</span>
           </h2>
 
           {showInfo && (
@@ -83,7 +100,7 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
               <Button variant="outline" className="flex-1">Back to All Categories</Button>
             </Link>
             <Link to={`/category/${category.toLowerCase()}/info`}>
-              <Button className="flex-1 bg-[#1ccfc9] hover:bg-[#19bbb5]">Get Started with {category}</Button>
+              <Button className="flex-1 bg-[#1ccfc9] hover:bg-[#19bbb5]">Get Started with {displayName}</Button>
             </Link>
           </div>
         </div>

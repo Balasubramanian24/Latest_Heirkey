@@ -67,7 +67,7 @@ const Dashboard = () => {
       title: 'Will Location',
       imageSrc: will,
       questionCount: '0/3 questions',
-      path: '/category/willlocation'
+      path: '/category/willinstructions'
     },
     {
       title: 'Funeral Arrangements',
