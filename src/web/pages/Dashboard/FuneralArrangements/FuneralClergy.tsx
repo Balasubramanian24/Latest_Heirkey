@@ -2,20 +2,28 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Formik, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
+import { Button } from '@/components/ui/button';
 import AppHeader from '@/web/components/Layout/AppHeader';
 import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-import funeralArrangementsData from '@/data/funeralArrangements.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
-import userInputService, { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  saveUserInput,
+  updateUserInput,
+  UserInput
+} from '@/store/slices/funeralArrangementsSlice';
 import {
   Question,
   QuestionItem,
   buildValidationSchema,
   generateInitialValues,
   handleDependentAnswers
-} from '@/web/components/HomeInstructions/FormFields';
+} from '@/web/components/FuneralInstructions/FormFields';
+import ScrollToQuestion from '@/web/components/FuneralInstructions/ScrollToQuestion';
 import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
 import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
 import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
@@ -24,67 +32,61 @@ import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
 import { categoryTabsConfig } from '@/data/categoryTabsConfig';
 
 const FuneralClergy = () => {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [savedAnswers, setSavedAnswers] = useState<Record<string, any>>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
-  const [existingCategoryId, setExistingCategoryId] = useState<string | null>(null);
-  const [existingSubCategoryId, setExistingSubCategoryId] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
+
+  // Get data from Redux store using selectors
+  const questions = useAppSelector((state: any) =>
+    state.funeralArrangements.questions['205']?.filter((q: Question) => q.sectionId === '205C') || []
+  );
+  const loading = useAppSelector((state: any) => state.funeralArrangements.loading);
+  const userInputs = useAppSelector((state: any) => state.funeralArrangements.userInputs);
   const tabs = categoryTabsConfig['funeralarrangements'];
 
   // Get the questionId from URL query parameters
   const queryParams = new URLSearchParams(location.search);
   const targetQuestionId = queryParams.get('questionId');
 
-  // Initialize questions from JSON data and fetch saved answers
+  // Fetch user inputs when component mounts
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      // Set questions from JSON data (section 205C)
-      if (funeralArrangementsData['205']) {
-        // Map questions to ensure type compatibility
-        const rawQuestions = funeralArrangementsData['205'].filter(q => q.sectionId === '205C');
-        const mappedQuestions = rawQuestions.map(q => {
-          if (q.type === 'text' || q.type === 'textarea' || q.type === 'number' || q.type === 'boolean' || q.type === 'choice') {
-            return q;
-          }
-          // Default to text if type is missing or unknown
-          return { ...q, type: 'text' };
-        });
-        setQuestions(mappedQuestions as Question[]);
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
+
+  // Process user inputs to get saved answers
+  useEffect(() => {
+    if (userInputs.length > 0 && !loading) {
+      // Find the user input for this subcategory
+      const userInput = userInputs.find((input: UserInput) => input.originalSubCategoryId === '205C');
+
+      if (userInput) {
+        // Convert to form values
+        const formValues = convertUserInputToFormValues(userInput);
+        setSavedAnswers(formValues);
+
+        // Store the existing record ID
+        setExistingInputId(userInput._id || null);
+
+        console.log('Loaded saved answers:', formValues);
+        console.log('Existing record ID:', userInput._id);
       }
-      // Fetch saved answers if user is authenticated
-      if (user && user.id) {
-        try {
-          // Fetch user inputs for this subcategory
-          const userInputs = await userInputService.getUserInputsBySubcategory(user.id, '2', '205C');
-          if (userInputs && userInputs.length > 0) {
-            const userInput = userInputs[0];
-            const formValues = convertUserInputToFormValues(userInput);
-            setSavedAnswers(formValues);
-            setExistingInputId(userInput._id);
-            setExistingCategoryId(userInput.categoryId);
-            setExistingSubCategoryId(userInput.subCategoryId);
-          }
-        } catch (error) {
-          console.error('Error fetching saved answers:', error);
-        }
-      }
-      setIsLoading(false);
-    };
-    fetchData();
-  }, [user]);
+    }
+  }, [userInputs, loading]);
 
   // Scroll to the target question if specified in URL
   useEffect(() => {
-    if (!isLoading && targetQuestionId) {
+    if (!loading && targetQuestionId) {
+      // Use setTimeout to ensure the DOM has been updated
       setTimeout(() => {
         const element = document.getElementById(`question-${targetQuestionId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Add a highlight effect
           element.classList.add('bg-yellow-100');
           setTimeout(() => {
             element.classList.remove('bg-yellow-100');
@@ -92,70 +94,119 @@ const FuneralClergy = () => {
         }
       }, 500);
     }
-  }, [isLoading, targetQuestionId]);
+  }, [loading, targetQuestionId]);
 
   // Handle form submission
-  const handleSubmit = async (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
+  const handleSubmit = async (values: Record<string, string>, { setSubmitting }: FormikHelpers<Record<string, string>>) => {
     try {
+      console.log('Saving clergy details:', values);
+
+      // Check if user is authenticated
       if (!user || !user.id) {
+        console.error('User not authenticated');
         throw new Error('You must be logged in to save answers');
       }
+
       // Group answers by section
-      const answersBySection = questions.reduce((sections: Record<string, any[]>, question) => {
-        if (!sections[question.sectionId]) {
-          sections[question.sectionId] = [];
-        }
-        const answer = values[question.id];
-        if (answer !== undefined) {
-          sections[question.sectionId].push({
-            index: sections[question.sectionId].length,
-            originalQuestionId: question.id,
-            question: question.text,
-            type: question.type,
-            answer
-          });
-        }
-        return sections;
-      }, {});
-      const formattedAnswersBySection = Object.entries(answersBySection).map(([sectionId, answers]) => ({
-        originalSectionId: sectionId,
+      const answersBySection = questions
+        .reduce((sections: Record<string, Array<{
+          index: number;
+          originalQuestionId: string;
+          question: string;
+          type: string;
+          answer: string;
+        }>>, question: Question) => {
+          if (!sections[question.sectionId]) {
+            sections[question.sectionId] = [];
+          }
+
+          const answer = values[question.id];
+          if (answer) {
+            sections[question.sectionId].push({
+              index: sections[question.sectionId].length,
+              originalQuestionId: question.id, // Store our original question ID
+              question: question.text,
+              type: question.type,
+              answer
+            });
+          }
+
+          return sections;
+        }, {});
+
+      // Format answers data
+      const formattedAnswersBySection: Array<{
+        originalSectionId: string;
+        isCompleted: boolean;
+        answers: Array<{
+          index: number;
+          originalQuestionId: string;
+          question: string;
+          type: string;
+          answer: string;
+        }>;
+      }> = Object.entries(answersBySection).map(([sectionId, answers]) => ({
+        originalSectionId: sectionId, // Store our original section ID
         isCompleted: true,
-        answers
+        answers: answers as Array<{
+          index: number;
+          originalQuestionId: string;
+          question: string;
+          type: string;
+          answer: string;
+        }>
       }));
+
+      // Check if we're updating an existing record or creating a new one
       if (existingInputId) {
-        try {
-          await userInputService.updateUserInput(existingInputId, {
+        console.log('Updating existing record:', existingInputId);
+
+        // Update existing record using Redux action
+        await dispatch(updateUserInput({
+          id: existingInputId,
+          userData: {
+            userId: user.id,
+            categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+            originalCategoryId: '2', // Funeral Arrangements category ID
+            subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+            originalSubCategoryId: '205C', // Clergy subcategory ID
             answersBySection: formattedAnswersBySection
-          });
-        } catch (error) {
-          setExistingInputId(null);
-        }
-      }
-      if (!existingInputId) {
-        const userData = {
-          userId: user.id,
-          categoryId: generateObjectId(),
-          originalCategoryId: '2', // Funeral Arrangements
-          subCategoryId: generateObjectId(),
-          originalSubCategoryId: '205C',
+          } as UserInput
+        })).unwrap();
+
+        console.log('Successfully updated record');
+      } else {
+        console.log('Creating new record');
+
+        // Format data for API
+        const userData: Omit<UserInput, '_id'> = {
+          userId: user.id, // Use actual user ID from auth context
+          categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+          originalCategoryId: '2', // Funeral Arrangements category ID
+          subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+          originalSubCategoryId: '205C', // Clergy subcategory ID
           answersBySection: formattedAnswersBySection
         };
-        const result = await userInputService.createUserInput(userData);
-        if (result && typeof result === 'object') {
-          const typedResult = result as { _id: string; categoryId: string; subCategoryId: string };
-          setExistingInputId(typedResult._id);
-          setExistingCategoryId(typedResult.categoryId);
-          setExistingSubCategoryId(typedResult.subCategoryId);
+
+        // Save to backend using Redux action
+        const result = await dispatch(saveUserInput(userData)).unwrap();
+
+        // Store the new record ID for future updates
+        if (result && result._id) {
+          setExistingInputId(result._id);
         }
       }
+
       setSubmitting(false);
-      navigate('/category/funeralarrangements/funeralnotification');
+      navigate('/category/funeralarrangements/notification');
     } catch (error) {
+      console.error('Error saving clergy details:', error);
       setSubmitting(false);
+      // Handle error (show error message, etc.)
     }
   };
 
-  if (questions.length === 0 || isLoading) {
+  if (questions.length === 0 || loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
@@ -193,22 +244,54 @@ const FuneralClergy = () => {
                 onSubmit={handleSubmit}
               >
                 {({ values, isSubmitting, isValid, dirty, setValues }) => {
+                  // Handle dependent answers when values change
+                  // We use a simple comparison instead of useEffect and useRef
+                  // to avoid React Hook errors inside render props
                   const handleDependentFields = () => {
                     handleDependentAnswers(values, questions, setValues);
                   };
+
+                  // Call once when component renders
                   if (Object.keys(values).length > 0) {
                     setTimeout(handleDependentFields, 0);
                   }
+
                   return (
                     <Form>
                       <div className="mt-4">
-                        {questions
-                          .sort((a, b) => a.order - b.order)
-                          .map(question => (
-                            <div key={question.id} id={`question-${question.id}`}>
-                              <QuestionItem question={question} values={values} />
-                            </div>
-                          ))}
+                        <ScrollToQuestion questions={questions}>
+                          {(refs) => (
+                            <>
+                              {[...questions]
+                                .sort((a: Question, b: Question) => a.order - b.order)
+                                .map((question: Question) => (
+                                  <div
+                                    key={question.id}
+                                    id={`question-${question.id}`}
+                                    ref={(el: HTMLDivElement | null) => {
+                                      refs[question.id] = el;
+                                    }}
+                                  >
+                                    <QuestionItem
+                                      question={question}
+                                      values={values}
+                                    />
+                                  </div>
+                                ))
+                              }
+                            </>
+                          )}
+                        </ScrollToQuestion>
+                        <div className="mt-8 flex justify-end">
+                          <Button
+                            type="submit"
+                            disabled={isSubmitting || !isValid || !dirty}
+                            className="bg-[#1ccfc9] hover:bg-[#19bbb5]"
+                          >
+                            Save & Continue
+                          </Button>
+                        </div>
+
                         <div className="mt-8 flex justify-between">
                           <SubCategoryFooterNav
                             leftLabel="Ceremony Location"
@@ -217,10 +300,11 @@ const FuneralClergy = () => {
                             rightTo="/category/funeralarrangements/notification"
                           />
                         </div>
+
                         <div className="mt-8">
                           <GoodToKnowBox
                             title="Editing my Answers"
-                            description="Each topic below is a part of your home documents, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
+                            description="Each topic below is a part of your funeral arrangements, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
                           />
                         </div>
                       </div>

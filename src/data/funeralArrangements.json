@@ -103,7 +103,7 @@
       {
         "id": "f11",
         "text": "Please list important contacts you would like to have contacted",
-        "type": "textarea",
+        "type": "text",
         "required": false,
         "sectionId": "205D",
         "order": 11
@@ -119,7 +119,7 @@
       {
         "id": "f13",
         "text": "What music would you like played?",
-        "type": "textarea",
+        "type": "text",
         "required": false,
         "sectionId": "205E",
         "order": 13,
@@ -131,7 +131,7 @@
       {
         "id": "f14",
         "text": "What readings would you like to be read?",
-        "type": "textarea",
+        "type": "text",
         "required": false,
         "sectionId": "205E",
         "order": 14,
@@ -154,4 +154,3 @@
       }
     ]
   }
-  

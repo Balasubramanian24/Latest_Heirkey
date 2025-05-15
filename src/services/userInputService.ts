@@ -36,20 +36,89 @@ interface UserInputData {
   answersBySection: SectionAnswers[];
 }
 
+/**
+ * Service for handling user input operations
+ */
 const userInputService = {
-  // Create a new user input
+  /**
+   * Creates a new user input record
+   * @param data - The user input data to save
+   * @returns The created user input record
+   */
   createUserInput: async (data: UserInputData) => {
-    const response = await api.post('/user-inputs', data);
-    return response.data;
+    try {
+      // Validate that we have at least one answer
+      if (!data.answersBySection || data.answersBySection.length === 0 ||
+          data.answersBySection.every(section => !section.answers || section.answers.length === 0)) {
+        throw new Error('Cannot save empty answers. Please provide at least one answer.');
+      }
+
+      // Data validation and preparation complete
+
+      // Ensure all answers are properly formatted
+      const sanitizedData = {
+        ...data,
+        answersBySection: data.answersBySection.map(section => ({
+          ...section,
+          originalSectionId: section.originalSectionId,
+          isCompleted: true,
+          answers: section.answers
+            .filter(answer => answer && answer.originalQuestionId) // Filter out invalid answers
+            .map(answer => ({
+              ...answer,
+              index: answer.index || 0,
+              type: answer.type === "textarea" ? "text" : (answer.type || "text"), // Convert textarea to text
+              answer: String(answer.answer || "").trim()
+            }))
+        }))
+      };
+
+      try {
+        const response = await api.post('/user-inputs', sanitizedData);
+        return response.data;
+      } catch (apiError) {
+        // Try with a direct fetch call as a last resort
+        const fetchResponse = await fetch('/v1/api/user-inputs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(sanitizedData),
+        });
+
+        if (!fetchResponse.ok) {
+          throw new Error(`API error: ${fetchResponse.status}`);
+        }
+
+        const result = await fetchResponse.json();
+        return result;
+      }
+    } catch (error) {
+      // Log error in development mode only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error creating user input:', error);
+      }
+      throw error;
+    }
   },
 
-  // Get user input by ID
+  /**
+   * Gets a user input record by ID
+   * @param id - The ID of the user input record to retrieve
+   * @returns The user input record
+   */
   getUserInput: async (id: string) => {
     const response = await api.get(`/user-inputs/${id}`);
     return response.data;
   },
 
-  // Get user inputs by user ID and category ID
+  /**
+   * Gets user input records for a specific user and category
+   * @param userId - The ID of the user
+   * @param categoryId - The ID of the category
+   * @returns Array of user input records
+   */
   getUserInputsByUserAndCategory: async (userId: string, categoryId: string) => {
     const response = await api.get('/user-inputs', {
       params: { userId, categoryId }
@@ -57,7 +126,13 @@ const userInputService = {
     return response.data;
   },
 
-  // Get user inputs for a specific subcategory
+  /**
+   * Gets user input records for a specific subcategory
+   * @param userId - The ID of the user
+   * @param originalCategoryId - The original category ID
+   * @param originalSubCategoryId - The original subcategory ID
+   * @returns Array of filtered user input records
+   */
   getUserInputsBySubcategory: async (userId: string, originalCategoryId: string, originalSubCategoryId: string) => {
     const response = await userInputService.getUserInputsByUserAndCategory(userId, originalCategoryId);
 
@@ -70,25 +145,95 @@ const userInputService = {
     );
   },
 
-  // Get user inputs by category (used by Redux)
+  /**
+   * Gets user input records by category (used by Redux)
+   * @param userId - The ID of the user
+   * @param originalCategoryId - The original category ID
+   * @returns Array of user input records
+   */
   getUserInputsByCategory: async (userId: string, originalCategoryId: string) => {
     const response = await userInputService.getUserInputsByUserAndCategory(userId, originalCategoryId);
     return Array.isArray(response) ? response : [];
   },
 
-  // Update user input
+  /**
+   * Updates an existing user input record
+   * @param id - The ID of the user input record to update
+   * @param data - The updated user input data
+   * @returns The updated user input record
+   */
   updateUserInput: async (id: string, data: Partial<UserInputData>) => {
-    const response = await api.patch(`/user-inputs/${id}`, data);
-    return response.data;
+    try {
+      // Validate that we have at least one answer if answersBySection is provided
+      if (data.answersBySection &&
+          (data.answersBySection.length === 0 ||
+           data.answersBySection.every(section => !section.answers || section.answers.length === 0))) {
+        throw new Error('Cannot update with empty answers. Please provide at least one answer.');
+      }
+
+      // Ensure all answers are properly formatted
+      const sanitizedData = data.answersBySection ? {
+        ...data,
+        answersBySection: data.answersBySection.map(section => ({
+          ...section,
+          originalSectionId: section.originalSectionId,
+          isCompleted: true,
+          answers: section.answers
+            .filter(answer => answer && answer.originalQuestionId) // Filter out invalid answers
+            .map(answer => ({
+              ...answer,
+              index: answer.index || 0,
+              type: answer.type === "textarea" ? "text" : (answer.type || "text"), // Convert textarea to text
+              answer: String(answer.answer || "").trim()
+            }))
+        }))
+      } : data;
+
+      try {
+        const response = await api.patch(`/user-inputs/${id}`, sanitizedData);
+        return response.data;
+      } catch (apiError) {
+        // Try with a direct fetch call as a last resort
+        const fetchResponse = await fetch(`/v1/api/user-inputs/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(sanitizedData),
+        });
+
+        if (!fetchResponse.ok) {
+          throw new Error(`API error: ${fetchResponse.status}`);
+        }
+
+        const result = await fetchResponse.json();
+        return result;
+      }
+    } catch (error) {
+      // Log error in development mode only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating user input:', error);
+      }
+      throw error;
+    }
   },
 
-  // Save user input (used by Redux)
+  /**
+   * Save user input (used by Redux)
+   * @param data - The user input data to save
+   * @returns The created user input record
+   */
   saveUserInput: async (data: UserInputData) => {
     return await userInputService.createUserInput(data);
   }
 };
 
-// Helper function to convert user input data to form values
+/**
+ * Helper function to convert user input data to form values
+ * @param userInput - The user input data to convert
+ * @returns An object with question IDs as keys and answers as values
+ */
 export const convertUserInputToFormValues = (userInput: UserInputData): Record<string, string> => {
   if (!userInput || !userInput.answersBySection) {
     return {};
