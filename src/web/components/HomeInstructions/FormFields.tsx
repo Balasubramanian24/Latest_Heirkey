@@ -43,10 +43,15 @@ export interface ChoiceQuestion extends BaseQuestion {
   options: string[];
 }
 
-export type Question = TextQuestion | NumberQuestion | BooleanQuestion | ChoiceQuestion;
+export interface TextareaQuestion extends BaseQuestion {
+  type: 'textarea';
+  placeholder?: string;
+}
+
+export type Question = TextQuestion | NumberQuestion | BooleanQuestion | ChoiceQuestion | TextareaQuestion;
 
 // Custom form field components for Formik
-export const TextareaField = ({ question }: { question: TextQuestion }) => {
+export const TextareaField = ({ question }: { question: TextQuestion | TextareaQuestion }) => {
   const [field, meta] = useField(question.id);
   
   return (
@@ -214,17 +219,15 @@ export const QuestionItem = ({
 const renderQuestion = (question: Question) => {
   switch (question.type) {
     case 'text':
-      return <TextareaField question={question as TextQuestion} />;
-      
+      return <TextareaField question={question} />;
+    case 'textarea':
+      return <TextareaField question={question} />;
     case 'number':
       return <NumberField question={question as NumberQuestion} />;
-      
     case 'boolean':
       return <BooleanField question={question as BooleanQuestion} />;
-      
     case 'choice':
       return <ButtonChoiceField question={question as ChoiceQuestion} />;
-      
     default:
       return null;
   }

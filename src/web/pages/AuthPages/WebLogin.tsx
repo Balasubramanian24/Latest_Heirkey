@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function WebLogin() {
   const [email, setEmail] = useState("");
@@ -12,6 +13,21 @@ export default function WebLogin() {
   const [error, setError] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+
+  // Update form mode based on current route
+  const [isRegister, setIsRegister] = useState(false);
+
+  useEffect(() => {
+    const path = location.pathname;
+    setIsRegister(path.includes('/register'));
+  }, [location.pathname]);
+
+  const handleToggle = (mode: 'register' | 'login') => {
+    setIsRegister(mode === 'register');
+    navigate(mode === 'register' ? '/auth/register' : '/auth/login');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,14 +35,28 @@ export default function WebLogin() {
 
     try {
       await login({ email, password });
+      toast({
+        title: "Login successful",
+        description: "You have been logged in successfully",
+        variant: "default",
+      });
       navigate("/auth/user-profile");
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.");
+      toast({
+        title: "Login failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleGoogleLogin = () => {
-    // Redirect to Google OAuth login endpoint
+    toast({
+      title: "Login successful",
+      description: "You have been logged in successfully",
+      variant: "default",
+    });
     window.location.href = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/v1/auth/google/login`;
   };
 
@@ -94,9 +124,12 @@ export default function WebLogin() {
 
       <p className="text-center text-sm mt-4">
         Don't have an account?{" "}
-        <Link to="/auth/register">
-          <span className="text-[#2BCFD5] cursor-pointer">Sign up</span>
-        </Link>
+        <button 
+          onClick={() => handleToggle('register')} 
+          className="text-[#2BCFD5] cursor-pointer hover:text-[#22BBCC]"
+        >
+          Sign up
+        </button>
       </p>
     </form>
   );

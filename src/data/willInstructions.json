@@ -1,0 +1,75 @@
+{
+    "105": [
+      {
+        "id": "w1",
+        "text": "Do you have a will?",
+        "type": "boolean",
+        "required": true,
+        "sectionId": "105A",
+        "order": 1
+      },
+      {
+        "id": "w2",
+        "text": "Is your will located in your house?",
+        "type": "boolean",
+        "required": true,
+        "sectionId": "105A",
+        "order": 2,
+        "dependsOn": {
+          "questionId": "w1",
+          "value": "yes"
+        }
+      },
+      {
+        "id": "w3",
+        "text": "Where is your will located?",
+        "placeholder": "list room, furniture, or building",
+        "type": "text",
+        "required": true,
+        "sectionId": "105B",
+        "order": 3,
+        "dependsOn": {
+          "questionId": "w1",
+          "value": "yes"
+        }
+      },
+      {
+        "id": "w4",
+        "text": "Where is your will located in your house?",
+        "placeholder": "list room, furniture, or building",
+        "type": "text",
+        "required": true,
+        "sectionId": "105B",
+        "order": 4,
+        "dependsOn": {
+          "questionId": "w2",
+          "value": "yes"
+        }
+      },
+      {
+        "id": "w5",
+        "text": "Do you have an attorney to contact about your will?",
+        "type": "boolean",
+        "required": true,
+        "sectionId": "105C",
+        "order": 5,
+        "dependsOn": {
+          "questionId": "w1",
+          "value": "yes"
+        }
+      },
+      {
+        "id": "w6",
+        "text": "If yes, can you provide their contact info",
+        "type": "text",
+        "required": true,
+        "sectionId": "105C",
+        "order": 6,
+        "dependsOn": {
+          "questionId": "w5",
+          "value": "yes"
+        }
+      }
+    ]
+  }
+  

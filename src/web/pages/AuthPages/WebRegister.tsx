@@ -5,8 +5,12 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+interface WebRegisterProps {
+  onToggle: (mode: 'register' | 'login') => void;
+}
 
-export default function WebRegister() {
+export default function WebRegister({ onToggle }: WebRegisterProps) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,6 +18,7 @@ export default function WebRegister() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +32,11 @@ export default function WebRegister() {
 
     if (!hasValidPassword || !passwordsMatch) {
       setError("Please ensure your password meets all requirements.");
+      toast({
+        title: "Registration failed",
+        description: "Please ensure your password meets all requirements.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -38,14 +48,28 @@ export default function WebRegister() {
         firstName: firstName || undefined,
         lastName: lastName || undefined
       });
+      toast({
+        title: "Registration successful",
+        description: "You have been registered successfully",
+        variant: "default",
+      });
       navigate("/auth/user-profile");
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
+      toast({
+        title: "Registration failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleGoogleSignup = () => {
-    // Redirect to Google OAuth signup endpoint
+    toast({
+      title: "Signup successful",
+      description: "You have been signed up successfully",
+      variant: "default",
+    });
     window.location.href = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'}/v1/auth/google/signup`;
   };
 
@@ -175,9 +199,12 @@ export default function WebRegister() {
 
       <p className="text-center text-sm mt-4">
         Already have an account?{" "}
-        <Link to="/auth/login">
-          <span className="text-[#2BCFD5] cursor-pointer">Log in</span>
-        </Link>
+        <button 
+          onClick={() => onToggle('login')} 
+          className="text-[#2BCFD5] cursor-pointer hover:text-[#22BBCC]"
+        >
+          Log in
+        </button>
       </p>
     </form>
   );

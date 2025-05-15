@@ -1,25 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import WebLayout from "@/web/components/Layout/WebLayout";
 import Footer from "@/web/components/Layout/Footer";
 import Register from "@/web/pages/AuthPages/WebRegister";
 import Login from "@/web/pages/AuthPages/WebLogin";
 import LoginImage from "@/assets/webappimage/AuthImages/LoginImage.jpg";
 
-interface AuthFormProps {
+interface WebAuthFormProps {
   initialMode?: 'register' | 'login';
 }
 
-export default function WebAuthForm({ initialMode = 'register' }: AuthFormProps) {
-  const [isRegister, setIsRegister] = useState(initialMode === 'register');
+export default function WebAuthForm({ initialMode }: WebAuthFormProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isRegister, setIsRegister] = useState(initialMode === 'register' || location.pathname.includes('/register'));
+
+  useEffect(() => {
+    const path = location.pathname;
+    setIsRegister(path.includes('/register'));
+  }, [location.pathname]);
+
+  const handleToggle = (mode: 'register' | 'login') => {
+    setIsRegister(mode === 'register');
+    navigate(mode === 'register' ? '/auth/register' : '/auth/login');
+  };
 
   return (
-    <WebLayout subHeaderTitle={isRegister ? "Sign Up" : "Login"}>
-      <div className="flex-grow flex flex-col md:flex-row items-stretch justify-center md:px-20 gap-12 bg-white py-8">
-        <div className="w-full md:w-1/2 max-w-md flex flex-col justify-center">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-md p-6 min-h-[500px] flex flex-col justify-center">
-            <div className="flex justify-center mb-6">
+    <div className="flex flex-col h-screen pt-20">
+      <WebLayout subHeaderTitle="Sign up or Log in">
+        <div className="flex-grow flex flex-col md:flex-row items-stretch justify-center md:px-20 gap-12 bg-white py-8">
+          <div className="w-full md:w-1/2 max-w-md flex flex-col justify-center">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-md p-6 min-h-[500px] flex flex-col justify-center">
+              <div className="flex justify-center mb-6">
               <button
-                onClick={() => setIsRegister(true)}
+                onClick={() => handleToggle('register')}
                 className={`w-1/2 py-2 font-medium text-sm rounded-l-md border transition-colors duration-200 ${
                   isRegister
                     ? "bg-white border-b-2 border-[#2BCFD5]"
@@ -29,7 +43,7 @@ export default function WebAuthForm({ initialMode = 'register' }: AuthFormProps)
                 Sign up
               </button>
               <button
-                onClick={() => setIsRegister(false)}
+                onClick={() => handleToggle('login')}
                 className={`w-1/2 py-2 font-medium text-sm rounded-r-md border transition-colors duration-200 ${
                   !isRegister
                     ? "bg-white border-b-2 border-[#2BCFD5]"
@@ -40,7 +54,7 @@ export default function WebAuthForm({ initialMode = 'register' }: AuthFormProps)
               </button>
             </div>
 
-            {isRegister ? <Register /> : <Login />}
+            {isRegister ? <Register onToggle={handleToggle} /> : <Login />}
           </div>
         </div>
 
@@ -56,5 +70,6 @@ export default function WebAuthForm({ initialMode = 'register' }: AuthFormProps)
       </div>
       <Footer />
     </WebLayout>
+    </div>
   );
-} 
+}

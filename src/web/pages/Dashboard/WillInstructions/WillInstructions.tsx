@@ -1,16 +1,16 @@
-import { Link, useParams } from 'react-router-dom';
-import { Avatar } from '@radix-ui/react-avatar';
+import { Link } from 'react-router-dom';
+import { Avatar } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2 } from 'lucide-react';
 import AppHeader from '@/web/components/Layout/AppHeader';
 import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-import homeInstructionsData from '@/data/homeIntsructions.json';
+import willInstructionsData from '@/data/willInstructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
 import { useAuth } from '@/contexts/AuthContext';
-import { categoryTabsConfig } from '@/data/categoryTabsConfig';
+import { useParams } from 'react-router-dom';
 import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
-
+import { categoryTabsConfig } from '@/data/categoryTabsConfig';
 
 interface SubCategory {
   id: string;
@@ -18,27 +18,17 @@ interface SubCategory {
   questionsCount: number;
 }
 
-// Define subcategories
+// Define subcategories for Will & Testament
 const subcategories: SubCategory[] = [
   {
-    id: '101',
-    title: 'Pets',
-    questionsCount: homeInstructionsData['101']?.length || 0
+    id: '105-location',
+    title: 'Location',
+    questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0
   },
   {
-    id: '102',
-    title: 'Trash',
-    questionsCount: homeInstructionsData['102']?.length || 0
-  },
-  {
-    id: '103',
-    title: 'Other',
-    questionsCount: homeInstructionsData['103']?.length || 0
-  },
-  {
-    id: '104',
-    title: 'Security',
-    questionsCount: homeInstructionsData['104']?.length || 0
+    id: '105-legal',
+    title: 'Legal',
+    questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0
   }
 ];
 
@@ -67,7 +57,7 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
   );
 };
 
-const HomeInstructions = ({ category }: { category?: string }) => {
+const WillInstructions = ({ category }: { category?: string }) => {
   const { user } = useAuth();
   const params = useParams();
   const categoryName = category || params.categoryName;
@@ -81,17 +71,12 @@ const HomeInstructions = ({ category }: { category?: string }) => {
 
   // Calculate overall progress
   const progressStats = (() => {
-    const totalQuestions = Object.values(homeInstructionsData).reduce(
-      (sum, questions) => sum + questions.length, 0
-    );
-    
+    const totalQuestions = willInstructionsData['105']?.length || 0;
     // In a real app, you'd get this from your backend
     const answeredQuestions = 0;
-    
     const completionPercentage = totalQuestions > 0 
       ? Math.round((answeredQuestions / totalQuestions) * 100) 
       : 0;
-    
     return {
       totalQuestions,
       answeredQuestions,
@@ -99,18 +84,17 @@ const HomeInstructions = ({ category }: { category?: string }) => {
     };
   })();
 
-  const tabs = categoryTabsConfig[categoryName as keyof typeof categoryTabsConfig] || categoryTabsConfig['homeinstructions'];
+  const tabs = categoryTabsConfig[categoryName as keyof typeof categoryTabsConfig] || categoryTabsConfig['willinstructions'];
 
   return (
     <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
-      
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-1">Home Instructions</h1>
+              <h1 className="text-3xl font-bold mb-1">Will and Testament</h1>
               <Link to="/dashboard" className="flex items-center text-sm hover:underline">
                 <span className="mr-1">←</span> Back Home
               </Link>
@@ -135,7 +119,6 @@ const HomeInstructions = ({ category }: { category?: string }) => {
           </div>
         </div>
       </div>
-      
       {/* Main content */}
       <SubCategoryTabs tabs={tabs} />
       <div className="flex-1 container mx-auto px-4 py-8">
@@ -163,35 +146,35 @@ const HomeInstructions = ({ category }: { category?: string }) => {
                   </div>
                 )}
               </div>
-              
               <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">How to Understand Topics</span></h2>
               <p className="text-gray-600 mb-6">
                 Each topic below is a part of your home documents, with questions to help you provide important 
-                information for you and your loved ones. Click on a category to answer questions at your own pace—
+                information for you and your loved ones. Click any topic to answer the questions at your own pace—
                 we'll save everything for you.
               </p>
-              
               {/* Subcategory cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+              <div className="grid grid-cols-1 gap-4 mt-6">
                 {subcategories.map(subcategory => (
-                  <Link key={subcategory.id} to={`/category/${categoryName}/${subcategory.title.toLowerCase()}`} className="block">
+                  <Link
+                    key={subcategory.id}
+                    to={`/category/willinstructions/${subcategory.title.toLowerCase().replace(/\s/g, '')}`}
+                    className="block"
+                  >
                     <SubCategoryCard subcategory={subcategory} />
                   </Link>
                 ))}
               </div>
             </div>
           </div>
-          
           {/* Right column - Search panel */}
           <div>
             <SearchPanel />
           </div>
         </div>
       </div>
-      
       <Footer />
     </div>
   );
 };
 
-export default HomeInstructions; 
+export default WillInstructions;

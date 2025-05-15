@@ -42,15 +42,30 @@ import SecurityInstructions from "./web/pages/Dashboard/HomeInstructions/Securit
 import HomeInstructions from "./web/pages/Dashboard/HomeInstructions/HomeInstructions";
 import CategoryStartup from "./web/pages/Global/CategoryStartup";
 import HomeInstructionsReview from "./web/pages/Dashboard/HomeInstructions/HomeInstructionsReview";
-
+import LocationInstructions from "./web/pages/Dashboard/WillInstructions/LocationInstructions";
+import LegalInstructions from "./web/pages/Dashboard/WillInstructions/LegalInstructions";
+import WillInstructions from "./web/pages/Dashboard/WillInstructions/WillInstructions";
+import WillInstructionsReview from "./web/pages/Dashboard/WillInstructions/WillInstructionsReview";
+import FuneralArrangements from "./web/pages/Dashboard/FuneralArrangements/FuneralArrangements";
+import FuneralDetails from "./web/pages/Dashboard/FuneralArrangements/FuneralDetails";
+import CeremonyLocation from "./web/pages/Dashboard/FuneralArrangements/CeremonyLocation";
+import FuneralClergy from "./web/pages/Dashboard/FuneralArrangements/FuneralClergy";
+import FuneralNotification from "./web/pages/Dashboard/FuneralArrangements/FuneralNotification";
+import FuneralProceedings from "./web/pages/Dashboard/FuneralArrangements/FuneralProceedings";
 
 function CategoryStartupWrapper() {
   const { categoryName } = useParams();
   return <CategoryStartup category={categoryName} />;
 }
 
-function HomeInstructionsWrapper() {
+function CategoryInfoWrapper() {
   const { categoryName } = useParams();
+  if (categoryName === 'willinstructions') {
+    return <WillInstructions category={categoryName} />;
+  }
+  if (categoryName === 'funeralarrangements') {
+    return <FuneralArrangements />;
+  }
   return <HomeInstructions category={categoryName} />;
 }
 
@@ -101,14 +116,23 @@ export default function App() {
 
             
             <Route path="/category/:categoryName" element={<CategoryStartupWrapper />} />
-            <Route path="/category/:categoryName/info" element={<HomeInstructionsWrapper />} />
+            <Route path="/category/:categoryName/info" element={<CategoryInfoWrapper />} />
             <Route path="/category/:categoryName/pets" element={<PetsInstructions />} />
             <Route path="/category/:categoryName/trash" element={<TrashInstructions />} />
             <Route path="/category/:categoryName/other" element={<OtherInstructions />} />
             <Route path="/category/:categoryName/security" element={<SecurityInstructions />} />
-
             <Route path="/category/homeinstructions/review" element={<HomeInstructionsReview />} />
 
+            
+            <Route path="/category/:categoryName/location" element={<LocationInstructions />} />
+            <Route path="/category/:categoryName/legal" element={<LegalInstructions />} />
+            <Route path="/category/willinstructions/review" element={<WillInstructionsReview />} />
+
+            <Route path="/category/:categoryName/details" element={<FuneralDetails />} />
+            <Route path="/category/:categoryName/ceremonylocation" element={<CeremonyLocation />} />
+            <Route path="/category/:categoryName/funeralclergy" element={<FuneralClergy />} />
+            <Route path="/category/:categoryName/funeralnotification" element={<FuneralNotification />} />
+            <Route path="/category/:categoryName/funeralproceedings" element={<FuneralProceedings />} />
           </>
         )}
       </Routes>

@@ -6,10 +6,12 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/web/components/Layout/AppHeader';
 import Footer from '../Layout/Footer';
 import WebLayout from '../Layout/WebLayout';
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function VerificationForm() {
   const navigate = useNavigate();
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const { user } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value;
@@ -58,7 +60,7 @@ export default function VerificationForm() {
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Check your email</h2>
               <p className="text-lg text-gray-600 mb-8">
                 We sent a verification link to <br />
-                <strong>francis@gmail.com</strong>
+                <strong>{user?.email}</strong>
               </p>
             </div>
 
@@ -93,7 +95,7 @@ export default function VerificationForm() {
             </form>
 
             <div className="text-center text-sm text-gray-600">
-              Didn’t receive the email?{' '}
+              Didn't receive the email?{' '}
               <button
                 type="button"
                 className="text-cyan-600 hover:text-cyan-700 hover:underline font-medium"

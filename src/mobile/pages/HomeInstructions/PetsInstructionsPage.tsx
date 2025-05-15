@@ -1,14 +1,16 @@
 // PetsStepperForm.jsx
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import questionsData from "@/data/homeIntsructions.json";
 import { Question } from "@/mobile/components/HomeInstructions/FormFields";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
-import userInputService, { generateObjectId } from '@/services/userInputService';
+import userInputService, { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import ScrollToQuestion from '@/mobile/components/HomeInstructions/ScrollToQuestion';
+import { castToQuestionType } from '@/mobile/utils/questionUtils';
 
 
 // Utility: get visible questions based on dependencies
@@ -41,12 +43,20 @@ const initialValues = {
 };
 
 export default function PetsInstructionsPage() {
-  const allQuestions = questionsData["101"];
+  const allQuestions = castToQuestionType(questionsData["101"]);
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [savedAnswers, setSavedAnswers] = useState<Record<string, any>>({});
+  const [existingInputId, setExistingInputId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { categoryName } = useParams();
+
+  // Get the questionId from URL query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const targetQuestionId = queryParams.get('questionId');
 
   // Validation (simple example, expand as needed)
   function validate(values: Record<string, any>) {
@@ -60,6 +70,62 @@ export default function PetsInstructionsPage() {
       }
     });
     return errors;
+  }
+
+  // Fetch saved answers when component mounts
+  useEffect(() => {
+    const fetchSavedAnswers = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        if (user && user.id) {
+          // Try to fetch existing user input for this subcategory
+          const userInputs = await userInputService.getUserInputsBySubcategory(
+            user.id,
+            '1', // Home Instructions category
+            '101' // Pets subcategory
+          );
+
+          if (userInputs && userInputs.length > 0) {
+            // Use the first matching record
+            const userInput = userInputs[0];
+            setExistingInputId(userInput._id);
+
+            // Convert the saved answers to form values
+            const formValues = convertUserInputToFormValues(userInput);
+            setSavedAnswers(formValues);
+
+            // If we have a target question, set the step to show that question
+            if (targetQuestionId) {
+              // Find which step contains this question
+              const steps = splitIntoSteps(allQuestions as Question[]);
+              for (let i = 0; i < steps.length; i++) {
+                if (steps[i].some(q => q.id === targetQuestionId)) {
+                  setStep(i);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching saved answers:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSavedAnswers();
+  }, [user, targetQuestionId]);
+
+  if (isLoading) {
+    return (
+      <>
+        <GradiantHeader title="Home Instructions" />
+        <div className="p-4 text-center">Loading your answers...</div>
+      </>
+    );
   }
 
   return (
@@ -107,7 +173,7 @@ export default function PetsInstructionsPage() {
         )}
 
         <Formik
-          initialValues={initialValues}
+          initialValues={Object.keys(savedAnswers).length > 0 ? savedAnswers : initialValues}
           validate={validate}
           onSubmit={async (values, { setSubmitting }) => {
             try {
@@ -134,24 +200,59 @@ export default function PetsInstructionsPage() {
                   };
                 });
 
-              // Format data for API
-              const userData = {
-                userId: user.id, // Use actual user ID from auth context
-                categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-                originalCategoryId: '1', // Our manual category ID for Home Instructions
-                subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-                originalSubCategoryId: '101', // Our manual subcategory ID for pets
-                answersBySection: [{
-                  originalSectionId: '101A', // Store our original section ID
-                  isCompleted: true,
-                  answers
-                }]
-              };
+              // Format the answers by section
+              const formattedAnswersBySection = [{
+                originalSectionId: '101A', // Store our original section ID
+                isCompleted: true,
+                answers
+              }];
 
-              // Save to backend
-              await userInputService.createUserInput(userData);
+              // Check if we're updating an existing record or creating a new one
+              if (existingInputId) {
+                console.log('Updating existing record:', existingInputId);
 
-              navigate(`/category/${categoryName}/trash`);
+                try {
+                  // Update existing record
+                  await userInputService.updateUserInput(existingInputId, {
+                    answersBySection: formattedAnswersBySection
+                  });
+                  console.log('Successfully updated record');
+                } catch (error) {
+                  console.error('Error updating record:', error);
+                  // If PATCH fails, fall back to creating a new record
+                  console.log('Falling back to creating a new record');
+                  setExistingInputId(null);
+                }
+              }
+
+              // If no existing record or update failed, create a new one
+              if (!existingInputId) {
+                // Format data for API
+                const userData = {
+                  userId: user.id, // Use actual user ID from auth context
+                  categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                  originalCategoryId: '1', // Our manual category ID for Home Instructions
+                  subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                  originalSubCategoryId: '101', // Our manual subcategory ID for pets
+                  answersBySection: formattedAnswersBySection
+                };
+
+                // Save to backend
+                const result = await userInputService.createUserInput(userData);
+
+                // Store the new record ID for future updates
+                if (result && typeof result === 'object') {
+                  const typedResult = result as { _id: string };
+                  setExistingInputId(typedResult._id);
+                }
+              }
+
+              // Navigate to the next page or back to review if we came from there
+              if (targetQuestionId) {
+                navigate(`/category/${categoryName}/review`);
+              } else {
+                navigate(`/category/${categoryName}/trash`);
+              }
             } catch (err: any) {
               console.error('Error saving pet instructions:', err);
               setError(err.message || 'Failed to save your answers. Please try again.');
@@ -197,49 +298,61 @@ export default function PetsInstructionsPage() {
                 </div>
               </div>
 
-                <div className="space-y-4 mt-8 bg-gray-50 p-5 rounded-xl shadow-sm border">
-                  {currentStepQuestions.map(q => (
-                    <div key={q.id}>
-                      <label className="block font-medium text-gray-700 mb-2">
-                        {q.text}{q.required && " *"}
-                      </label>
-                      {q.type === "boolean" ? (
-                        <div className="flex space-x-4">
-                          <label className="flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white">
-                            <Field type="radio" name={q.id} value="yes" className="hidden" />
-                            Yes
-                          </label>
-                          <label
-                            className="flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white"
-                          >
-                            <Field type="radio" name={q.id} value="no" className="hidden" />
-                            No
-                          </label>
-                        </div>
-                      ) : q.type === "choice" ? (
-                        <Field
-                          as="select"
-                          name={q.id}
-                          className="w-full border rounded-lg px-3 py-2"
+              <div className="space-y-4 mt-8 bg-gray-50 p-5 rounded-xl shadow-sm border">
+                <ScrollToQuestion questions={currentStepQuestions}>
+                  {(refs) => (
+                    <>
+                      {currentStepQuestions.map(q => (
+                        <div
+                          key={q.id}
+                          id={`question-${q.id}`}
+                          ref={(el: HTMLDivElement | null) => {
+                            refs[q.id] = el;
+                          }}
                         >
-                          <option value="">Select</option>
-                          {q.options?.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </Field>
-                      ) : (
-                        <Field
-                          name={q.id}
-                          as={q.id === "q4" ? "textarea" : "input"}
-                          type={q.type?.toLowerCase() === "number" ? "number" : "text"}
-                          className="w-full border rounded-lg px-3 py-2"
-                          rows={q.id === "q4" ? 3 : undefined}
-                        />
-                      )}
-                      <ErrorMessage name={q.id} component="div" className="text-red-500 text-sm mt-1" />
-                    </div>
-                  ))}
-                </div>
+                          <label className="block font-medium text-gray-700 mb-2">
+                            {q.text}{q.required && " *"}
+                          </label>
+                          {q.type === "boolean" ? (
+                            <div className="flex space-x-4">
+                              <label className="flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white">
+                                <Field type="radio" name={q.id} value="yes" className="hidden" />
+                                Yes
+                              </label>
+                              <label
+                                className="flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white"
+                              >
+                                <Field type="radio" name={q.id} value="no" className="hidden" />
+                                No
+                              </label>
+                            </div>
+                          ) : q.type === "choice" ? (
+                            <Field
+                              as="select"
+                              name={q.id}
+                              className="w-full border rounded-lg px-3 py-2"
+                            >
+                              <option value="">Select</option>
+                              {q.options?.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </Field>
+                          ) : (
+                            <Field
+                              name={q.id}
+                              as={q.id === "q4" ? "textarea" : "input"}
+                              type={q.type?.toLowerCase() === "number" ? "number" : "text"}
+                              className="w-full border rounded-lg px-3 py-2"
+                              rows={q.id === "q4" ? 3 : undefined}
+                            />
+                          )}
+                          <ErrorMessage name={q.id} component="div" className="text-red-500 text-sm mt-1" />
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </ScrollToQuestion>
+              </div>
 
               <div className="mt-6 flex justify-between items-center">
                 <button
