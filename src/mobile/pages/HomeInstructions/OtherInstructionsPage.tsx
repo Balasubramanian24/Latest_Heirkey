@@ -1,30 +1,47 @@
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import questionsData from "@/data/homeIntsructions.json";
 import GradiantHeader from "@/mobile/components/header/gradiantHeader";
 import Footer from "@/mobile/components/layout/Footer";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import userInputService, { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import ScrollToQuestion from '@/mobile/components/HomeInstructions/ScrollToQuestion';
 import { castToQuestionType } from '@/mobile/utils/questionUtils';
-
-const otherQuestions = castToQuestionType(questionsData["103"]);
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  saveUserInput,
+  updateUserInput,
+  UserInput,
+  selectUserInputsBySubcategoryId,
+  selectQuestionsBySubcategoryId,
+  selectLoading,
+  selectError
+} from '@/store/slices/homeInstructionsSlice';
 
 const initialValues = {
   o1: "",
 };
 
 export default function OtherInstructionsPage() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { categoryName } = useParams();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
+  const [formError, setError] = useState<string | null>(null);
   const { user } = useAuth();
+
+  // Get data from Redux store
+  const otherQuestions = useAppSelector((state) => selectQuestionsBySubcategoryId('103')(state));
+  const userInputs = useAppSelector((state) => selectUserInputsBySubcategoryId('103')(state));
+  const isLoading = useAppSelector(selectLoading);
+  const reduxError = useAppSelector(selectError);
+
+  // Cast questions to the correct type
+  const typedQuestions = castToQuestionType(otherQuestions);
 
   // Get the questionId from URL query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -38,40 +55,27 @@ export default function OtherInstructionsPage() {
     Security: "/category/homeinstructions/security",
   };
 
-  // Fetch saved answers when component mounts
+  // Fetch user inputs when component mounts
   useEffect(() => {
-    const fetchSavedAnswers = async () => {
-      setIsLoading(true);
-      setError(null);
+    if (user && user.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
-      try {
-        if (user && user.id) {
-          // Try to fetch existing user input for this subcategory
-          const userInputs = await userInputService.getUserInputsBySubcategory(
-            user.id,
-            '1', // Home Instructions category
-            '103' // Other subcategory
-          );
-
-          if (userInputs && userInputs.length > 0) {
-            // Use the first matching record
-            const userInput = userInputs[0];
-            setExistingInputId(userInput._id);
-
-            // Convert the saved answers to form values
-            const formValues = convertUserInputToFormValues(userInput);
-            setSavedAnswers(formValues);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching saved answers:', error);
-      } finally {
-        setIsLoading(false);
+  // Process user inputs when they are loaded
+  useEffect(() => {
+    if (userInputs && userInputs.length > 0) {
+      // Use the first matching record
+      const userInput = userInputs[0];
+      if (userInput._id) {
+        setExistingInputId(userInput._id);
       }
-    };
 
-    fetchSavedAnswers();
-  }, [user]);
+      // Convert the saved answers to form values
+      const formValues = convertUserInputToFormValues(userInput);
+      setSavedAnswers(formValues);
+    }
+  }, [userInputs]);
 
   if (isLoading) {
     return (
@@ -111,9 +115,9 @@ export default function OtherInstructionsPage() {
           })}
         </div>
 
-        {error && (
+        {(formError || reduxError) && (
           <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{formError || reduxError}</AlertDescription>
           </Alert>
         )}
 
@@ -141,7 +145,7 @@ export default function OtherInstructionsPage() {
               const answers = Object.entries(values)
                 .filter(([, value]) => value !== "") // Filter out empty answers
                 .map(([key, value], index) => {
-                  const question = otherQuestions.find(q => q.id === key);
+                  const question = typedQuestions.find(q => q.id === key);
                   return {
                     index,
                     originalQuestionId: key,
@@ -163,14 +167,23 @@ export default function OtherInstructionsPage() {
                 console.log('Updating existing record:', existingInputId);
 
                 try {
-                  // Update existing record
-                  await userInputService.updateUserInput(existingInputId, {
-                    answersBySection: formattedAnswersBySection
-                  });
+                  // Update existing record using Redux action
+                  await dispatch(updateUserInput({
+                    id: existingInputId,
+                    userData: {
+                      userId: user.id,
+                      categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                      originalCategoryId: '1',
+                      subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                      originalSubCategoryId: '103',
+                      answersBySection: formattedAnswersBySection
+                    } as UserInput
+                  })).unwrap();
+
                   console.log('Successfully updated record');
                 } catch (error) {
                   console.error('Error updating record:', error);
-                  // If PATCH fails, fall back to creating a new record
+                  // If update fails, fall back to creating a new record
                   console.log('Falling back to creating a new record');
                   setExistingInputId(null);
                 }
@@ -179,7 +192,7 @@ export default function OtherInstructionsPage() {
               // If no existing record or update failed, create a new one
               if (!existingInputId) {
                 // Format data for API
-                const userData = {
+                const userData: Omit<UserInput, '_id'> = {
                   userId: user.id, // Use actual user ID from auth context
                   categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                   originalCategoryId: '1', // Our manual category ID for Home Instructions
@@ -188,13 +201,12 @@ export default function OtherInstructionsPage() {
                   answersBySection: formattedAnswersBySection
                 };
 
-                // Save to backend
-                const result = await userInputService.createUserInput(userData);
+                // Save to backend using Redux action
+                const result = await dispatch(saveUserInput(userData)).unwrap();
 
                 // Store the new record ID for future updates
-                if (result && typeof result === 'object') {
-                  const typedResult = result as { _id: string };
-                  setExistingInputId(typedResult._id);
+                if (result && result._id) {
+                  setExistingInputId(result._id);
                 }
               }
 
@@ -225,16 +237,18 @@ export default function OtherInstructionsPage() {
                 </div>
               </div>
               <div className="bg-gray-50 p-4 rounded-xl shadow-sm border mt-4">
-                <ScrollToQuestion questions={otherQuestions}>
+                <ScrollToQuestion questions={typedQuestions}>
                   {(refs) => (
                     <div
-                      id={`question-${otherQuestions[0].id}`}
+                      id={`question-${typedQuestions[0]?.id}`}
                       ref={(el: HTMLDivElement | null) => {
-                        refs[otherQuestions[0].id] = el;
+                        if (typedQuestions[0]) {
+                          refs[typedQuestions[0].id] = el;
+                        }
                       }}
                     >
                       <label className="block font-medium text-gray-700 mb-2">
-                        {otherQuestions[0].text}
+                        {typedQuestions[0]?.text}
                       </label>
                       <Field
                         as="textarea"

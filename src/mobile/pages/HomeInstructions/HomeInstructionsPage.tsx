@@ -1,43 +1,35 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
-import homeInstructionsData from '@/data/homeIntsructions.json';
 import Footer from '@/mobile/components/layout/Footer';
-
-interface SubCategory {
-  id: string;
-  title: string;
-  questionsCount: number;
-}
-
-const subcategories: SubCategory[] = [
-  {
-    id: '101',
-    title: 'Pets',
-    questionsCount: homeInstructionsData['101']?.length || 0
-  },
-  {
-    id: '102',
-    title: 'Trash',
-    questionsCount: homeInstructionsData['102']?.length || 0
-  },
-  {
-    id: '103',
-    title: 'Other',
-    questionsCount: homeInstructionsData['103']?.length || 0
-  },
-  {
-    id: '104',
-    title: 'Security',
-    questionsCount: homeInstructionsData['104']?.length || 0
-  }
-];
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  SubCategory,
+  selectSubcategories,
+  selectUserInputs,
+  selectLoading,
+  selectError
+} from '@/store/slices/homeInstructionsSlice';
 
 const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
   const navigate = useNavigate();
-  const completedQuestions = 0;
-  const completionPercentage = subcategory.questionsCount > 0 
-    ? Math.round((completedQuestions / subcategory.questionsCount) * 100) 
+  const userInputs = useAppSelector(selectUserInputs);
+
+  // Calculate completed questions for this subcategory
+  const completedQuestions = userInputs.reduce((count, input) => {
+    if (input.originalSubCategoryId === subcategory.id) {
+      return count + input.answersBySection.reduce(
+        (sectionCount, section) => sectionCount + section.answers.length, 0
+      );
+    }
+    return count;
+  }, 0);
+
+  const completionPercentage = subcategory.questionsCount > 0
+    ? Math.round((completedQuestions / subcategory.questionsCount) * 100)
     : 0;
 
   return (
@@ -55,7 +47,7 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
               {completedQuestions}/{subcategory.questionsCount}
             </span>
           </div>
-          
+
           <div className="space-y-2">
             <p className="text-xs text-gray-500">
               {completionPercentage}% Complete
@@ -68,11 +60,45 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
 };
 
 const HomeInstructionsPage = () => {
- 
- return (
+  const dispatch = useAppDispatch();
+  const { user } = useAuth();
+  const subcategories = useAppSelector(selectSubcategories);
+  const loading = useAppSelector(selectLoading);
+  const error = useAppSelector(selectError);
+
+  // Fetch user inputs when component mounts
+  useEffect(() => {
+    if (user && user.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <GradiantHeader title="Home Instructions" />
+        <div className="container mx-auto px-4 py-6 text-center">
+          Loading your home instructions...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <GradiantHeader title="Home Instructions" />
+        <div className="container mx-auto px-4 py-6 text-center text-red-500">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen bg-gray-50">
       <GradiantHeader title="Home Instructions" />
-      
+
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-md mx-auto space-y-6">
           <div className="space-y-2">
@@ -86,9 +112,9 @@ const HomeInstructionsPage = () => {
 
           <div className="space-y-4">
             {subcategories.map((subcategory) => (
-              <SubCategoryCard 
-                key={subcategory.id} 
-                subcategory={subcategory} 
+              <SubCategoryCard
+                key={subcategory.id}
+                subcategory={subcategory}
               />
             ))}
           </div>
@@ -99,4 +125,4 @@ const HomeInstructionsPage = () => {
   );
 };
 
-export default HomeInstructionsPage; 
+export default HomeInstructionsPage;

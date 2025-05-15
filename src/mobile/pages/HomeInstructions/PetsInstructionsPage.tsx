@@ -1,16 +1,27 @@
 // PetsStepperForm.jsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-import questionsData from "@/data/homeIntsructions.json";
+// import questionsData from "@/data/homeIntsructions.json";
 import { Question } from "@/mobile/components/HomeInstructions/FormFields";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
-import userInputService, { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import ScrollToQuestion from '@/mobile/components/HomeInstructions/ScrollToQuestion';
 import { castToQuestionType } from '@/mobile/utils/questionUtils';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  saveUserInput,
+  updateUserInput,
+  UserInput,
+  selectUserInputsBySubcategoryId,
+  selectQuestionsBySubcategoryId,
+  selectLoading,
+  selectError
+} from '@/store/slices/homeInstructionsSlice';
 
 
 // Utility: get visible questions based on dependencies
@@ -43,16 +54,24 @@ const initialValues = {
 };
 
 export default function PetsInstructionsPage() {
-  const allQuestions = castToQuestionType(questionsData["101"]);
+  const dispatch = useAppDispatch();
   const [step, setStep] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [savedAnswers, setSavedAnswers] = useState<Record<string, any>>({});
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
+  const [formError, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const { categoryName } = useParams();
+
+  // Get data from Redux store
+  const allQuestions = useAppSelector((state) => selectQuestionsBySubcategoryId('101')(state));
+  const userInputs = useAppSelector((state) => selectUserInputsBySubcategoryId('101')(state));
+  const isLoading = useAppSelector(selectLoading);
+  const reduxError = useAppSelector(selectError);
+
+  // Cast questions to the correct type
+  const typedQuestions = castToQuestionType(allQuestions);
 
   // Get the questionId from URL query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -61,7 +80,7 @@ export default function PetsInstructionsPage() {
   // Validation (simple example, expand as needed)
   function validate(values: Record<string, any>) {
     const errors: Record<string, string> = {};
-    getVisibleQuestions(allQuestions as Question[], values).forEach(q => {
+    getVisibleQuestions(typedQuestions, values).forEach(q => {
       if (q.required && !values[q.id]) {
         errors[q.id] = "Required";
       }
@@ -72,52 +91,39 @@ export default function PetsInstructionsPage() {
     return errors;
   }
 
-  // Fetch saved answers when component mounts
+  // Fetch user inputs when component mounts
   useEffect(() => {
-    const fetchSavedAnswers = async () => {
-      setIsLoading(true);
-      setError(null);
+    if (user && user.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
-      try {
-        if (user && user.id) {
-          // Try to fetch existing user input for this subcategory
-          const userInputs = await userInputService.getUserInputsBySubcategory(
-            user.id,
-            '1', // Home Instructions category
-            '101' // Pets subcategory
-          );
+  // Process user inputs when they are loaded
+  useEffect(() => {
+    if (userInputs && userInputs.length > 0) {
+      // Use the first matching record
+      const userInput = userInputs[0];
+      if (userInput._id) {
+        setExistingInputId(userInput._id);
+      }
 
-          if (userInputs && userInputs.length > 0) {
-            // Use the first matching record
-            const userInput = userInputs[0];
-            setExistingInputId(userInput._id);
+      // Convert the saved answers to form values
+      const formValues = convertUserInputToFormValues(userInput);
+      setSavedAnswers(formValues);
 
-            // Convert the saved answers to form values
-            const formValues = convertUserInputToFormValues(userInput);
-            setSavedAnswers(formValues);
-
-            // If we have a target question, set the step to show that question
-            if (targetQuestionId) {
-              // Find which step contains this question
-              const steps = splitIntoSteps(allQuestions as Question[]);
-              for (let i = 0; i < steps.length; i++) {
-                if (steps[i].some(q => q.id === targetQuestionId)) {
-                  setStep(i);
-                  break;
-                }
-              }
-            }
+      // If we have a target question, set the step to show that question
+      if (targetQuestionId) {
+        // Find which step contains this question
+        const steps = splitIntoSteps(typedQuestions);
+        for (let i = 0; i < steps.length; i++) {
+          if (steps[i].some(q => q.id === targetQuestionId)) {
+            setStep(i);
+            break;
           }
         }
-      } catch (error) {
-        console.error('Error fetching saved answers:', error);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchSavedAnswers();
-  }, [user, targetQuestionId]);
+    }
+  }, [userInputs, targetQuestionId, typedQuestions]);
 
   if (isLoading) {
     return (
@@ -166,9 +172,9 @@ export default function PetsInstructionsPage() {
         </div>
 
 
-        {error && (
+        {(formError || reduxError) && (
           <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{formError || reduxError}</AlertDescription>
           </Alert>
         )}
 
@@ -190,7 +196,7 @@ export default function PetsInstructionsPage() {
               const answers = Object.entries(values)
                 .filter(([_, value]) => value !== "") // Filter out empty answers
                 .map(([key, value], index) => {
-                  const question = (allQuestions as Question[]).find(q => q.id === key);
+                  const question = typedQuestions.find(q => q.id === key);
                   return {
                     index,
                     originalQuestionId: key,
@@ -212,14 +218,23 @@ export default function PetsInstructionsPage() {
                 console.log('Updating existing record:', existingInputId);
 
                 try {
-                  // Update existing record
-                  await userInputService.updateUserInput(existingInputId, {
-                    answersBySection: formattedAnswersBySection
-                  });
+                  // Update existing record using Redux action
+                  await dispatch(updateUserInput({
+                    id: existingInputId,
+                    userData: {
+                      userId: user.id,
+                      categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                      originalCategoryId: '1',
+                      subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+                      originalSubCategoryId: '101',
+                      answersBySection: formattedAnswersBySection
+                    } as UserInput
+                  })).unwrap();
+
                   console.log('Successfully updated record');
                 } catch (error) {
                   console.error('Error updating record:', error);
-                  // If PATCH fails, fall back to creating a new record
+                  // If update fails, fall back to creating a new record
                   console.log('Falling back to creating a new record');
                   setExistingInputId(null);
                 }
@@ -228,7 +243,7 @@ export default function PetsInstructionsPage() {
               // If no existing record or update failed, create a new one
               if (!existingInputId) {
                 // Format data for API
-                const userData = {
+                const userData: Omit<UserInput, '_id'> = {
                   userId: user.id, // Use actual user ID from auth context
                   categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                   originalCategoryId: '1', // Our manual category ID for Home Instructions
@@ -237,13 +252,12 @@ export default function PetsInstructionsPage() {
                   answersBySection: formattedAnswersBySection
                 };
 
-                // Save to backend
-                const result = await userInputService.createUserInput(userData);
+                // Save to backend using Redux action
+                const result = await dispatch(saveUserInput(userData)).unwrap();
 
                 // Store the new record ID for future updates
-                if (result && typeof result === 'object') {
-                  const typedResult = result as { _id: string };
-                  setExistingInputId(typedResult._id);
+                if (result && result._id) {
+                  setExistingInputId(result._id);
                 }
               }
 
@@ -280,7 +294,7 @@ export default function PetsInstructionsPage() {
             }, [values.q1, navigate]);
 
             // Dynamically get visible questions and steps
-            const visibleQuestions = getVisibleQuestions(allQuestions as Question[], values);
+            const visibleQuestions = getVisibleQuestions(typedQuestions, values);
             const steps = splitIntoSteps(visibleQuestions);
             const currentStepQuestions = steps[step];
 
