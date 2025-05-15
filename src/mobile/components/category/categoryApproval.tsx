@@ -37,7 +37,7 @@ const CategoryConfirmCard: React.FC<CategoryConfirmCardProps> = ({
       <div className="space-y-2">
         <Link to={`/category/${categoryName?.replace(/-/g, '')}/info`}>
         <Button
-          className="w-full h-3 bg-[#2BCFD5] hover:bg-[#25b6bb] text-white text-lg font-semibold rounded-lg py-6 transition-colors"
+          className="w-full h-3 bg-[#2BCFD5] hover:bg-[#25b6bb] text-white text-lg font-semibold rounded-lg py-6 transition-colors mb-2"
           onClick={onStart}
         >
           Get Started with "{categoryName?.replace(/-/g, ' ')}"

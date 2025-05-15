@@ -3,8 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import CategoryReviewPage from '@/web/components/Category/CategoryReviewPage';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import { useAuth } from '@/contexts/AuthContext';
-import userInputService from '@/services/userInputService';
 import homeInstructionsData from '@/data/homeIntsructions.json';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  UserInput as ReduxUserInput
+} from '../../../../store/slices/homeInstructionsSlice';
 
 // Define interfaces for the data structure
 interface Answer {
@@ -52,6 +56,7 @@ Object.entries(homeInstructionsData).forEach(([subcategoryId, questions]) => {
 export default function HomeInstructionsReview() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [topics, setTopics] = useState<Array<{
     id: string;
     title: string;
@@ -59,8 +64,11 @@ export default function HomeInstructionsReview() {
     data: string;
     onEdit: () => void;
   }>>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // Get data from Redux store using selectors
+  const userInputs = useAppSelector((state: any) => state.homeInstructions.userInputs) as ReduxUserInput[];
+  const loading = useAppSelector((state: any) => state.homeInstructions.loading);
+  const error = useAppSelector((state: any) => state.homeInstructions.error);
 
   // Fallback user info if not authenticated
   const userInfo = {
@@ -69,86 +77,74 @@ export default function HomeInstructionsReview() {
     avatar: user?.image || avatar
   };
 
+  // Fetch user inputs when component mounts
   useEffect(() => {
-    const fetchUserAnswers = async () => {
-      if (!user || !user.id) {
-        setError('You must be logged in to view your answers');
-        setIsLoading(false);
-        return;
-      }
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
-      try {
-        // Fetch user inputs for the Home Instructions category (ID: 1)
-        const userInputsResponse = await userInputService.getUserInputsByUserAndCategory(user.id, '1');
-        const userInputs = userInputsResponse as Array<{
-          originalSubCategoryId: string;
-          answersBySection: Array<{
-            originalSectionId: string;
-            answers: Array<{
-              originalQuestionId: string;
-              answer: string;
-            }>;
-          }>;
-        }>;
+  // Process user inputs to create topics for review
+  useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
 
-        // Transform the data for the review page
-        const allTopics: Array<{
-          id: string;
-          title: string;
-          subtitle?: string;
-          data: string;
-          onEdit: () => void;
-        }> = [];
+    if (userInputs.length > 0 && !loading) {
+      // Transform the data for the review page
+      const allTopics: Array<{
+        id: string;
+        title: string;
+        subtitle?: string;
+        data: string;
+        onEdit: () => void;
+      }> = [];
 
-        // Process all user inputs
-        userInputs.forEach((userInput) => {
-          const subcategoryId = userInput.originalSubCategoryId;
+      // Process all user inputs
+      userInputs.forEach((userInput: ReduxUserInput) => {
+        const subcategoryId = userInput.originalSubCategoryId;
 
-          // Process answers by section
-          userInput.answersBySection.forEach((section) => {
-            section.answers.forEach((answer) => {
-              // Find the original question from our data
-              const questionId = answer.originalQuestionId;
-              const subcategoryData = homeInstructionsData[subcategoryId as keyof typeof homeInstructionsData];
-              const questionData = subcategoryData?.find(q => q.id === questionId);
+        // Process answers by section
+        userInput.answersBySection.forEach((section) => {
+          section.answers.forEach((answer) => {
+            // Find the original question from our data
+            const questionId = answer.originalQuestionId;
+            const subcategoryData = homeInstructionsData[subcategoryId as keyof typeof homeInstructionsData];
+            const questionData = subcategoryData?.find((q: any) => q.id === questionId);
 
-              if (questionData) {
-                allTopics.push({
-                  id: questionId,
-                  title: questionData.text,
-                  subtitle: `Section: ${section.originalSectionId}`,
-                  data: answer.answer,
-                  onEdit: () => {
-                    // Navigate to the appropriate subcategory page with question ID as a parameter
-                    const route = subcategoryRoutes[subcategoryId as keyof typeof subcategoryRoutes];
-                    if (route) {
-                      navigate(`${route}?questionId=${questionId}`);
-                    }
+            if (questionData) {
+              allTopics.push({
+                id: questionId,
+                title: questionData.text,
+                subtitle: `Section: ${section.originalSectionId}`,
+                data: answer.answer,
+                onEdit: () => {
+                  // Navigate to the appropriate subcategory page with question ID as a parameter
+                  const route = subcategoryRoutes[subcategoryId as keyof typeof subcategoryRoutes];
+                  if (route) {
+                    navigate(`${route}?questionId=${questionId}`);
                   }
-                });
-              }
-            });
+                }
+              });
+            }
           });
         });
+      });
 
-        setTopics(allTopics);
-      } catch (err) {
-        console.error('Error fetching user answers:', err);
-        setError('Failed to load your answers. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setTopics(allTopics);
+    }
+  }, [userInputs, loading, navigate, user]);
 
-    fetchUserAnswers();
-  }, [user, navigate]);
-
-  if (isLoading) {
+  if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading your answers...</div>;
   }
 
   if (error) {
     return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
+  }
+
+  if (!user?.id) {
+    return <div className="flex justify-center items-center h-screen text-red-500">You must be logged in to view your answers</div>;
   }
 
   return (

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Avatar } from '@radix-ui/react-avatar';
 import { ChevronLeft, Printer } from 'lucide-react';
-import Layout from '@/mobile/components/layout/Layout';
 import { Button } from '@/components/ui/button';
+import GradiantHeader from '../header/gradiantHeader';
 
 interface Topic {
   id: string;
@@ -18,7 +17,6 @@ interface CategoryReviewPageProps {
   infoTitle: string;
   infoDescription: string;
   topics: Topic[];
-  user: { name: string; email: string; avatar: string };
   onPrint?: () => void;
 }
 
@@ -27,7 +25,6 @@ const CategoryReviewPage = ({
   infoTitle,
   infoDescription,
   topics,
-  user,
   onPrint,
 }: CategoryReviewPageProps) => {
   const navigate = useNavigate();
@@ -35,16 +32,9 @@ const CategoryReviewPage = ({
 
   return (
     <>
-      {/* Category Header */}
-      <div className="w-full bg-gradient-to-r from-[#4b4e7a] to-[#3ed6c5] py-6 px-4">
-        <div className="flex flex-col mb-2">
-          <div className="text-2xl font-bold text-white mb-1">Category: {categoryTitle}</div>
-          <Link to="/dashboard" className="text-white text-sm opacity-90 flex items-center">
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Back Home
-          </Link>
-        </div>
-      </div>
+      <GradiantHeader title="Current Category"
+       showAvatar={true}
+      />
 
       {/* Main Content */}
       <div className="px-4 py-5">
@@ -103,17 +93,6 @@ const CategoryReviewPage = ({
               </div>
             </div>
           ))}
-        </div>
-
-        {/* User Profile - Mobile Shows at Bottom */}
-        <div className="flex items-center gap-3 mt-6 border-t border-[#e5e7ef] pt-4">
-          <Avatar className="rounded-full w-12 h-12 bg-white overflow-hidden border-2 border-[#e5e7ef] shadow-sm">
-            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-          </Avatar>
-          <div>
-            <div className="font-semibold text-sm">{user.name}</div>
-            <div className="text-xs text-[#888]">{user.email}</div>
-          </div>
         </div>
       </div>
     </>
