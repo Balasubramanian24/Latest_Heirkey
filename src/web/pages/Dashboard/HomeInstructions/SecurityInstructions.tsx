@@ -2,16 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Formik, Form, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { Avatar } from '@radix-ui/react-avatar';
+// import { Avatar } from '@radix-ui/react-avatar';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { CheckCircle2 } from 'lucide-react';
+// import { Progress } from '@/components/ui/progress';
+// import { CheckCircle2 } from 'lucide-react';
 import AppHeader from '@/web/components/Layout/AppHeader';
 import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
-import userInputService, { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import { convertUserInputToFormValues, generateObjectId } from '@/services/userInputService';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Question,
@@ -20,6 +19,13 @@ import {
   generateInitialValues,
   handleDependentAnswers
 } from '@/web/components/HomeInstructions/FormFields';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  saveUserInput,
+  updateUserInput,
+  UserInput
+} from '../../../../store/slices/homeInstructionsSlice';
 import ScrollToQuestion from '@/web/components/HomeInstructions/ScrollToQuestion';
 import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
 import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
@@ -28,15 +34,19 @@ import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
 import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
 
 const SecurityInstructions = () => {
-  const [questions, setQuestions] = useState<Question[]>([]);
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(true);
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
-  const [existingCategoryId, setExistingCategoryId] = useState<string | null>(null);
-  const [existingSubCategoryId, setExistingSubCategoryId] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
+
+  // Get data from Redux store using selectors
+  const questions = useAppSelector((state: any) => state.homeInstructions.questions['104'] || []);
+  const loading = useAppSelector((state: any) => state.homeInstructions.loading);
+  const error = useAppSelector((state: any) => state.homeInstructions.error);
+  const userInputs = useAppSelector((state: any) => state.homeInstructions.userInputs);
+
   const tabs = [
     { label: 'Pets', path: '/category/homeinstructions/pets' },
     { label: 'Trash', path: '/category/homeinstructions/trash' },
@@ -55,52 +65,36 @@ const SecurityInstructions = () => {
     avatar,
   };
 
-  // Initialize questions from JSON data and fetch saved answers
+  // Fetch user inputs when component mounts
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
-      // Set questions from JSON data
-      if (homeInstructionsData['104']) {
-        setQuestions(homeInstructionsData['104'] as Question[]);
+  // Process user inputs to get saved answers
+  useEffect(() => {
+    if (userInputs.length > 0 && !loading) {
+      // Find the user input for this subcategory
+      const userInput = userInputs.find((input: UserInput) => input.originalSubCategoryId === '104');
+
+      if (userInput) {
+        // Convert to form values
+        const formValues = convertUserInputToFormValues(userInput);
+        setSavedAnswers(formValues);
+
+        // Store the existing record ID
+        setExistingInputId(userInput._id || null);
+
+        console.log('Loaded saved answers:', formValues);
+        console.log('Existing record ID:', userInput._id);
       }
-
-      // Fetch saved answers if user is authenticated
-      if (user && user.id) {
-        try {
-          // Fetch user inputs for this subcategory
-          const userInputs = await userInputService.getUserInputsBySubcategory(user.id, '1', '104');
-
-          if (userInputs && userInputs.length > 0) {
-            // Get the first user input
-            const userInput = userInputs[0];
-
-            // Convert to form values
-            const formValues = convertUserInputToFormValues(userInput);
-            setSavedAnswers(formValues);
-
-            // Store the existing record IDs
-            setExistingInputId(userInput._id);
-            setExistingCategoryId(userInput.categoryId);
-            setExistingSubCategoryId(userInput.subCategoryId);
-
-            console.log('Loaded saved answers:', formValues);
-            console.log('Existing record ID:', userInput._id);
-          }
-        } catch (error) {
-          console.error('Error fetching saved answers:', error);
-        }
-      }
-
-      setIsLoading(false);
-    };
-
-    fetchData();
-  }, [user]);
+    }
+  }, [userInputs, loading]);
 
   // Scroll to the target question if specified in URL
   useEffect(() => {
-    if (!isLoading && targetQuestionId) {
+    if (!loading && targetQuestionId) {
       // Use setTimeout to ensure the DOM has been updated
       setTimeout(() => {
         const element = document.getElementById(`question-${targetQuestionId}`);
@@ -114,10 +108,10 @@ const SecurityInstructions = () => {
         }
       }, 500);
     }
-  }, [isLoading, targetQuestionId]);
+  }, [loading, targetQuestionId]);
 
   // Handle form submission
-  const handleSubmit = async (values: Record<string, any>, { setSubmitting }: FormikHelpers<Record<string, any>>) => {
+  const handleSubmit = async (values: Record<string, string>, { setSubmitting }: FormikHelpers<Record<string, string>>) => {
     try {
       console.log('Saving security instructions:', values);
 
@@ -129,7 +123,13 @@ const SecurityInstructions = () => {
 
       // Group answers by section
       const answersBySection = questions
-        .reduce((sections: Record<string, any[]>, question) => {
+        .reduce((sections: Record<string, Array<{
+          index: number;
+          originalQuestionId: string;
+          question: string;
+          type: string;
+          answer: string;
+        }>>, question: Question) => {
           if (!sections[question.sectionId]) {
             sections[question.sectionId] = [];
           }
@@ -149,35 +149,51 @@ const SecurityInstructions = () => {
         }, {});
 
       // Format answers data
-      const formattedAnswersBySection = Object.entries(answersBySection).map(([sectionId, answers]) => ({
+      const formattedAnswersBySection: Array<{
+        originalSectionId: string;
+        isCompleted: boolean;
+        answers: Array<{
+          index: number;
+          originalQuestionId: string;
+          question: string;
+          type: string;
+          answer: string;
+        }>;
+      }> = Object.entries(answersBySection).map(([sectionId, answers]) => ({
         originalSectionId: sectionId, // Store our original section ID
         isCompleted: true,
-        answers
+        answers: answers as Array<{
+          index: number;
+          originalQuestionId: string;
+          question: string;
+          type: string;
+          answer: string;
+        }>
       }));
 
       // Check if we're updating an existing record or creating a new one
       if (existingInputId) {
         console.log('Updating existing record:', existingInputId);
 
-        try {
-          // Update existing record
-          await userInputService.updateUserInput(existingInputId, {
+        // Update existing record using Redux action
+        await dispatch(updateUserInput({
+          id: existingInputId,
+          userData: {
+            userId: user.id,
+            categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+            originalCategoryId: '1',
+            subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
+            originalSubCategoryId: '104',
             answersBySection: formattedAnswersBySection
-          });
-          console.log('Successfully updated record');
-        } catch (error) {
-          console.error('Error updating record:', error);
-          // If PATCH fails, fall back to creating a new record
-          console.log('Falling back to creating a new record');
-          setExistingInputId(null);
-        }
-      }
+          } as UserInput
+        })).unwrap();
 
-      if (!existingInputId) {
+        console.log('Successfully updated record');
+      } else {
         console.log('Creating new record');
 
         // Format data for API
-        const userData = {
+        const userData: Omit<UserInput, '_id'> = {
           userId: user.id, // Use actual user ID from auth context
           categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
           originalCategoryId: '1', // Our manual category ID for Home Instructions
@@ -186,15 +202,12 @@ const SecurityInstructions = () => {
           answersBySection: formattedAnswersBySection
         };
 
-        // Save to backend
-        const result = await userInputService.createUserInput(userData);
+        // Save to backend using Redux action
+        const result = await dispatch(saveUserInput(userData)).unwrap();
 
         // Store the new record ID for future updates
-        if (result && typeof result === 'object') {
-          const typedResult = result as { _id: string; categoryId: string; subCategoryId: string };
-          setExistingInputId(typedResult._id);
-          setExistingCategoryId(typedResult.categoryId);
-          setExistingSubCategoryId(typedResult.subCategoryId);
+        if (result && result._id) {
+          setExistingInputId(result._id);
         }
       }
 
@@ -208,8 +221,12 @@ const SecurityInstructions = () => {
   };
 
   // If no questions loaded yet, return loading state
-  if (questions.length === 0 || isLoading) {
+  if (questions.length === 0 || loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
   }
 
   const validationSchema = buildValidationSchema(questions, Yup);
@@ -264,9 +281,9 @@ const SecurityInstructions = () => {
                         <ScrollToQuestion questions={questions}>
                           {(refs) => (
                             <>
-                              {questions
-                                .sort((a, b) => a.order - b.order)
-                                .map(question => (
+                              {[...questions]
+                                .sort((a: Question, b: Question) => a.order - b.order)
+                                .map((question: Question) => (
                                   <div
                                     key={question.id}
                                     id={`question-${question.id}`}

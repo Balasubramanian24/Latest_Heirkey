@@ -5,50 +5,38 @@ import { CheckCircle2 } from 'lucide-react';
 import AppHeader from '@/web/components/Layout/AppHeader';
 import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-import homeInstructionsData from '@/data/homeIntsructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { categoryTabsConfig } from '@/data/categoryTabsConfig';
 import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
-
-
-interface SubCategory {
-  id: string;
-  title: string;
-  questionsCount: number;
-}
-
-// Define subcategories
-const subcategories: SubCategory[] = [
-  {
-    id: '101',
-    title: 'Pets',
-    questionsCount: homeInstructionsData['101']?.length || 0
-  },
-  {
-    id: '102',
-    title: 'Trash',
-    questionsCount: homeInstructionsData['102']?.length || 0
-  },
-  {
-    id: '103',
-    title: 'Other',
-    questionsCount: homeInstructionsData['103']?.length || 0
-  },
-  {
-    id: '104',
-    title: 'Security',
-    questionsCount: homeInstructionsData['104']?.length || 0
-  }
-];
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  SubCategory,
+  UserInput,
+  selectSubcategories,
+  selectProgressStats
+} from '../../../../store/slices/homeInstructionsSlice';
+import { useEffect } from 'react';
 
 const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
-  // This would come from your user's data in a real implementation
-  const completedQuestions = 0;
-  const completionPercentage = subcategory.questionsCount > 0 
-    ? Math.round((completedQuestions / subcategory.questionsCount) * 100) 
+  // Get the completed questions count from Redux state
+  const userInputs = useAppSelector((state: any) => state.homeInstructions.userInputs) as UserInput[];
+
+  // Calculate completed questions for this subcategory
+  const completedQuestions = userInputs.reduce((count: number, input: UserInput) => {
+    if (input.originalSubCategoryId === subcategory.id) {
+      return count + input.answersBySection.reduce(
+        (sectionCount: number, section) => sectionCount + section.answers.length, 0
+      );
+    }
+    return count;
+  }, 0);
+
+  const completionPercentage = subcategory.questionsCount > 0
+    ? Math.round((completedQuestions / subcategory.questionsCount) * 100)
     : 0;
-  
+
   return (
     <div className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
       <div className="p-4">
@@ -58,9 +46,9 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
             {completedQuestions}/{subcategory.questionsCount} questions
           </span>
         </div>
-        <Progress 
-          value={completionPercentage} 
-          className="h-1.5 mb-2" 
+        <Progress
+          value={completionPercentage}
+          className="h-1.5 mb-2"
         />
       </div>
     </div>
@@ -69,8 +57,20 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
 
 const HomeInstructions = ({ category }: { category?: string }) => {
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
   const params = useParams();
   const categoryName = category || params.categoryName;
+
+  // Get data from Redux store
+  const subcategories = useAppSelector(selectSubcategories);
+  const progressStats = useAppSelector(selectProgressStats);
+
+  // Fetch user inputs when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
   // Fallback user info if not authenticated
   const userInfo = {
@@ -79,32 +79,12 @@ const HomeInstructions = ({ category }: { category?: string }) => {
     avatar: user?.image || avatar
   };
 
-  // Calculate overall progress
-  const progressStats = (() => {
-    const totalQuestions = Object.values(homeInstructionsData).reduce(
-      (sum, questions) => sum + questions.length, 0
-    );
-    
-    // In a real app, you'd get this from your backend
-    const answeredQuestions = 0;
-    
-    const completionPercentage = totalQuestions > 0 
-      ? Math.round((answeredQuestions / totalQuestions) * 100) 
-      : 0;
-    
-    return {
-      totalQuestions,
-      answeredQuestions,
-      completionPercentage
-    };
-  })();
-
   const tabs = categoryTabsConfig[categoryName as keyof typeof categoryTabsConfig] || categoryTabsConfig['homeinstructions'];
 
   return (
     <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
-      
+
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
         <div className="container mx-auto px-4">
@@ -121,9 +101,9 @@ const HomeInstructions = ({ category }: { category?: string }) => {
                 <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img 
-                  src={userInfo.avatar} 
-                  alt={userInfo.name} 
+                <img
+                  src={userInfo.avatar}
+                  alt={userInfo.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -135,7 +115,7 @@ const HomeInstructions = ({ category }: { category?: string }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Main content */}
       <SubCategoryTabs tabs={tabs} />
       <div className="flex-1 container mx-auto px-4 py-8">
@@ -151,9 +131,9 @@ const HomeInstructions = ({ category }: { category?: string }) => {
                     {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
                   </span>
                 </div>
-                <Progress 
-                  value={progressStats.completionPercentage} 
-                  className="h-2" 
+                <Progress
+                  value={progressStats.completionPercentage}
+                  className="h-2"
                 />
                 {progressStats.completionPercentage === 100 && (
                   <div className="mt-2 text-center">
@@ -163,17 +143,17 @@ const HomeInstructions = ({ category }: { category?: string }) => {
                   </div>
                 )}
               </div>
-              
+
               <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">How to Understand Topics</span></h2>
               <p className="text-gray-600 mb-6">
-                Each topic below is a part of your home documents, with questions to help you provide important 
+                Each topic below is a part of your home documents, with questions to help you provide important
                 information for you and your loved ones. Click on a category to answer questions at your own pace—
                 we'll save everything for you.
               </p>
-              
+
               {/* Subcategory cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
-                {subcategories.map(subcategory => (
+                {subcategories.map((subcategory: SubCategory) => (
                   <Link key={subcategory.id} to={`/category/${categoryName}/${subcategory.title.toLowerCase()}`} className="block">
                     <SubCategoryCard subcategory={subcategory} />
                   </Link>
@@ -181,17 +161,17 @@ const HomeInstructions = ({ category }: { category?: string }) => {
               </div>
             </div>
           </div>
-          
+
           {/* Right column - Search panel */}
           <div>
             <SearchPanel />
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );
 };
 
-export default HomeInstructions; 
+export default HomeInstructions;
