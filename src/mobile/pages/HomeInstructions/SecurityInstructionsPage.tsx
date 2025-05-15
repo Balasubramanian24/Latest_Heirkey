@@ -97,7 +97,9 @@ export default function SecurityInstructionsPage() {
   if (isLoading) {
     return (
       <>
-        <GradiantHeader title="Home Instructions" />
+        <GradiantHeader title="Home Instructions"
+        showAvatar={true}
+        />
         <div className="p-4 text-center">Loading your answers...</div>
       </>
     );
@@ -105,7 +107,9 @@ export default function SecurityInstructionsPage() {
 
   return (
     <>
-      <GradiantHeader title="Home Instructions" />
+      <GradiantHeader title="Home Instructions"
+       showAvatar={true}
+      />
       <div style={{ padding: 16 }}>
         {/* Tab Bar */}
         <div className="flex gap-2 mb-4 bg-gray-50 rounded-lg p-1">

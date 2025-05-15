@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import CategoryReviewPage from '@/mobile/components/category/CategoryReviewPage';
-import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import { useNavigate, useParams } from 'react-router-dom';
 import questionsData from '@/data/homeIntsructions.json';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,15 +41,6 @@ const HomeInstructionsReviewPage = () => {
   const allQuestions = useAppSelector(selectQuestions);
   const loading = useAppSelector(selectLoading);
   const error = useAppSelector(selectError);
-
-  // User info with fallbacks for missing data
-  const userInfo = {
-    name: user?.firstName && user?.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : 'Guest User',
-    email: user?.email || 'guest@example.com',
-    avatar: avatar, // Always use the default avatar for simplicity
-  };
 
   // Handle navigation to edit a specific question
   const handleEditQuestion = (questionId: string, subcategoryId: string) => {
@@ -158,7 +148,6 @@ const HomeInstructionsReviewPage = () => {
       infoTitle="How to edit your information"
       infoDescription="Review the details about your home, life, and essential information. Tap Edit on any item to update it."
       topics={topics}
-      user={userInfo}
       onPrint={() => window.print()}
     />
   );

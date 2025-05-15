@@ -22,6 +22,10 @@ import TrashInstructionsPage from '@/mobile/pages/HomeInstructions/TrashInstruct
 import OtherInstructionsPage from "./mobile/pages/HomeInstructions/OtherInstructionsPage";
 import SecurityInstructionsPage from "./mobile/pages/HomeInstructions/SecurityInstructionsPage";
 import HomeInstructionsReviewPage from "./mobile/pages/HomeInstructions/HomeInstructionsReviewPage";
+import LocationInstrucationsPage from "./mobile/pages/WillLoacation/LocationInstrucationsPage";
+import LegalInstructionsPage from "./mobile/pages/WillLoacation/LegalInstructionsPage";
+import WillInstructionsPage from "./mobile/pages/WillLoacation/WillInstructionsPage";
+import WillInstructionsReviewPage from "./mobile/pages/WillLoacation/WillInstructionReviewPage";
 
 
 
@@ -52,6 +56,7 @@ import CeremonyLocation from "./web/pages/Dashboard/FuneralArrangements/Ceremony
 import FuneralClergy from "./web/pages/Dashboard/FuneralArrangements/FuneralClergy";
 import FuneralNotification from "./web/pages/Dashboard/FuneralArrangements/FuneralNotification";
 import FuneralProceedings from "./web/pages/Dashboard/FuneralArrangements/FuneralProceedings";
+
 
 function CategoryStartupWrapper() {
   const { categoryName } = useParams();
@@ -97,8 +102,12 @@ export default function App() {
             <Route path="/category/:categoryName/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/other" element={<Layout><OtherInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
-            
             <Route path="/category/:categoryName/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
+
+
+            <Route path="/category/:categoryName/location" element={<LocationInstrucationsPage />} />
+            <Route path="/category/:categoryName/legal" element={<LegalInstructionsPage />} />
+            <Route path="/category/:categoryName/review" element={<WillInstructionsReviewPage />} />
           </>
         ) : (
           // Web routes

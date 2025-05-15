@@ -97,8 +97,11 @@ const HomeInstructionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GradiantHeader title="Home Instructions" />
-
+      <GradiantHeader 
+      showAvatar={true}
+      title="Home Instructions"
+      />
+      
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-md mx-auto space-y-6">
           <div className="space-y-2">

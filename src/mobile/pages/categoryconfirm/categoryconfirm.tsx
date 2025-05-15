@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import CategoryConfirmCard from "@/mobile/components/category/categoryApproval";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
+import { UserAvatar } from '@/mobile/components/layout/UserAvatar';
 
 const CategoryConfirmPage = () => {
   const navigate = useNavigate();
@@ -20,13 +21,15 @@ const CategoryConfirmPage = () => {
   return (
 
     <div className="min-h-screen bg-background">
-      <GradiantHeader title= "Current Category" />
-        <CategoryConfirmCard
-          onStart={handleStart}
-          onBack={handleBack}
+      <GradiantHeader title= "Current Category" 
+      showAvatar={true}
+      />
+      <CategoryConfirmCard
+        onStart={handleStart}
+        onBack={handleBack}
           category={categoryName || "Selected Category"}
         />
-      <Footer />
+      <Footer />  
     </div>
   );
 };
