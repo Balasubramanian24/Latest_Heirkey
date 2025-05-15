@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import CategoryCard from '@/mobile/components/dashboard/CategoryCard';
-import GradiantHeader from '@/mobile/components/header/gradiantHeader';
-
+import { useAuth } from '@/contexts/AuthContext';
 import homeImg from '@/assets/global/category/home.jpg'
 import documentsImg from '@/assets/global/category/document.jpg'
 import willImg from '@/assets/global/category/will.jpg'
 import funeralImg from '@/assets/global/category/funeral.jpg'
 import contactImg from '@/assets/global/category/contact.jpg'
 import socialMediaImg from '@/assets/global/category/socialMedia.jpg'
+import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 
 const categories = [
   {
@@ -60,10 +60,15 @@ const questionCounts = {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleCategoryClick = (categoryId: string, categoryName: string) => {
     navigate(`/category/${categoryName.toLowerCase().replace(/\s+/g, '')}`);
   };
+
+  const headerTitle = user?.firstName && user?.lastName 
+    ? `${user.firstName} ${user.lastName}`
+    : user?.firstName || user?.email || 'Welcome';
 
   return (
     <motion.div
@@ -73,7 +78,10 @@ export default function DashboardPage() {
       transition={{ duration: 0.3 }}
       className="min-h-screen overflow-y-auto bg-background"
     >
-      <GradiantHeader title="Dashboard" />
+      <GradiantHeader 
+        title={headerTitle} 
+        showAvatar={true} 
+      />
       <div className="container mx-auto px-4 py-8 max-w-md" style={{ minHeight: '100vh' }}>
         <div className="overflow-y-auto">
           <div className="w-full max-w-md mx-auto px-4 py-6">

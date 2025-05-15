@@ -76,17 +76,19 @@ export default function TrashInstructionsPage() {
 
   return (
     <>
-      <GradiantHeader title="Home Instructions" />
+      <GradiantHeader title="Home Instructions"
+       showAvatar={true}
+      />
       <div style={{ padding: 16 }}>
         {/* Tab Bar */}
         <div className="flex gap-2 mb-4 bg-gray-50 rounded-lg p-1">
           {["Pets", "Trash", "Other", "Security"].map(tab => {
             // Map tab names to their routes
             const tabRoutes: Record<string, string> = {
-              Pets: "/homeinstructions/pets",
-              Trash: "/homeinstructions/trash",
-              Other: "/homeinstructions/other",
-              Security: "/homeinstructions/security",
+              Pets: "/category/homeinstructions/pets",
+              Trash: "/category/homeinstructions/trash",
+              Other: "/category/homeinstructions/other",
+              Security: "/category/homeinstructions/security",
             };
             const isActive = tab === "Trash";
             return (

@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
-import homeInstructionsData from '@/data/homeIntsructions.json';
 import Footer from '@/mobile/components/layout/Footer';
+// import legalInstructionsData from '@/data/legalInstructions.json'; // Uncomment and use real data
 
 interface SubCategory {
   id: string;
@@ -10,32 +10,23 @@ interface SubCategory {
   questionsCount: number;
 }
 
+// Example subcategories, replace with your real data
 const subcategories: SubCategory[] = [
   {
-    id: '101',
-    title: 'Pets',
-    questionsCount: homeInstructionsData['101']?.length || 0
+    id: 'legal-1',
+    title: 'Executor Details',
+    questionsCount: 4, // replace with real count
   },
   {
-    id: '102',
-    title: 'Trash',
-    questionsCount: homeInstructionsData['102']?.length || 0
-  },
-  {
-    id: '103',
-    title: 'Other',
-    questionsCount: homeInstructionsData['103']?.length || 0
-  },
-  {
-    id: '104',
-    title: 'Security',
-    questionsCount: homeInstructionsData['104']?.length || 0
+    id: 'legal-2',
+    title: 'Witness Information',
+    questionsCount: 2, // replace with real count
   }
 ];
 
 const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
   const navigate = useNavigate();
-  const completedQuestions = 0;
+  const completedQuestions = 0; // Replace with real completion logic
   const completionPercentage = subcategory.questionsCount > 0 
     ? Math.round((completedQuestions / subcategory.questionsCount) * 100) 
     : 0;
@@ -43,7 +34,7 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
   return (
     <div
       className="cursor-pointer"
-      onClick={() => navigate(`/category/homeinstructions/${subcategory.title.toLowerCase()}`)}
+      onClick={() => navigate(`/category/willinstructions/legal/${subcategory.title.toLowerCase().replace(/\s/g, '')}`)}
     >
       <Card className="bg-white rounded-xl shadow-sm border border-gray-100">
         <CardContent className="p-4">
@@ -55,7 +46,6 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
               {completedQuestions}/{subcategory.questionsCount}
             </span>
           </div>
-          
           <div className="space-y-2">
             <p className="text-xs text-gray-500">
               {completionPercentage}% Complete
@@ -67,26 +57,23 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
   );
 };
 
-const HomeInstructionsPage = () => {
- 
- return (
+const LegalInstructionsPage = () => {
+  return (
     <div className="min-h-screen bg-gray-50">
       <GradiantHeader 
-      showAvatar={true}
-      title="Home Instructions"
+        showAvatar={true}
+        title="Legal Instructions"
       />
-      
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-md mx-auto space-y-6">
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-gray-900">
-              Select a Category
+              Select a Legal Category
             </h1>
             <p className="text-sm text-gray-600">
-              Choose a category to add or update your home instructions
+              Choose a legal category to add or update your will's legal instructions
             </p>
           </div>
-
           <div className="space-y-4">
             {subcategories.map((subcategory) => (
               <SubCategoryCard 
@@ -102,4 +89,4 @@ const HomeInstructionsPage = () => {
   );
 };
 
-export default HomeInstructionsPage; 
+export default LegalInstructionsPage;
