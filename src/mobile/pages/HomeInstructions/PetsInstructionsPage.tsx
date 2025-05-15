@@ -70,8 +70,8 @@ export default function PetsInstructionsPage() {
   const isLoading = useAppSelector(selectLoading);
   const reduxError = useAppSelector(selectError);
 
-  // Cast questions to the correct type
-  const typedQuestions = castToQuestionType(allQuestions);
+  // Cast questions to the correct type - memoize to prevent recalculation on every render
+  const typedQuestions = useState(() => castToQuestionType(allQuestions))[0];
 
   // Get the questionId from URL query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -103,27 +103,38 @@ export default function PetsInstructionsPage() {
     if (userInputs && userInputs.length > 0) {
       // Use the first matching record
       const userInput = userInputs[0];
-      if (userInput._id) {
+
+      // Only update state if we have a new ID or if it's the first time
+      if (userInput._id && userInput._id !== existingInputId) {
         setExistingInputId(userInput._id);
+
+        // Convert the saved answers to form values
+        const formValues = convertUserInputToFormValues(userInput);
+        setSavedAnswers(formValues);
+      } else if (!existingInputId && userInput._id) {
+        // First time setting the ID
+        setExistingInputId(userInput._id);
+
+        // Convert the saved answers to form values
+        const formValues = convertUserInputToFormValues(userInput);
+        setSavedAnswers(formValues);
       }
+    }
+  }, [userInputs, existingInputId]);
 
-      // Convert the saved answers to form values
-      const formValues = convertUserInputToFormValues(userInput);
-      setSavedAnswers(formValues);
-
-      // If we have a target question, set the step to show that question
-      if (targetQuestionId) {
-        // Find which step contains this question
-        const steps = splitIntoSteps(typedQuestions);
-        for (let i = 0; i < steps.length; i++) {
-          if (steps[i].some(q => q.id === targetQuestionId)) {
-            setStep(i);
-            break;
-          }
+  // Handle target question in a separate effect to avoid infinite loops
+  useEffect(() => {
+    if (targetQuestionId) {
+      // Find which step contains this question
+      const steps = splitIntoSteps(typedQuestions);
+      for (let i = 0; i < steps.length; i++) {
+        if (steps[i].some(q => q.id === targetQuestionId)) {
+          setStep(i);
+          break;
         }
       }
     }
-  }, [userInputs, targetQuestionId, typedQuestions]);
+  }, [targetQuestionId, typedQuestions]);
 
   if (isLoading) {
     return (
@@ -291,9 +302,15 @@ export default function PetsInstructionsPage() {
                 };
                 console.log("petFields", petFields);
                 localStorage.setItem("petsInstructions", JSON.stringify(petFields));
-                navigate("/homeinstructions/trash");
+
+                // Use the dynamic route with categoryName
+                if (categoryName) {
+                  navigate(`/category/${categoryName}/trash`);
+                } else {
+                  navigate("/homeinstructions/trash");
+                }
               }
-            }, [values.q1, navigate]);
+            }, [values.q1, navigate, categoryName]);
 
             // Dynamically get visible questions and steps
             const visibleQuestions = getVisibleQuestions(typedQuestions, values);
