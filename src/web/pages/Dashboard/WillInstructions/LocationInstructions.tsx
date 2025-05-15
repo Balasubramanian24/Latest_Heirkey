@@ -16,6 +16,9 @@ import {
   buildValidationSchema,
   generateInitialValues
 } from '@/web/components/HomeInstructions/FormFields';
+import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
+import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
+import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
 
 const LocationInstructions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -39,25 +42,26 @@ const LocationInstructions = () => {
   return (
     <div className="flex flex-col pt-20 min-h-screen">
       <AppHeader />
-      <div className="bg-gradient-to-r from-[#183153] to-[#1ccfc9] text-white py-4">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-1">Will and Testament</h1>
-            <span className="flex items-center text-sm">← Back Home</span>
-          </div>
-          <div className="text-right">
-            <div className="font-semibold">{user?.firstName || user?.username || 'Guest'}</div>
-            <div className="text-sm opacity-80">{user?.email || 'guest@example.com'}</div>
-          </div>
-        </div>
-      </div>
+      <SubCategoryHeader
+        title="Will & Testament"
+        backTo="/dashboard"
+        user={{
+          name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
+          email: user?.email || 'guest@example.com',
+          avatar,
+        }}
+      />
       <SubCategoryTabs tabs={tabs} />
+      <div className="container mx-auto px-6">
+        <SubCategoryTitle
+          category="Location"
+          description="These files contain questions to help you record your details so they're easy to find later."
+        />
+      </div>
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-2xl font-semibold text-[#183153] mb-2">Will & Testament: <span className="text-[#1ccfc9]">Location</span></h2>
-              <p className="text-gray-600 mb-6">These fields contain questions to help you record your details so they're easy to find later.</p>
               <Formik
                 initialValues={generateInitialValues(questions)}
                 validationSchema={Yup.object(buildValidationSchema(questions, Yup))}
