@@ -26,8 +26,13 @@ import LocationInstrucationsPage from "./mobile/pages/WillLoacation/LocationInst
 import LegalInstructionsPage from "./mobile/pages/WillLoacation/LegalInstructionsPage";
 import WillInstructionsPage from "./mobile/pages/WillLoacation/WillInstructionsPage";
 import WillInstructionsReviewPage from "./mobile/pages/WillLoacation/WillInstructionReviewPage";
-
-
+import FuneralArrangementsPage from '@/mobile/pages/FuneralArrangements/FuneralArrangementsPage';
+import FuneralDetailsPage from '@/mobile/pages/FuneralArrangements/FuneralDetailsPage';
+import CeremonyLocationPage from '@/mobile/pages/FuneralArrangements/CeremonyLocationPage';
+import FuneralClergyPage from '@/mobile/pages/FuneralArrangements/FuneralClergyPage';
+import FuneralNotificationPage from '@/mobile/pages/FuneralArrangements/FuneralNotificationPage';
+import FuneralProceedingsPage from '@/mobile/pages/FuneralArrangements/FuneralProceedingsPage';
+import FuneralArrangementReviewPage from '@/mobile/pages/FuneralArrangements/FuneralArrangementReviewPage';
 
 // Web imports
 import WebLandingPage from "@/web/WebLandingPage";
@@ -81,6 +86,9 @@ function InfoPageWrapper() {
   if (categoryName === 'willlocation' || categoryName === 'willinstructions') {
     return <WillInstructionsPage />;
   }
+  if (categoryName === 'funeralarrangements') {
+    return <FuneralArrangementsPage />;
+  }
   return <HomeInstructionsPage />;
 }
 
@@ -114,10 +122,16 @@ export default function App() {
             <Route path="/category/:categoryName/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
 
-
             <Route path="/category/:categoryName/location" element={<Layout><LocationInstrucationsPage /></Layout>} />
             <Route path="/category/:categoryName/legal" element={<Layout><LegalInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/review" element={<Layout><WillInstructionsReviewPage /></Layout>} />
+
+            <Route path="/category/:categoryName/details" element={<Layout><FuneralDetailsPage /></Layout>} />
+            <Route path="/category/:categoryName/ceremonylocation" element={<Layout><CeremonyLocationPage /></Layout>} />
+            <Route path="/category/:categoryName/clergy" element={<Layout><FuneralClergyPage /></Layout>} />
+            <Route path="/category/:categoryName/notification" element={<Layout><FuneralNotificationPage /></Layout>} />
+            <Route path="/category/:categoryName/proceedings" element={<Layout><FuneralProceedingsPage /></Layout>} />
+            <Route path="/category/funeralarrangements/review" element={<Layout><FuneralArrangementReviewPage /></Layout>} />
           </>
         ) : (
           // Web routes

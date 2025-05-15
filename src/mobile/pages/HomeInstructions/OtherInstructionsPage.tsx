@@ -19,6 +19,8 @@ import {
   selectLoading,
   selectError
 } from '@/store/slices/homeInstructionsSlice';
+import { categoryTabsConfig } from '@/data/categoryTabsConfig';
+import { CircularProgress } from '@/components/ui/CircularProgress';
 
 const initialValues = {
   o1: "",
@@ -116,11 +118,11 @@ export default function OtherInstructionsPage() {
       <div style={{ padding: 16 }}>
         {/* Tab Bar */}
         <div className="flex gap-2 mb-4 bg-gray-50 rounded-lg p-1">
-          {["Pets", "Trash", "Other", "Security"].map(tab => {
-            const isActive = tab === "Other";
+          {categoryTabsConfig.homeinstructions.map(tab => {
+            const isActive = tab.label === "Other";
             return (
               <button
-                key={tab}
+                key={tab.label}
                 type="button"
                 className={
                   "flex-1 py-2 rounded-md font-medium " +
@@ -130,10 +132,10 @@ export default function OtherInstructionsPage() {
                 }
                 disabled={isActive}
                 onClick={() => {
-                  if (!isActive) navigate(tabRoutes[tab]);
+                  if (!isActive) navigate(tab.path);
                 }}
               >
-                {tab}
+                {tab.label}
               </button>
             );
           })}
@@ -255,9 +257,13 @@ export default function OtherInstructionsPage() {
                   <p className="text-lg font-semibold">
                     Home Instructions: <span className="text-[#2BCFD5]">Other</span>
                   </p>
-                  <div className="w-8 h-8 rounded-full bg-gray-100 text-sm flex items-center justify-center font-semibold">
-                    1/1
-                  </div>
+                  <CircularProgress 
+                    value={1} 
+                    max={1} 
+                    size={40} 
+                    stroke={3}
+                    color="#2BCFD5"
+                  />
                 </div>
               </div>
               <div className="bg-gray-50 p-4 rounded-xl shadow-sm border mt-4">

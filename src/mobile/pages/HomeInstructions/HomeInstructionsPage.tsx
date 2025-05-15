@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
@@ -14,57 +14,46 @@ import {
   selectError
 } from '@/store/slices/homeInstructionsSlice';
 
-const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
-  const navigate = useNavigate();
-  const userInputs = useAppSelector(selectUserInputs);
-
-  // Calculate completed questions for this subcategory
-  const completedQuestions = userInputs.reduce((count, input) => {
-    if (input.originalSubCategoryId === subcategory.id) {
-      return count + input.answersBySection.reduce(
-        (sectionCount, section) => sectionCount + section.answers.length, 0
-      );
-    }
-    return count;
-  }, 0);
-
-  const completionPercentage = subcategory.questionsCount > 0
-    ? Math.round((completedQuestions / subcategory.questionsCount) * 100)
-    : 0;
-
-  return (
-    <div
-      className="cursor-pointer"
-      onClick={() => navigate(`/category/homeinstructions/${subcategory.title.toLowerCase()}`)}
-    >
-      <Card className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-semibold text-[#183153]">
-              {subcategory.title}
-            </h3>
-            <span className="text-sm text-[#2BCFD5] font-medium">
-              {completedQuestions}/{subcategory.questionsCount}
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs text-gray-500">
-              {completionPercentage}% Complete
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+const SubCategoryCard = ({
+  subcategory,
+  isActive,
+  onClick,
+  completedQuestions
+}: {
+  subcategory: SubCategory;
+  isActive: boolean;
+  onClick: () => void;
+  completedQuestions: number;
+}) => (
+  <div
+    className="cursor-pointer"
+    onClick={onClick}
+  >
+    <Card className={
+      "rounded-xl shadow-sm border transition-all " +
+      (isActive
+        ? "border-[#2BCFD5] bg-white"
+        : "border-gray-200 bg-gray-50")
+    }>
+      <CardContent className="p-4 flex justify-between items-center">
+        <span className="text-base font-medium text-gray-900">{subcategory.title}</span>
+        <span className="text-xs text-gray-500">
+          {completedQuestions}/{subcategory.questionsCount} questions
+        </span>
+      </CardContent>
+    </Card>
+  </div>
+);
 
 const HomeInstructionsPage = () => {
   const dispatch = useAppDispatch();
   const { user } = useAuth();
   const subcategories = useAppSelector(selectSubcategories);
+  const userInputs = useAppSelector(selectUserInputs);
   const loading = useAppSelector(selectLoading);
   const error = useAppSelector(selectError);
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string | null>(null);
 
   // Fetch user inputs when component mounts
   useEffect(() => {
@@ -76,7 +65,7 @@ const HomeInstructionsPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <GradiantHeader title="Home Instructions" />
+        <GradiantHeader title="Home Instructions" showAvatar={true} />
         <div className="container mx-auto px-4 py-6 text-center">
           Loading your home instructions...
         </div>
@@ -87,7 +76,7 @@ const HomeInstructionsPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <GradiantHeader title="Home Instructions" />
+        <GradiantHeader title="Home Instructions" showAvatar={true} />
         <div className="container mx-auto px-4 py-6 text-center text-red-500">
           {error}
         </div>
@@ -98,29 +87,43 @@ const HomeInstructionsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <GradiantHeader 
-      showAvatar={true}
-      title="Home Instructions"
+        showAvatar={true}
+        title="Home Instructions"
       />
-      
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-md mx-auto space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-xl font-bold text-gray-900">
-              Select a Category
-            </h1>
-            <p className="text-sm text-gray-600">
-              Choose a category to add or update your home instructions
-            </p>
-          </div>
+      <div className="container mx-auto px-4 py-6 max-w-md">
+        {/* Understanding Topics Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+          <h2 className="text-base font-bold text-[#8B5CF6] mb-2">Understanding Topics</h2>
+          <p className="text-sm text-gray-600">
+            Each topic below is a part of your home documents, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you.
+          </p>
+        </div>
+        <div className="space-y-3">
+          {subcategories.map((subcategory) => {
+            // Calculate completed questions for this subcategory
+            const completedQuestions = userInputs.reduce((count, input) => {
+              if (input.originalSubCategoryId === subcategory.id) {
+                return count + input.answersBySection.reduce(
+                  (sectionCount, section) => sectionCount + section.answers.length, 0
+                );
+              }
+              return count;
+            }, 0);
 
-          <div className="space-y-4">
-            {subcategories.map((subcategory) => (
+            const isActive = activeTab === subcategory.id;
+            return (
               <SubCategoryCard
                 key={subcategory.id}
                 subcategory={subcategory}
+                isActive={isActive}
+                completedQuestions={completedQuestions}
+                onClick={() => {
+                  setActiveTab(subcategory.id);
+                  navigate(`/category/homeinstructions/${subcategory.title.toLowerCase()}`);
+                }}
               />
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
       <Footer />

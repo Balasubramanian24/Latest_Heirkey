@@ -98,7 +98,7 @@ const LegalInstructionsPage = () => {
               return (
                 <Form className="space-y-4">
                   {/* Progress */}
-                  <div className="bg-gray-50 flex justify-between items-center rounded-xl shadow-sm border p-4">
+                  <div className="bg-gray-50 flex justify-between items-center rounded-xl shadow-sm border p-4 mb-4">
                     <span className="text-black font-semibold text-lg">Will: <span className="text-[#2BCFD5]">Legal</span></span>
                     <span>
                       <CircularProgress value={answeredCount} max={totalCount} />
