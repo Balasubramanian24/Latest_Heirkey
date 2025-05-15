@@ -26,7 +26,14 @@ import {
 
 // Utility: get visible questions based on dependencies
 function getVisibleQuestions(allQuestions: Question[], values: Record<string, any>) {
-  return allQuestions.filter(q => {
+  // For existing data with q1="yes", ensure all questions are visible
+  if (values.q1 === "yes" && values.q5) {
+    console.log('Existing data with q1="yes" and q5 exists, showing all questions');
+    return allQuestions;
+  }
+
+  // Normal filtering logic
+  const visibleQuestions = allQuestions.filter(q => {
     if (!q.dependsOn) return true;
     // Only show questions that depend on q1="yes" when q1 is actually "yes"
     if (q.dependsOn.questionId === "q1") {
@@ -34,6 +41,7 @@ function getVisibleQuestions(allQuestions: Question[], values: Record<string, an
     }
     return values[q.dependsOn.questionId] === q.dependsOn.value;
   });
+  return visibleQuestions;
 }
 
 
@@ -43,12 +51,17 @@ function splitIntoSteps(questions: Question[]) {
   if (questions.length === 1) {
     return [questions];
   }
-  
-  return [
+
+  // Create the steps array
+  const steps = [
     questions.filter(q => q.id === "q1" || q.id === "q2"),
     questions.filter(q => q.id === "q3" || q.id === "q4"),
     questions.filter(q => ["q5", "q6", "q7"].includes(q.id)),
   ];
+
+  // Filter out empty steps
+  const nonEmptySteps = steps.filter(step => step.length > 0);
+  return nonEmptySteps;
 }
 
 // Initial values for Formik
@@ -68,6 +81,7 @@ export default function PetsInstructionsPage() {
   const [savedAnswers, setSavedAnswers] = useState<Record<string, any>>({});
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
   const [formError, setError] = useState<string | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
@@ -112,6 +126,7 @@ export default function PetsInstructionsPage() {
     if (userInputs && userInputs.length > 0) {
       // Use the first matching record
       const userInput = userInputs[0];
+      // console.log('Loaded user input:', userInput);
 
       // Only update state if we have a new ID or if it's the first time
       if (userInput._id && userInput._id !== existingInputId) {
@@ -119,17 +134,31 @@ export default function PetsInstructionsPage() {
 
         // Convert the saved answers to form values
         const formValues = convertUserInputToFormValues(userInput);
+        // console.log('Converted form values:', formValues);
         setSavedAnswers(formValues);
+
+        // Always reset to step 0 when loading data, unless coming from a specific question
+        if (!targetQuestionId) {
+          // console.log('Resetting to step 0 when loading data');
+          setStep(0);
+        }
       } else if (!existingInputId && userInput._id) {
         // First time setting the ID
         setExistingInputId(userInput._id);
 
         // Convert the saved answers to form values
         const formValues = convertUserInputToFormValues(userInput);
+        // console.log('Converted form values (first time):', formValues);
         setSavedAnswers(formValues);
+
+        // Always reset to step 0 when loading data, unless coming from a specific question
+        if (!targetQuestionId) {
+          // console.log('Resetting to step 0 when loading data (first time)');
+          setStep(0);
+        }
       }
     }
-  }, [userInputs, existingInputId]);
+  }, [userInputs, existingInputId, targetQuestionId]);
 
   // Handle target question in a separate effect to avoid infinite loops
   useEffect(() => {
@@ -144,6 +173,11 @@ export default function PetsInstructionsPage() {
       }
     }
   }, [targetQuestionId, typedQuestions]);
+
+  // Reset success message when step changes
+  useEffect(() => {
+    setShowSuccessMessage(false);
+  }, [step]);
 
   if (isLoading) {
     return (
@@ -206,6 +240,7 @@ export default function PetsInstructionsPage() {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               console.log("Pets Instructions Submitted", values);
+              // console.log("Current step at submission:", step);
 
               // Check if user is authenticated
               if (!user || !user.id) {
@@ -213,6 +248,14 @@ export default function PetsInstructionsPage() {
                 setError('You must be logged in to save answers');
                 return;
               }
+
+              // Get the current steps based on the values
+              // const visibleQuestions = getVisibleQuestions(typedQuestions, values);
+              // const steps = splitIntoSteps(visibleQuestions);
+              // console.log('Total steps at submission:', steps.length);
+
+              // We should only reach here if we're on the last step and clicked Save
+              // console.log('On last step, saving to backend');
 
               // Format the answers for the backend
               const answers = Object.entries(values)
@@ -283,15 +326,34 @@ export default function PetsInstructionsPage() {
                 }
               }
 
-              // Navigate to the next page or back to review if we came from there
+              // If we came from the review page, go back there
               if (targetQuestionId) {
+                // console.log('Navigating back to review page');
                 navigate(`/category/${categoryName}/review`);
               } else {
-                navigate(`/category/${categoryName}/trash`);
+                // Always save the data first
+                // console.log('Data saved successfully');
+
+                // NEVER navigate to trash page automatically
+                // Just show a success message and let the user decide when to navigate
+
+                // If we're not on the third step, force navigation to the third step
+                if (step < 2) {
+                  console.log('Not on third step yet, moving to third step');
+                  setStep(2);
+                } else {
+                  console.log('On third step, staying here after save');
+                  // Show success message
+                  setShowSuccessMessage(true);
+                }
+
+                // Always finish the submission
+                setSubmitting(false);
               }
-            } catch (err: any) {
+            } catch (err: unknown) {
               console.error('Error saving pet instructions:', err);
-              setError(err.message || 'Failed to save your answers. Please try again.');
+              const errorMessage = err instanceof Error ? err.message : 'Failed to save your answers. Please try again.';
+              setError(errorMessage);
               setSubmitting(false);
             }
           }}
@@ -299,8 +361,23 @@ export default function PetsInstructionsPage() {
           {({ values, isSubmitting }) => {
             // Dynamically get visible questions and steps
             const visibleQuestions = getVisibleQuestions(typedQuestions, values);
+            // console.log('Visible questions:', visibleQuestions.map(q => q.id));
+
             const steps = splitIntoSteps(visibleQuestions);
-            const currentStepQuestions = steps[step];
+            // console.log('Steps:', steps.map(step => step.map(q => q.id)));
+            // console.log('Current step:', step, 'of', steps.length);
+
+            // Check if step is out of bounds and adjust if needed
+            if (steps.length > 0 && step >= steps.length) {
+              // console.log('Step out of bounds, adjusting to:', steps.length - 1);
+              // Use setTimeout to avoid state updates during render
+              setTimeout(() => {
+                setStep(steps.length - 1);
+              }, 0);
+            }
+
+            // Get current step questions, with fallback to empty array if undefined
+            const currentStepQuestions = steps[step] || [];
 
             return (
             <Form>
@@ -372,6 +449,23 @@ export default function PetsInstructionsPage() {
                 </ScrollToQuestion>
               </div>
 
+              {/* Success message */}
+              {showSuccessMessage && (
+                <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-lg flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold">Data saved successfully!</p>
+                    <p className="text-sm">Your pet information has been saved.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/category/${categoryName}/trash`)}
+                    className="bg-[#2BCFD5] text-white px-4 py-2 rounded-lg text-sm"
+                  >
+                    Continue to Trash →
+                  </button>
+                </div>
+              )}
+
               <div className="mt-6 flex justify-between items-center">
                 <button
                   type="button"
@@ -385,7 +479,18 @@ export default function PetsInstructionsPage() {
                 {step < steps.length - 1 ? (
                   <button
                     type="button"
-                    onClick={() => setStep(s => s + 1)}
+                    onClick={() => {
+                      // console.log('Next button clicked, moving to step:', step + 1);
+                      // console.log('Current visible questions:', visibleQuestions.map(q => q.id));
+                      // console.log('Current steps:', steps.map(s => s.map(q => q.id)));
+
+                      // Force move to the next step
+                      setStep(prevStep => {
+                        const newStep = prevStep + 1;
+                        console.log('Setting step to:', newStep);
+                        return newStep;
+                      });
+                    }}
                     disabled={currentStepQuestions.some(q => q.required && !(values as Record<string, any>)[q.id])}
                     className="bg-[#2BCFD5] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#25b6bb]"
                   >
@@ -396,8 +501,14 @@ export default function PetsInstructionsPage() {
                     type="submit"
                     disabled={isSubmitting}
                     className="bg-[#2BCFD5] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#25b6bb]"
+                    onClick={() => {
+                      // console.log('Save button clicked, current step:', step, 'of', steps.length);
+                      // console.log('Current visible questions:', visibleQuestions.map(q => q.id));
+                      // console.log('Current steps:', steps.map(s => s.map(q => q.id)));
+                      // console.log('Current step questions:', currentStepQuestions.map(q => q.id));
+                    }}
                   >
-                    Save
+                    {step < 2 ? 'Save & Continue' : 'Save & Finish'}
                   </button>
                 )}
               </div>
