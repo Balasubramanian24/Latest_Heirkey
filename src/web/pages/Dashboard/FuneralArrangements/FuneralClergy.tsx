@@ -178,7 +178,8 @@ const FuneralClergy = () => {
       <SubCategoryTabs tabs={tabs} />
       <div className="container mx-auto px-6">
         <SubCategoryTitle
-          category="Funeral Arrangements: Clergy"
+          mainCategory="Funeral Arrangements"
+          category="Clergy"
           description="These files contain questions to help you record your details so they're easy to find later."
         />
       </div>
@@ -213,7 +214,7 @@ const FuneralClergy = () => {
                             leftLabel="Ceremony Location"
                             leftTo="/category/funeralarrangements/ceremonylocation"
                             rightLabel="Notifications"
-                            rightTo="/category/funeralarrangements/funeralnotification"
+                            rightTo="/category/funeralarrangements/notification"
                           />
                         </div>
                         <div className="mt-8">

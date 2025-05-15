@@ -12,6 +12,7 @@ import { categoryTabsConfig } from '@/data/categoryTabsConfig';
 const categoryDisplayNames: Record<string, string> = {
   homeinstructions: 'Home Instructions',
   willinstructions: 'Will & Testament',
+  funeralinstructions: 'Funeral Arrangements',
   // Add more as needed
 };
 

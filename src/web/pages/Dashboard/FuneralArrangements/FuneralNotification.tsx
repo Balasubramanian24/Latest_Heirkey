@@ -178,7 +178,8 @@ const FuneralNotification = () => {
       <SubCategoryTabs tabs={tabs} />
       <div className="container mx-auto px-6">
         <SubCategoryTitle
-          category="Funeral Arrangements: Notifications"
+          mainCategory="Funeral Arrangements"
+          category="Notifications"
           description="These files contain questions to help you record your details so they're easy to find later."
         />
       </div>
@@ -211,7 +212,7 @@ const FuneralNotification = () => {
                         <div className="mt-8 flex justify-between">
                           <SubCategoryFooterNav
                             leftLabel="Clergy"
-                            leftTo="/category/funeralarrangements/funeralclergy"
+                            leftTo="/category/funeralarrangements/clergy"
                             rightLabel="Proceedings"
                             rightTo="/category/funeralarrangements/proceedings"
                           />

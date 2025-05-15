@@ -54,6 +54,7 @@ const LocationInstructions = () => {
       <SubCategoryTabs tabs={tabs} />
       <div className="container mx-auto px-6">
         <SubCategoryTitle
+          mainCategory="Will & Testament"
           category="Location"
           description="These files contain questions to help you record your details so they're easy to find later."
         />

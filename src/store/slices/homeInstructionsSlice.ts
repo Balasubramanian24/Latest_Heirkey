@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import userInputService from '../../services/userInputService';
 import homeInstructionsData from '../../data/homeIntsructions.json';
 
@@ -247,35 +247,57 @@ const homeInstructionsSlice = createSlice({
 
 export const { updateProgressStats } = homeInstructionsSlice.actions;
 
-// Selectors
-export const selectSubcategories = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions.subcategories;
+// Basic selectors
+export const selectHomeInstructionsState = (state: { homeInstructions: HomeInstructionsState }) =>
+  state.homeInstructions;
 
-export const selectQuestions = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions.questions;
+export const selectSubcategories = createSelector(
+  [selectHomeInstructionsState],
+  (homeInstructions) => homeInstructions.subcategories
+);
 
-export const selectUserInputs = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions.userInputs;
+export const selectQuestions = createSelector(
+  [selectHomeInstructionsState],
+  (homeInstructions) => homeInstructions.questions
+);
 
-export const selectProgressStats = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions.progressStats;
+export const selectUserInputs = createSelector(
+  [selectHomeInstructionsState],
+  (homeInstructions) => homeInstructions.userInputs
+);
 
-export const selectLoading = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions.loading;
+export const selectProgressStats = createSelector(
+  [selectHomeInstructionsState],
+  (homeInstructions) => homeInstructions.progressStats
+);
 
-export const selectError = (state: { homeInstructions: HomeInstructionsState }) =>
-  state.homeInstructions.error;
+export const selectLoading = createSelector(
+  [selectHomeInstructionsState],
+  (homeInstructions) => homeInstructions.loading
+);
 
+export const selectError = createSelector(
+  [selectHomeInstructionsState],
+  (homeInstructions) => homeInstructions.error
+);
+
+// Memoized selectors with parameters
 export const selectSubcategoryById = (subcategoryId: string) =>
-  (state: { homeInstructions: HomeInstructionsState }) =>
-    state.homeInstructions.subcategories.find(subcategory => subcategory.id === subcategoryId);
+  createSelector(
+    [selectSubcategories],
+    (subcategories) => subcategories.find(subcategory => subcategory.id === subcategoryId)
+  );
 
 export const selectQuestionsBySubcategoryId = (subcategoryId: string) =>
-  (state: { homeInstructions: HomeInstructionsState }) =>
-    state.homeInstructions.questions[subcategoryId] || [];
+  createSelector(
+    [selectQuestions],
+    (questions) => questions[subcategoryId] || []
+  );
 
 export const selectUserInputsBySubcategoryId = (subcategoryId: string) =>
-  (state: { homeInstructions: HomeInstructionsState }) =>
-    state.homeInstructions.userInputs.filter(input => input.originalSubCategoryId === subcategoryId);
+  createSelector(
+    [selectUserInputs],
+    (userInputs) => userInputs.filter(input => input.originalSubCategoryId === subcategoryId)
+  );
 
 export default homeInstructionsSlice.reducer;
