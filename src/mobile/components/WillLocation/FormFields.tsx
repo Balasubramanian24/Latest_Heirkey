@@ -71,11 +71,11 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({ question, values }) 
 
       {question.type === "boolean" ? (
         <div className="flex space-x-4">
-          <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[question.id] === 'yes' ? 'bg-[#2BCFD5] text-white' : ''}`}>
+          <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[question.id] === 'yes' ? 'bg-[#2BCFD5] text-black' : ''}`}>
             <Field type="radio" name={question.id} value="yes" className="hidden" />
             Yes
           </label>
-          <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[question.id] === 'no' ? 'bg-[#2BCFD5] text-white' : ''}`}>
+          <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[question.id] === 'no' ? 'bg-[#2BCFD5] text-black' : ''}`}>
             <Field type="radio" name={question.id} value="no" className="hidden" />
             No
           </label>
