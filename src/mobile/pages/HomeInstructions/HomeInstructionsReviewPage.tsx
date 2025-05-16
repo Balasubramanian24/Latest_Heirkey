@@ -45,7 +45,8 @@ const HomeInstructionsReviewPage = () => {
   const handleEditQuestion = (questionId: string, subcategoryId: string) => {
     const route = subcategoryRoutes[subcategoryId];
     if (route) {
-      const basePath = categoryName ? `/category/${categoryName}/${route}` : `/homeinstructions/${route}`;
+      // Always use the /category prefix for consistent routing
+      const basePath = `/category/${categoryName || 'homeinstructions'}/${route}`;
       navigate(`${basePath}?questionId=${questionId}`);
     }
   };

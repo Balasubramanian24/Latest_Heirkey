@@ -70,15 +70,15 @@ interface WillInstructionsState {
 // Define initial state
 const initialState: WillInstructionsState = {
   subcategories: [
-    { 
-      id: '105-location', 
-      title: 'Location', 
-      questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0 
+    {
+      id: '105-location',
+      title: 'Location',
+      questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0
     },
-    { 
-      id: '105-legal', 
-      title: 'Legal', 
-      questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0 
+    {
+      id: '105-legal',
+      title: 'Legal',
+      questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0
     }
   ],
   questions: willInstructionsData,
@@ -285,6 +285,16 @@ export const selectFormValues = createSelector(
 export const selectProgressStats = createSelector(
   [selectWillInstructionsState],
   (willInstructions) => willInstructions.progressStats
+);
+
+export const selectLoading = createSelector(
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.loading
+);
+
+export const selectError = createSelector(
+  [selectWillInstructionsState],
+  (willInstructions) => willInstructions.error
 );
 
 export const selectQuestionsBySubcategoryId = (subcategoryId: string) =>

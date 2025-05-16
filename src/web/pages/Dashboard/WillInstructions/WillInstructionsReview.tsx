@@ -3,53 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import CategoryReviewPage from '@/web/components/Category/CategoryReviewPage';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import { useAuth } from '@/contexts/AuthContext';
-import userInputService from '@/services/userInputService';
-import willInstructionsData from '@/data/willInstructions.json';
 
-// Define interfaces for the data structure
-interface Answer {
-  index: number;
-  questionId?: string;
-  originalQuestionId: string;
-  question: string;
-  type: string;
-  answer: string;
-}
+// We're using 'any' type for API responses with detailed console logging
 
-interface SectionAnswers {
-  originalSectionId: string;
-  isCompleted: boolean;
-  answers: Answer[];
-}
-
-interface UserInput {
-  userId: string;
-  categoryId: string;
-  originalCategoryId: string;
-  subCategoryId: string;
-  originalSubCategoryId: string;
-  answersBySection: SectionAnswers[];
-}
-
-// Map subcategory IDs to their routes
-const subcategoryRoutes: Record<string, string> = {
-  '105-location': '/category/willinstructions/location',
-  '105-legal': '/category/willinstructions/legal',
-};
-
-// Map question IDs to their subcategory IDs
-const questionToSubcategoryMap: Record<string, string> = {};
-
-// Initialize the question to subcategory mapping
-Object.entries(willInstructionsData).forEach(([subcategoryId, questions]) => {
-  questions.forEach(question => {
-    // Map to our custom subcategory keys
-    let subKey = '';
-    if (question.sectionId === '105A' || question.sectionId === '105B') subKey = '105-location';
-    if (question.sectionId === '105C') subKey = '105-legal';
-    if (subKey) questionToSubcategoryMap[question.id] = subKey;
-  });
-});
+// No need for mapping tables as we're using direct navigation based on section IDs
 
 export default function WillInstructionsReview() {
   const { user } = useAuth();
@@ -80,18 +37,34 @@ export default function WillInstructionsReview() {
       }
 
       try {
-        // Fetch user inputs for the Will & Testament category (ID: 105)
-        const userInputsResponse = await userInputService.getUserInputsByUserAndCategory(user.id, '105');
-        const userInputs = userInputsResponse as Array<{
-          originalSubCategoryId: string;
-          answersBySection: Array<{
-            originalSectionId: string;
-            answers: Array<{
-              originalQuestionId: string;
-              answer: string;
-            }>;
-          }>;
-        }>;
+        // Fetch user inputs for the Will Instructions category (ID: 2)
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/v1/api'}/user-inputs?userId=${user.id}&categoryId=2`);
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("DIRECT API RESPONSE FOR WILL INSTRUCTIONS:", data);
+
+        // Ensure we're only working with Will Instructions data (category ID 2)
+        // Add more explicit filtering to exclude funeral arrangements data
+        const userInputs = Array.isArray(data)
+          ? data.filter(item => {
+              // Only include items with originalCategoryId === '2'
+              if (item.originalCategoryId !== '2') return false;
+
+              // Exclude any items that might be related to funeral arrangements
+              // Check if any section IDs start with '106' (funeral arrangements)
+              const hasFuneralSections = item.answersBySection?.some(
+                (section: any) => section.originalSectionId?.startsWith('106')
+              );
+
+              return !hasFuneralSections;
+            })
+          : [];
+
+        console.log("FILTERED WILL INSTRUCTIONS DATA:", userInputs);
 
         // Transform the data for the review page
         const allTopics: Array<{
@@ -103,34 +76,49 @@ export default function WillInstructionsReview() {
         }> = [];
 
         // Process all user inputs
-        userInputs.forEach((userInput) => {
-          // Process answers by section
-          userInput.answersBySection.forEach((section) => {
-            section.answers.forEach((answer) => {
-              // Find the original question from our data
-              const questionId = answer.originalQuestionId;
-              // Will only has one subcategory array, so search all questions
-              const allQuestions = willInstructionsData['105'];
-              const questionData = allQuestions?.find(q => q.id === questionId);
-              const subKey = questionToSubcategoryMap[questionId];
-              if (questionData) {
-                allTopics.push({
-                  id: questionId,
-                  title: questionData.text,
-                  subtitle: `Section: ${section.originalSectionId}`,
-                  data: answer.answer,
-                  onEdit: () => {
-                    // Navigate to the appropriate subcategory page with question ID as a parameter
-                    const route = subcategoryRoutes[subKey];
-                    if (route) {
-                      navigate(`${route}?questionId=${questionId}`);
-                    }
+        userInputs.forEach((userInput: any) => {
+          console.log("Processing userInput:", userInput);
+
+          // Process answers by section - only include Will Instructions sections (105A, 105B, 105C)
+          userInput.answersBySection.forEach((section: any) => {
+            console.log("Processing section:", section);
+
+            // Skip sections that aren't part of Will Instructions
+            if (!section.originalSectionId?.startsWith('105')) {
+              console.log("Skipping non-Will Instructions section:", section.originalSectionId);
+              return;
+            }
+
+            section.answers.forEach((answer: any) => {
+              console.log("Processing answer:", answer);
+
+              // Add this answer to our topics list
+              allTopics.push({
+                id: answer.originalQuestionId,
+                title: answer.question, // Use the question text directly from the answer
+                subtitle: `Section: ${section.originalSectionId}`,
+                data: answer.answer,
+                onEdit: () => {
+                  // Determine which subcategory to navigate to
+                  let route = '/category/willinstructions';
+
+                  // Location sections
+                  if (section.originalSectionId === '105A' || section.originalSectionId === '105B') {
+                    route = '/category/willinstructions/location';
                   }
-                });
-              }
+                  // Legal section
+                  else if (section.originalSectionId === '105C') {
+                    route = '/category/willinstructions/legal';
+                  }
+
+                  navigate(`${route}?questionId=${answer.originalQuestionId}`);
+                }
+              });
             });
           });
         });
+
+        console.log("FINAL TOPICS TO DISPLAY:", allTopics);
 
         setTopics(allTopics);
       } catch (err) {
@@ -162,4 +150,4 @@ export default function WillInstructionsReview() {
       onPrint={() => window.print()}
     />
   );
-} 
+}
