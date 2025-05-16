@@ -167,7 +167,7 @@ const FuneralProceedings = () => {
           userData: {
             userId: user.id,
             categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-            originalCategoryId: '2', // Funeral Arrangements category ID
+            originalCategoryId: '3', // Funeral Arrangements category ID
             subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
             originalSubCategoryId: '205E', // Proceedings subcategory ID
             answersBySection: formattedAnswersBySection
