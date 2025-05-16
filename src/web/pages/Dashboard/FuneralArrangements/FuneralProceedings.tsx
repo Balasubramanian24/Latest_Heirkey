@@ -291,22 +291,16 @@ const FuneralProceedings = () => {
                             Save & Continue
                           </Button>
                         </div>
-
-                        <div className="mt-8 flex justify-between">
-                          <SubCategoryFooterNav
-                            leftLabel="Notifications"
-                            leftTo="/category/funeralarrangements/notification"
-                            rightLabel="Review"
-                            rightTo="/category/funeralarrangements/review"
-                          />
-                        </div>
-
-                        <div className="mt-8">
-                          <GoodToKnowBox
+                        <GoodToKnowBox
                             title="Editing my Answers"
                             description="Each topic below is a part of your funeral arrangements, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
-                          />
-                        </div>
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="Notifications"
+                          leftTo="/category/funeralarrangements/notification"
+                          rightLabel="Review"
+                          rightTo="/category/funeralarrangements/review"
+                        />
                       </div>
                     </Form>
                   );

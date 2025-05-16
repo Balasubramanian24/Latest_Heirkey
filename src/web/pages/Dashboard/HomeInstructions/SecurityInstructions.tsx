@@ -308,7 +308,7 @@ const SecurityInstructions = () => {
                             disabled={isSubmitting || !isValid || !dirty}
                             className="bg-[#1ccfc9] hover:bg-[#19bbb5]"
                           >
-                            Save security information
+                            Save & Continue
                           </Button>
                         </div>
                         <GoodToKnowBox

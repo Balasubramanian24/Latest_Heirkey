@@ -30,6 +30,7 @@ import {
   selectFormValues
 } from '@/store/slices/willInstructionsSlice';
 import { generateObjectId } from '@/services/userInputService';
+import { Button } from '@/components/ui/button';
 
 const LegalInstructions = () => {
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
@@ -194,7 +195,7 @@ const LegalInstructions = () => {
                   }
                 }}
               >
-                {({ values, isSubmitting, setValues }) => {
+                {({ values, isSubmitting, setValues, isValid, dirty }) => {
                   // Function to handle field changes and clear dependent fields
                   const handleFieldChange = (fieldId: string, value: string) => {
                     // Create a new values object with the updated field
@@ -233,11 +234,20 @@ const LegalInstructions = () => {
                         </>
                       )}
                     </ScrollToQuestion>
+                    <div className="mt-8 flex justify-end">
+                          <Button
+                            type="submit"
+                            disabled={isSubmitting || !isValid || !dirty}
+                            className="bg-[#1ccfc9] hover:bg-[#19bbb5]"
+                          >
+                            Save & Continue
+                          </Button>
+                    </div>
                     <GoodToKnowBox
                       title="Editing my Answers"
                       description="Each topic below is a part of your home documents, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
                     />
-                    <div className="mt-6">
+                    {/* <div className="mt-6">
                       <button
                         type="submit"
                         disabled={isSubmitting}
@@ -245,7 +255,7 @@ const LegalInstructions = () => {
                       >
                         {isSubmitting ? 'Saving...' : 'Save and Continue'}
                       </button>
-                    </div>
+                    </div> */}
                     <SubCategoryFooterNav
                       leftLabel="Location"
                       leftTo="/category/willinstructions/location"

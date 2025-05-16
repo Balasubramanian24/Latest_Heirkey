@@ -291,22 +291,16 @@ const CeremonyLocation = () => {
                             Save & Continue
                           </Button>
                         </div>
-
-                        <div className="mt-8 flex justify-between">
-                          <SubCategoryFooterNav
-                            leftLabel="Details"
-                            leftTo="/category/funeralarrangements/details"
-                            rightLabel="Clergy"
-                            rightTo="/category/funeralarrangements/clergy"
-                          />
-                        </div>
-
-                        <div className="mt-8">
-                          <GoodToKnowBox
+                        <GoodToKnowBox
                             title="Editing my Answers"
                             description="Each topic below is a part of your funeral arrangements, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
-                          />
-                        </div>
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="Details"
+                          leftTo="/category/funeralarrangements/details"
+                          rightLabel="Clergy"
+                          rightTo="/category/funeralarrangements/clergy"
+                        />
                       </div>
                     </Form>
                   );

@@ -370,22 +370,16 @@ const FuneralNotification = () => {
                             Save & Continue
                           </Button>
                         </div>
-
-                        <div className="mt-8 flex justify-between">
-                          <SubCategoryFooterNav
-                            leftLabel="Clergy"
+                        <GoodToKnowBox
+                            title="Editing my Answers"
+                            description="Each topic below is a part of your funeral arrangements, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
+                        />
+                        <SubCategoryFooterNav
+                          leftLabel="Clergy"
                             leftTo="/category/funeralarrangements/clergy"
                             rightLabel="Proceedings"
                             rightTo="/category/funeralarrangements/proceedings"
                           />
-                        </div>
-
-                        <div className="mt-8">
-                          <GoodToKnowBox
-                            title="Editing my Answers"
-                            description="Each topic below is a part of your funeral arrangements, with questions to help you provide important information for you and your loved ones. Click any topic to answer the questions at your own pace—we'll save everything for you."
-                          />
-                        </div>
                       </div>
                     </Form>
                   );
