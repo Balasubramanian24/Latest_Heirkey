@@ -11,6 +11,7 @@ export default function Layout({ children }: LayoutProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
+  // const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <div className="flex flex-col min-h-screen">
