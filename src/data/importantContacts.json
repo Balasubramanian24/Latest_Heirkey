@@ -1,0 +1,73 @@
+{
+    "207": [
+      {
+        "id": "c1",
+        "text": "Please list any or all essential family and friends you would like contacted at the time of your death or injury.",
+        "type": "contact_list",
+        "required": false,
+        "sectionId": "207A",
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "text": "Do you have a contact at your workplace you would like to contact?",
+        "type": "boolean",
+        "required": true,
+        "sectionId": "207B",
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "text": "Please list their contact info",
+        "type": "contact_list",
+        "required": true,
+        "sectionId": "207B",
+        "order": 3,
+        "dependsOn": {
+          "questionId": "c2",
+          "value": "yes"
+        }
+      },
+      {
+        "id": "c4",
+        "text": "Do you have a Religious Affiliation to contact?",
+        "type": "boolean",
+        "required": true,
+        "sectionId": "207C",
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "text": "Name of Church",
+        "type": "text",
+        "required": true,
+        "sectionId": "207C",
+        "order": 5,
+        "dependsOn": {
+          "questionId": "c4",
+          "value": "yes"
+        }
+      },
+      {
+        "id": "c6",
+        "text": "Are you a member of any clubs that you would like notified of your death?",
+        "type": "boolean",
+        "required": true,
+        "sectionId": "207D",
+        "order": 6
+      },
+      {
+        "id": "c7",
+        "text": "Name of Organization",
+        "type": "text",
+        "required": true,
+        "sectionId": "207D",
+        "order": 7,
+        "dependsOn": {
+          "questionId": "c6",
+          "value": "yes"
+        }
+      }
+    ]
+  }
+  
