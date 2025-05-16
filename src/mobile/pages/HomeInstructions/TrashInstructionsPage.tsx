@@ -19,6 +19,8 @@ import {
   selectLoading,
   selectError
 } from '@/store/slices/homeInstructionsSlice';
+import { categoryTabsConfig } from '@/data/categoryTabsConfig';
+import { CircularProgress } from '@/components/ui/CircularProgress';
 
 const initialValues = {
   t1: "",
@@ -106,18 +108,11 @@ export default function TrashInstructionsPage() {
       <div style={{ padding: 16 }}>
         {/* Tab Bar */}
         <div className="flex gap-2 mb-4 bg-gray-50 rounded-lg p-1">
-          {["Pets", "Trash", "Other", "Security"].map(tab => {
-            // Map tab names to their routes
-            const tabRoutes: Record<string, string> = {
-              Pets: "/category/homeinstructions/pets",
-              Trash: "/category/homeinstructions/trash",
-              Other: "/category/homeinstructions/other",
-              Security: "/category/homeinstructions/security",
-            };
-            const isActive = tab === "Trash";
+          {categoryTabsConfig.homeinstructions.map(tab => {
+            const isActive = tab.label === "Trash";
             return (
               <button
-                key={tab}
+                key={tab.label}
                 type="button"
                 className={
                   "flex-1 py-2 rounded-md font-medium " +
@@ -127,10 +122,10 @@ export default function TrashInstructionsPage() {
                 }
                 disabled={isActive}
                 onClick={() => {
-                  if (!isActive) navigate(tabRoutes[tab]);
+                  if (!isActive) navigate(tab.path);
                 }}
               >
-                {tab}
+                {tab.label}
               </button>
             );
           })}
@@ -249,9 +244,13 @@ export default function TrashInstructionsPage() {
                   <p className="text-lg font-semibold">
                     Home Instructions: <span className="text-[#2BCFD5]">Trash</span>
                   </p>
-                  <div className="w-8 h-8 rounded-full bg-gray-100 text-sm flex items-center justify-center font-semibold">
-                    1/1
-                  </div>
+                  <CircularProgress 
+                    value={1} 
+                    max={1} 
+                    size={40} 
+                    stroke={3}
+                    color="#2BCFD5"
+                  />
                 </div>
               </div>
 

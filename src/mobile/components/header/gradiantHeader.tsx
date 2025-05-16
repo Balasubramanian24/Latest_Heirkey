@@ -1,5 +1,4 @@
 import { useAuth } from '@/contexts/AuthContext';
-import defaultAvatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 import { UserAvatar } from '../layout/UserAvatar';
 
 interface AuthHeaderProps {

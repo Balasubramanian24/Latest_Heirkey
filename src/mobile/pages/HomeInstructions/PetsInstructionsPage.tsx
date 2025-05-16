@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
-// import questionsData from "@/data/homeIntsructions.json";
 import { Question } from "@/mobile/components/HomeInstructions/FormFields";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
@@ -22,6 +21,8 @@ import {
   selectLoading,
   selectError
 } from '@/store/slices/homeInstructionsSlice';
+import { categoryTabsConfig } from '@/data/categoryTabsConfig';
+import { CircularProgress } from '@/components/ui/CircularProgress';
 
 
 // Utility: get visible questions based on dependencies
@@ -197,18 +198,11 @@ export default function PetsInstructionsPage() {
       <div style={{ padding: 16 }}>
         {/* Tab Bar */}
         <div className="flex gap-2 mb-4 bg-gray-50 rounded-2xl p-1">
-          {["Pets", "Trash", "Other", "Security"].map(tab => {
-            // Map tab names to their routes
-            const tabRoutes: Record<string, string> = {
-              Pets: "/category/homeinstructions/pets",
-              Trash: "/category/homeinstructions/trash",
-              Other: "/category/homeinstructions/other",
-              Security: "/category/homeinstructions/security",
-            };
-            const isActive = tab === "Pets";
+          {categoryTabsConfig.homeinstructions.map(tab => {
+            const isActive = tab.label === "Pets";
             return (
               <button
-                key={tab}
+                key={tab.label}
                 type="button"
                 className={
                   "flex-1 py-2 rounded-md font-medium " +
@@ -218,10 +212,10 @@ export default function PetsInstructionsPage() {
                 }
                 disabled={isActive}
                 onClick={() => {
-                  if (!isActive) navigate(tabRoutes[tab]);
+                  if (!isActive) navigate(tab.path);
                 }}
               >
-                {tab}
+                {tab.label}
               </button>
             );
           })}
@@ -387,9 +381,13 @@ export default function PetsInstructionsPage() {
                   <p className="text-lg font-semibold">
                     Home Instructions: <span className="text-[#2BCFD5]">Pets</span>
                   </p>
-                  <div className="w-8 h-8 rounded-full bg-gray-100 text-sm flex items-center justify-center font-semibold">
-                    {step + 1}/{steps.length}
-                  </div>
+                  <CircularProgress 
+                    value={step + 1} 
+                    max={steps.length} 
+                    size={40} 
+                    stroke={3}
+                    color="#2BCFD5"
+                  />
                 </div>
               </div>
 

@@ -1,5 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { User } from 'lucide-react';
+import defaultAvatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
 
 interface UserAvatarProps {
   user: {
@@ -16,6 +17,7 @@ export function UserAvatar({ user, className }: UserAvatarProps) {
   if (!user) {
     return (
       <Avatar className={className}>
+        <AvatarImage src={defaultAvatar} alt="Default avatar" />
         <AvatarFallback>
           <User className="h-6 w-6" />
         </AvatarFallback>
@@ -35,18 +37,18 @@ export function UserAvatar({ user, className }: UserAvatarProps) {
 
   const getImagePath = () => {
     const imagePath = user.image || user.profileImage;
-    if (!imagePath) return undefined;
+    if (!imagePath || imagePath.includes('defaultImage.jpg')) return undefined;
     return `${import.meta.env.VITE_API_URL}/uploads/${imagePath}`;
   };
 
+  const imageSrc = getImagePath() || defaultAvatar;
+
   return (
     <Avatar className={className}>
-      {(user.image || user.profileImage) ? (
-        <AvatarImage
-          src={getImagePath()}
-          alt={`${user.firstName || 'User'}'s avatar`}
-        />
-      ) : null}
+      <AvatarImage
+        src={imageSrc}
+        alt={`${user.firstName || 'User'}'s avatar`}
+      />
       <AvatarFallback>{getInitials()}</AvatarFallback>
     </Avatar>
   );
