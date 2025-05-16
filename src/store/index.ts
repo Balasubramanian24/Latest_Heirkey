@@ -1,15 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import homeInstructionsReducer from './slices/homeInstructionsSlice';
+import funeralArrangementsReducer from './slices/funeralArrangementsSlice';
 import willInstructionsReducer from './slices/willInstructionsSlice';
 
 export const store = configureStore({
   reducer: {
     homeInstructions: homeInstructionsReducer,
+    funeralArrangements: funeralArrangementsReducer,
     willInstructions: willInstructionsReducer,
   },
 });
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

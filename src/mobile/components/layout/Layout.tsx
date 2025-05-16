@@ -1,20 +1,26 @@
 import { ReactNode } from 'react';
 import Header from '@/mobile/components/layout/Header';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Static header component */}
+      {/* Header component with auth context */}
       <Header
-        isLandingPage={false}          // hardcoded value
-        isAuthenticated={false}        // hardcoded value
-        showAuthButtons={true}         // hardcoded value
-        user={null}                    // no user object
-        handleLogout={() => {}}       // empty function
+        isLandingPage={isLandingPage}
+        isAuthenticated={isAuthenticated}
+        showAuthButtons={!isAuthenticated}
+        user={user}
+        handleLogout={logout}
       />
 
       {/* Main content area */}

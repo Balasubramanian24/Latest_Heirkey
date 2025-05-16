@@ -1,37 +1,34 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Formik, Form, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
-import { Avatar } from '@radix-ui/react-avatar';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { CheckCircle2 } from 'lucide-react';
-import AppHeader from '@/web/components/Layout/AppHeader';
-import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-import SearchPanel from '@/web/pages/Global/SearchPanel';
-import { convertUserInputToFormValues, generateObjectId } from '@/services/userInputService';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { convertUserInputToFormValues, generateObjectId } from '@/services/userInputService';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
+import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
+import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
+import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
+import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
 import {
-  Question,
-  QuestionItem,
   buildValidationSchema,
   generateInitialValues,
-  handleDependentAnswers
+  handleDependentAnswers,
+  Question,
+  QuestionItem
 } from '@/web/components/HomeInstructions/FormFields';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import ScrollToQuestion from '@/web/components/HomeInstructions/ScrollToQuestion';
+import AppHeader from '@/web/components/Layout/AppHeader';
+import Footer from '@/web/components/Layout/Footer';
+import SearchPanel from '@/web/pages/Global/SearchPanel';
+import { Form, Formik, FormikHelpers } from 'formik';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import * as Yup from 'yup';
 import {
   fetchUserInputs,
   saveUserInput,
   updateUserInput,
   UserInput
 } from '../../../../store/slices/homeInstructionsSlice';
-import ScrollToQuestion from '@/web/components/HomeInstructions/ScrollToQuestion';
-import GoodToKnowBox from '@/web/components/Global/GoodToKnowBox';
-import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
-import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
-import SubCategoryTitle from '@/web/components/Global/SubCategoryTitle';
-import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
 
 const PetsInstructions = () => {
   const [savedAnswers, setSavedAnswers] = useState<Record<string, string>>({});

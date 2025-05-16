@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Avatar } from '@radix-ui/react-avatar';
 import { Progress } from '@/components/ui/progress';
@@ -9,6 +10,17 @@ import funeralArrangementsData from '@/data/funeralArrangements.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import {
+  fetchUserInputs,
+  SubCategory,
+  UserInput,
+  selectSubcategories,
+  selectUserInputs,
+  selectProgressStats,
+  selectLoading,
+  selectError
+} from '@/store/slices/funeralArrangementsSlice';
 
 const sectionTitles = {
   '205A': 'Details',
@@ -18,29 +30,29 @@ const sectionTitles = {
   '205E': 'Proceedings'
 };
 
-// Define SubCategory type
-interface SubCategory {
-  id: string;
-  title: string;
-  questionsCount: number;
-}
-
-const subcategories: SubCategory[] = Object.entries(sectionTitles).map(([sectionId, title]) => ({
-  id: sectionId,
-  title,
-  questionsCount: funeralArrangementsData['205'].filter(q => q.sectionId === sectionId).length
-}));
-
 const tabs = Object.entries(sectionTitles).map(([sectionId, title]) => ({
   label: title,
   path: `/category/funeralarrangements/${title.toLowerCase().replace(/\s/g, '')}`
 }));
 
 const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
-  const completedQuestions = 0; // Replace with real logic
-  const completionPercentage = subcategory.questionsCount > 0 
-    ? Math.round((completedQuestions / subcategory.questionsCount) * 100) 
+  // Get the user inputs from Redux state
+  const userInputs = useAppSelector(selectUserInputs);
+
+  // Calculate completed questions for this subcategory
+  const completedQuestions = userInputs.reduce((count: number, input: UserInput) => {
+    if (input.originalSubCategoryId === subcategory.id) {
+      return count + input.answersBySection.reduce(
+        (sectionCount: number, section) => sectionCount + section.answers.length, 0
+      );
+    }
+    return count;
+  }, 0);
+
+  const completionPercentage = subcategory.questionsCount > 0
+    ? Math.round((completedQuestions / subcategory.questionsCount) * 100)
     : 0;
+
   return (
     <div className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
       <div className="p-4">
@@ -58,7 +70,21 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
 
 const FuneralArrangements = () => {
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
   const params = useParams();
+
+  // Get data from Redux store
+  const subcategories = useAppSelector(selectSubcategories);
+  const progressStats = useAppSelector(selectProgressStats);
+  const loading = useAppSelector(selectLoading);
+  const error = useAppSelector(selectError);
+
+  // Fetch user inputs when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
   // Fallback user info if not authenticated
   const userInfo = {
@@ -66,21 +92,6 @@ const FuneralArrangements = () => {
     email: user?.email || 'guest@example.com',
     avatar: user?.image || avatar
   };
-
-  // Calculate overall progress
-  const progressStats = (() => {
-    const totalQuestions = funeralArrangementsData['205'].length;
-    // In a real app, you'd get this from your backend
-    const answeredQuestions = 0;
-    const completionPercentage = totalQuestions > 0 
-      ? Math.round((answeredQuestions / totalQuestions) * 100) 
-      : 0;
-    return {
-      totalQuestions,
-      answeredQuestions,
-      completionPercentage
-    };
-  })();
 
   return (
     <div className="flex flex-col pt-20 min-h-screen">
@@ -101,9 +112,9 @@ const FuneralArrangements = () => {
                 <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img 
-                  src={userInfo.avatar} 
-                  alt={userInfo.name} 
+                <img
+                  src={userInfo.avatar}
+                  alt={userInfo.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -131,9 +142,9 @@ const FuneralArrangements = () => {
                     {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
                   </span>
                 </div>
-                <Progress 
-                  value={progressStats.completionPercentage} 
-                  className="h-2" 
+                <Progress
+                  value={progressStats.completionPercentage}
+                  className="h-2"
                 />
                 {progressStats.completionPercentage === 100 && (
                   <div className="mt-2 text-center">
@@ -146,18 +157,34 @@ const FuneralArrangements = () => {
               {/* Info Box */}
               <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">How to Understand Topics</span></h2>
               <p className="text-gray-600 mb-6">
-                Each topic below is a part of your funeral arrangements, with questions to help you provide important 
+                Each topic below is a part of your funeral arrangements, with questions to help you provide important
                 information for you and your loved ones. Click on a category to answer questions at your own pace—
                 we'll save everything for you.
               </p>
+              {/* Loading state */}
+              {loading && (
+                <div className="text-center py-4">
+                  <p className="text-gray-500">Loading your funeral arrangements...</p>
+                </div>
+              )}
+
+              {/* Error state */}
+              {error && (
+                <div className="text-center py-4">
+                  <p className="text-red-500">{error}</p>
+                </div>
+              )}
+
               {/* Subcategory cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
-                {subcategories.map(subcategory => (
-                  <Link key={subcategory.id} to={`/category/funeralarrangements/${subcategory.title.toLowerCase().replace(/\s/g, '')}`} className="block">
-                    <SubCategoryCard subcategory={subcategory} />
-                  </Link>
-                ))}
-              </div>
+              {!loading && !error && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                  {subcategories.map((subcategory: SubCategory) => (
+                    <Link key={subcategory.id} to={`/category/funeralarrangements/${subcategory.title.toLowerCase().replace(/\s/g, '')}`} className="block">
+                      <SubCategoryCard subcategory={subcategory} />
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           {/* Right column - Search panel */}

@@ -34,7 +34,7 @@ const CategoryReviewPage = ({
     <div className="w-full bg-gradient-to-r from-[#4b4e7a] to-[#3ed6c5] py-7 px-0 mb-0 pt-24">
       <div className="container mx-auto flex items-center justify-between px-6">
         <div>
-          <div className="text-3xl font-bold text-white mb-1">Category: {categoryTitle}</div>
+          <div className="text-3xl font-bold text-white mb-1">Category: {categoryTitle.toUpperCase()}</div>
           <div>
             <Link to="/dashboard" className="text-white text-base opacity-90 hover:underline flex items-center">
               <span className="mr-1">←</span> Back Home
@@ -107,4 +107,4 @@ const CategoryReviewPage = ({
   </div>
 );
 
-export default CategoryReviewPage; 
+export default CategoryReviewPage;

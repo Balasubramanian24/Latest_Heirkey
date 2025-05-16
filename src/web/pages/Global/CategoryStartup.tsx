@@ -12,7 +12,7 @@ import { categoryTabsConfig } from '@/data/categoryTabsConfig';
 const categoryDisplayNames: Record<string, string> = {
   homeinstructions: 'Home Instructions',
   willinstructions: 'Will & Testament',
-  funeralinstructions: 'Funeral Arrangements',
+  funeralarrangements: 'Funeral Arrangements',
   // Add more as needed
 };
 
@@ -48,9 +48,9 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
                 <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img 
-                  src={userInfo.avatar} 
-                  alt={userInfo.name} 
+                <img
+                  src={userInfo.avatar}
+                  alt={userInfo.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -81,7 +81,7 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
           </div>
 
           <h2 className="text-2xl font-bold mb-2">
-            Category: <span className="text-[#1ccfc9]">{displayName.toUpperCase().replace(' ', ' ')}</span>
+            Category: <span className="text-[#1ccfc9]">{displayName.toUpperCase()}</span>
           </h2>
 
           {showInfo && (
@@ -113,4 +113,4 @@ export default function CategoryStartup({ category = 'Topic' }: { category?: str
       <Footer />
     </div>
   );
-} 
+}

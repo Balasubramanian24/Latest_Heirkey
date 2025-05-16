@@ -96,16 +96,19 @@ export default function UserProfile() {
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl sm:text-2xl text-gray-900">Profile Settings</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={handleLogout}
-              disabled={isLoading}
-            >
-              <LogOut size={16} />
-              Logout
-            </Button>
+            <div className="flex flex-col items-end">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 text-red-500 hover:text-red-600 hover:bg-red-50"
+                onClick={handleLogout}
+                disabled={isLoading}
+              >
+                <LogOut size={16} />
+                Logout
+              </Button>
+              <span className="text-xs text-gray-500 mt-1">Also in menu</span>
+            </div>
           </CardHeader>
 
           <CardContent>
