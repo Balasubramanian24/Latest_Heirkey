@@ -36,6 +36,12 @@ interface UserInputData {
   answersBySection: SectionAnswers[];
 }
 
+// Interface for dashboard stats
+interface CategoryStats {
+  categoryId: string;
+  answeredQuestions: number;
+}
+
 /**
  * Service for handling user input operations
  */
@@ -226,6 +232,40 @@ const userInputService = {
    */
   saveUserInput: async (data: UserInputData) => {
     return await userInputService.createUserInput(data);
+  },
+
+  /**
+   * Gets dashboard stats for a user
+   * @param userId - The ID of the user
+   * @returns Array of category stats with answered question counts
+   */
+  getDashboardStats: async (userId: string) => {
+    try {
+      const response = await api.get('/user-inputs/dashboard/stats', {
+        params: { userId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      // Try with a direct fetch call as a last resort
+      try {
+        const fetchResponse = await fetch(`/v1/api/user-inputs/dashboard/stats?userId=${userId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!fetchResponse.ok) {
+          throw new Error(`API error: ${fetchResponse.status}`);
+        }
+
+        return await fetchResponse.json();
+      } catch (fetchError) {
+        console.error('Error with direct fetch for dashboard stats:', fetchError);
+        throw fetchError;
+      }
+    }
   }
 };
 

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Avatar } from '@radix-ui/react-avatar'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import AppHeader from '@/web/components/Layout/AppHeader'
 import Footer from '@/web/components/Layout/Footer'
 import SearchPanel from '@/web/pages/Global/SearchPanel'
@@ -12,36 +12,12 @@ import contact from '@/assets/global/category/contact.jpg'
 import socialMedia from '@/assets/global/category/socialMedia.jpg'
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg'
 import { useAuth } from '@/contexts/AuthContext'
-import { useAppDispatch } from '@/store/hooks'
-import { fetchUserInputs as fetchHomeInstructionsInputs } from '@/store/slices/homeInstructionsSlice'
-import { fetchUserInputs as fetchWillInstructionsInputs } from '@/store/slices/willInstructionsSlice'
-import { fetchUserInputs as fetchFuneralArrangementsInputs } from '@/store/slices/funeralArrangementsSlice'
 import userInputService from '@/services/userInputService'
 
 // Define interfaces for the data structure
-interface Answer {
-  index: number;
-  questionId?: string;
-  originalQuestionId: string;
-  question: string;
-  type: string;
-  answer: string;
-}
-
-interface SectionAnswers {
-  originalSectionId: string;
-  isCompleted: boolean;
-  answers: Answer[];
-}
-
-interface UserInput {
-  userId: string;
-  categoryId?: string;
-  originalCategoryId: string;
-  subCategoryId?: string;
-  originalSubCategoryId: string;
-  answersBySection: SectionAnswers[];
-  _id?: string;
+interface CategoryStat {
+  categoryId: string;
+  answeredQuestions: number;
 }
 
 const CategoryCard = ({
@@ -81,82 +57,71 @@ const CategoryCard = ({
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const dispatch = useAppDispatch();
   const [categoryProgress, setCategoryProgress] = useState<Record<string, { answered: number, total: number }>>({
-    homeinstructions: { answered: 0, total: 5 },
+    homeinstructions: { answered: 0, total: 11 },
     homedocuments: { answered: 0, total: 26 },
-    willinstructions: { answered: 0, total: 3 },
-    funeralarrangements: { answered: 0, total: 12 },
+    willinstructions: { answered: 0, total: 6 },
+    funeralarrangements: { answered: 0, total: 15 },
     importantcontacts: { answered: 0, total: 12 },
     socialmedia: { answered: 0, total: 12 }
   });
   const [isLoading, setIsLoading] = useState(true);
+  const dataFetchedRef = useRef(false);
 
-  // Fetch progress data when component mounts
+  // Function to fetch progress data - wrapped in useCallback to prevent unnecessary re-renders
+  const fetchProgressData = useCallback(async () => {
+    if (!user || !user.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Fetch dashboard stats from the new optimized endpoint
+      const dashboardStats = await userInputService.getDashboardStats(user.id);
+
+      // Update progress with the stats from the backend
+      const progress = { ...categoryProgress };
+
+      // Process each category stat
+      dashboardStats.forEach((stat: CategoryStat) => {
+        // Map the categoryId to our frontend category keys
+        switch (stat.categoryId) {
+          case '1':
+            progress.homeinstructions.answered = stat.answeredQuestions;
+            break;
+          case '2':
+            progress.willinstructions.answered = stat.answeredQuestions;
+            break;
+          case '3':
+            progress.funeralarrangements.answered = stat.answeredQuestions;
+            break;
+          // Add more categories as needed
+        }
+      });
+
+      setCategoryProgress(progress);
+
+      // Mark data as fetched
+      dataFetchedRef.current = true;
+    } catch (error) {
+      console.error('Error fetching progress data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, categoryProgress]);
+
+  // Fetch data when component mounts
   useEffect(() => {
-    const fetchProgressData = async () => {
-      if (!user || !user.id) {
-        setIsLoading(false);
-        return;
-      }
+    // Prevent multiple fetches on re-renders
+    if (dataFetchedRef.current) return;
 
-      try {
-        // Fetch data for each category
-        const homeInstructionsPromise = userInputService.getUserInputsByUserAndCategory(user.id, '1');
-        const willInstructionsPromise = userInputService.getUserInputsByUserAndCategory(user.id, '2');
-        const funeralArrangementsPromise = userInputService.getUserInputsByUserAndCategory(user.id, '3');
-        // Add more categories as needed
-
-        const [homeInstructionsData, willInstructionsData, funeralArrangementsData] = await Promise.all([
-          homeInstructionsPromise,
-          willInstructionsPromise,
-          funeralArrangementsPromise
-        ]) as [UserInput[], UserInput[], UserInput[]];
-
-        // Calculate progress for each category
-        const progress = { ...categoryProgress };
-
-        // Home Instructions
-        const homeInstructionsAnswered = homeInstructionsData.reduce((total: number, input: UserInput) => {
-          return total + input.answersBySection.reduce((sectionTotal: number, section: SectionAnswers) => {
-            return sectionTotal + section.answers.length;
-          }, 0);
-        }, 0);
-        progress.homeinstructions.answered = homeInstructionsAnswered;
-
-        // Will Instructions
-        const willInstructionsAnswered = willInstructionsData.reduce((total: number, input: UserInput) => {
-          return total + input.answersBySection.reduce((sectionTotal: number, section: SectionAnswers) => {
-            return sectionTotal + section.answers.length;
-          }, 0);
-        }, 0);
-        progress.willinstructions.answered = willInstructionsAnswered;
-
-        // Funeral Arrangements
-        const funeralArrangementsAnswered = funeralArrangementsData.reduce((total: number, input: UserInput) => {
-          return total + input.answersBySection.reduce((sectionTotal: number, section: SectionAnswers) => {
-            return sectionTotal + section.answers.length;
-          }, 0);
-        }, 0);
-        progress.funeralarrangements.answered = funeralArrangementsAnswered;
-
-        setCategoryProgress(progress);
-      } catch (error) {
-        console.error('Error fetching progress data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+    // Only fetch the dashboard stats - no need to dispatch Redux actions
+    // that would fetch all user inputs
     fetchProgressData();
 
-    // Also dispatch Redux actions to update the store
-    if (user?.id) {
-      dispatch(fetchHomeInstructionsInputs(user.id));
-      dispatch(fetchWillInstructionsInputs(user.id));
-      dispatch(fetchFuneralArrangementsInputs(user.id));
-    }
-  }, [user, dispatch, categoryProgress]);
+  }, [fetchProgressData]); // Only depend on fetchProgressData
 
   // Fallback user info if not authenticated
   const userInfo = {
@@ -243,6 +208,30 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="flex-1 container mx-auto px-4 py-8">
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => {
+              dataFetchedRef.current = false;
+              fetchProgressData();
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh Progress
+              </>
+            )}
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
