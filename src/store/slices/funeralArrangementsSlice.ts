@@ -99,7 +99,7 @@ export const fetchUserInputs = createAsyncThunk<UserInput[], string>(
   'funeralArrangements/fetchUserInputs',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await userInputService.getUserInputsByCategory(userId, '2'); // '2' is the category ID for Funeral Arrangements
+      const response = await userInputService.getUserInputsByCategory(userId, '3'); // '3' is the category ID for Funeral Arrangements
       return response as UserInput[];
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user inputs';
@@ -285,4 +285,4 @@ export const selectUserInputsBySubcategoryId = (subcategoryId: string) =>
   (state: { funeralArrangements: FuneralArrangementsState }) =>
     state.funeralArrangements.userInputs.filter(input => input.originalSubCategoryId === subcategoryId);
 
-export default funeralArrangementsSlice.reducer; 
+export default funeralArrangementsSlice.reducer;
