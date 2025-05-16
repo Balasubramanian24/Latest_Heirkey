@@ -36,8 +36,8 @@ const LocationInstructions = () => {
   const dispatch = useAppDispatch();
 
   // Get questions and form values from Redux
-  const questions = useAppSelector(selectQuestionsBySubcategoryId('105-location'));
-  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105-location'));
+  const questions = useAppSelector(selectQuestionsBySubcategoryId('105B'));
+  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105B'));
   const formValues = useAppSelector(selectFormValues);
 
   const tabs = [
@@ -160,7 +160,7 @@ const LocationInstructions = () => {
                           categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                           originalCategoryId: '2', // Will Instructions category
                           subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-                          originalSubCategoryId: '105-location',
+                          originalSubCategoryId: '105B',
                           answersBySection: formattedAnswersBySection
                         }
                       }));
@@ -175,7 +175,7 @@ const LocationInstructions = () => {
                         categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                         originalCategoryId: '2', // Our manual category ID for Will Instructions
                         subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-                        originalSubCategoryId: '105-location', // Our manual subcategory ID for location
+                        originalSubCategoryId: '105B', // Our manual subcategory ID for location
                         answersBySection: formattedAnswersBySection
                       };
 

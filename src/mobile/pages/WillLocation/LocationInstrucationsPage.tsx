@@ -47,8 +47,8 @@ const LocationInstrucationsPage = () => {
   const targetQuestionId = searchParams.get('questionId');
 
   // Get data from Redux store
-  const locationQuestions = useAppSelector(selectQuestionsBySubcategoryId('105-location'));
-  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105-location'));
+  const locationQuestions = useAppSelector(selectQuestionsBySubcategoryId('105B'));
+  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105B'));
   const formValues = useAppSelector(selectFormValues);
   const loading = useAppSelector(selectLoading);
   const reduxError = useAppSelector(selectError);
@@ -200,7 +200,7 @@ const LocationInstrucationsPage = () => {
                   categoryId: generateObjectId(), // Generate a MongoDB compatible ID
                   originalCategoryId: '2', // Will Instructions category ID
                   subCategoryId: generateObjectId(), // Generate a MongoDB compatible ID
-                  originalSubCategoryId: '105-location',
+                  originalSubCategoryId: '105B',
                   answersBySection
                 };
 

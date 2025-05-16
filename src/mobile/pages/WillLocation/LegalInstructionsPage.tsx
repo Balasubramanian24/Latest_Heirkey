@@ -46,8 +46,8 @@ const LegalInstructionsPage = () => {
   const targetQuestionId = searchParams.get('questionId');
 
   // Get data from Redux store
-  const legalQuestions = useAppSelector(selectQuestionsBySubcategoryId('105-legal'));
-  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105-legal'));
+  const legalQuestions = useAppSelector(selectQuestionsBySubcategoryId('105A'));
+  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105A'));
   const formValues = useAppSelector(selectFormValues);
   const loading = useAppSelector(selectLoading);
   const reduxError = useAppSelector(selectError);
@@ -171,7 +171,7 @@ const LegalInstructionsPage = () => {
                   categoryId: generateObjectId(), // Generate a MongoDB compatible ID
                   originalCategoryId: '2', // Will Instructions category ID
                   subCategoryId: generateObjectId(), // Generate a MongoDB compatible ID
-                  originalSubCategoryId: '105-legal',
+                  originalSubCategoryId: '105A',
                   answersBySection
                 };
 
