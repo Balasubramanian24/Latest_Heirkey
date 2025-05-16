@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import userInputService from '../../services/userInputService';
 import funeralArrangementsData from '../../data/funeralArrangements.json';
 
-// Define types for our state
+// Define types for our state..
 export interface SubCategory {
   id: string;
   title: string;

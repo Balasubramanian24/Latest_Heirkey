@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@r
 import userInputService from '../../services/userInputService';
 import willInstructionsData from '../../data/willInstructions.json';
 
-// Define types for our state
+// Define types for our state..
 export interface SubCategory {
   id: string;
   title: string;
