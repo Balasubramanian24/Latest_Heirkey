@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Avatar } from '@radix-ui/react-avatar'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import AppHeader from '@/web/components/Layout/AppHeader'
 import Footer from '@/web/components/Layout/Footer'
 import SearchPanel from '@/web/pages/Global/SearchPanel'
@@ -11,29 +12,43 @@ import contact from '@/assets/global/category/contact.jpg'
 import socialMedia from '@/assets/global/category/socialMedia.jpg'
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg'
 import { useAuth } from '@/contexts/AuthContext'
+import userInputService from '@/services/userInputService'
 
-const CategoryCard = ({ 
-  title, 
-  imageSrc, 
-  questionCount, 
-  path 
-}: { 
-  title: string; 
-  imageSrc: string; 
-  questionCount: string; 
+// Define interfaces for the data structure
+interface CategoryStat {
+  categoryId: string;
+  answeredQuestions: number;
+}
+
+const CategoryCard = ({
+  title,
+  imageSrc,
+  questionCount,
+  path,
+  isCompleted = false
+}: {
+  title: string;
+  imageSrc: string;
+  questionCount: string;
   path: string;
+  isCompleted?: boolean;
 }) => {
   return (
     <div className="relative flex flex-col rounded-lg overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
+      {isCompleted && (
+        <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+          Completed
+        </div>
+      )}
       <Link to={path} className="block">
-        <img 
-          src={imageSrc} 
-          alt={title} 
+        <img
+          src={imageSrc}
+          alt={title}
           className="w-full h-40 object-cover"
         />
         <div className="p-4">
           <h3 className="font-medium">{title}</h3>
-          <span className="text-sm text-blue-400">{questionCount}</span>
+          <span className={`text-sm ${isCompleted ? 'text-green-500' : 'text-blue-400'}`}>{questionCount}</span>
         </div>
       </Link>
     </div>
@@ -42,50 +57,121 @@ const CategoryCard = ({
 
 const Dashboard = () => {
   const { user } = useAuth();
-  
+  const [categoryProgress, setCategoryProgress] = useState<Record<string, { answered: number, total: number }>>({
+    homeinstructions: { answered: 0, total: 11 },
+    homedocuments: { answered: 0, total: 26 },
+    willinstructions: { answered: 0, total: 6 },
+    funeralarrangements: { answered: 0, total: 15 },
+    importantcontacts: { answered: 0, total: 12 },
+    socialmedia: { answered: 0, total: 12 }
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const dataFetchedRef = useRef(false);
+
+  // Function to fetch progress data - wrapped in useCallback to prevent unnecessary re-renders
+  const fetchProgressData = useCallback(async () => {
+    if (!user || !user.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Fetch dashboard stats from the new optimized endpoint
+      const dashboardStats = await userInputService.getDashboardStats(user.id);
+
+      // Update progress with the stats from the backend
+      const progress = { ...categoryProgress };
+
+      // Process each category stat
+      dashboardStats.forEach((stat: CategoryStat) => {
+        // Map the categoryId to our frontend category keys
+        switch (stat.categoryId) {
+          case '1':
+            progress.homeinstructions.answered = stat.answeredQuestions;
+            break;
+          case '2':
+            progress.willinstructions.answered = stat.answeredQuestions;
+            break;
+          case '3':
+            progress.funeralarrangements.answered = stat.answeredQuestions;
+            break;
+          // Add more categories as needed
+        }
+      });
+
+      setCategoryProgress(progress);
+
+      // Mark data as fetched
+      dataFetchedRef.current = true;
+    } catch (error) {
+      console.error('Error fetching progress data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, categoryProgress]);
+
+  // Fetch data when component mounts
+  useEffect(() => {
+    // Prevent multiple fetches on re-renders
+    if (dataFetchedRef.current) return;
+
+    // Only fetch the dashboard stats - no need to dispatch Redux actions
+    // that would fetch all user inputs
+    fetchProgressData();
+
+  }, [fetchProgressData]); // Only depend on fetchProgressData
+
   // Fallback user info if not authenticated
   const userInfo = {
     name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Guest',
     email: user?.email || 'guest@example.com',
     avatar: user?.image || avatar
   }
-  
+
   const categories = [
     {
       title: 'Home Instructions',
       imageSrc: home,
-      questionCount: '0/5 questions',
-      path: '/category/homeinstructions'
+      questionCount: `${categoryProgress.homeinstructions.answered}/${categoryProgress.homeinstructions.total} questions`,
+      path: '/category/homeinstructions',
+      isCompleted: categoryProgress.homeinstructions.answered >= categoryProgress.homeinstructions.total
     },
     {
       title: 'Home Documents',
       imageSrc: documents,
-      questionCount: '0/26 questions',
-      path: '/category/homedocuments'
+      questionCount: `${categoryProgress.homedocuments.answered}/${categoryProgress.homedocuments.total} questions`,
+      path: '/category/homedocuments',
+      isCompleted: categoryProgress.homedocuments.answered >= categoryProgress.homedocuments.total
     },
     {
       title: 'Will Location',
       imageSrc: will,
-      questionCount: '0/3 questions',
-      path: '/category/willinstructions'
+      questionCount: `${categoryProgress.willinstructions.answered}/${categoryProgress.willinstructions.total} questions`,
+      path: '/category/willinstructions',
+      isCompleted: categoryProgress.willinstructions.answered >= categoryProgress.willinstructions.total
     },
     {
       title: 'Funeral Arrangements',
       imageSrc: funeral,
-      questionCount: '0/12',
-      path: '/category/funeralarrangements'
+      questionCount: `${categoryProgress.funeralarrangements.answered}/${categoryProgress.funeralarrangements.total} questions`,
+      path: '/category/funeralarrangements',
+      isCompleted: categoryProgress.funeralarrangements.answered >= categoryProgress.funeralarrangements.total
     },
     {
       title: 'Important Contacts',
       imageSrc: contact,
-      questionCount: '0/12',
-      path: '/category/importantcontacts'
+      questionCount: `${categoryProgress.importantcontacts.answered}/${categoryProgress.importantcontacts.total} questions`,
+      path: '/category/importantcontacts',
+      isCompleted: categoryProgress.importantcontacts.answered >= categoryProgress.importantcontacts.total
     },
     {
       title: 'Social Media',
       imageSrc: socialMedia,
-      questionCount: '0/12',
-      path: '/category/socialmedia'
+      questionCount: `${categoryProgress.socialmedia.answered}/${categoryProgress.socialmedia.total} questions`,
+      path: '/category/socialmedia',
+      isCompleted: categoryProgress.socialmedia.answered >= categoryProgress.socialmedia.total
     }
   ]
 
@@ -107,9 +193,9 @@ const Dashboard = () => {
                 <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img 
-                  src={userInfo.avatar} 
-                  alt={userInfo.name} 
+                <img
+                  src={userInfo.avatar}
+                  alt={userInfo.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -122,18 +208,49 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="flex-1 container mx-auto px-4 py-8">
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => {
+              dataFetchedRef.current = false;
+              fetchProgressData();
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh Progress
+              </>
+            )}
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {categories.map((category, index) => (
-                <CategoryCard 
-                  key={index}
-                  title={category.title}
-                  imageSrc={category.imageSrc}
-                  questionCount={category.questionCount}
-                  path={category.path}
-                />
-              ))}
+              {isLoading ? (
+                <div className="col-span-2 flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#2BCFD5]"></div>
+                </div>
+              ) : (
+                categories.map((category, index) => (
+                  <CategoryCard
+                    key={index}
+                    title={category.title}
+                    imageSrc={category.imageSrc}
+                    questionCount={category.questionCount}
+                    path={category.path}
+                    isCompleted={category.isCompleted}
+                  />
+                ))
+              )}
             </div>
           </div>
 

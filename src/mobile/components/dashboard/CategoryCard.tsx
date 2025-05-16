@@ -9,6 +9,7 @@ interface CategoryCardProps {
   description: string;
   imageUrl: string;
   questionCount: number;
+  totalQuestions?: number; // Make it optional for backward compatibility
   isCompleted: boolean;
   index: number;
   onClick: () => void;
@@ -19,6 +20,7 @@ export default function CategoryCard({
   description,
   imageUrl,
   questionCount,
+  totalQuestions = 0, // Default to 0 if not provided
   isCompleted,
   index,
   onClick,
@@ -53,7 +55,7 @@ export default function CategoryCard({
             <h3 className="font-semibold text-base text-secondary-900">
               {name}
             </h3>
-            <span className="text-xs text-primary">{questionCount} Qs</span>
+            <span className="text-xs text-primary">{questionCount}/{totalQuestions} Qs</span>
           </div>
           <p className="text-sm text-muted-foreground">{description}</p>
         </CardContent>

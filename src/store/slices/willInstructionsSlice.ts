@@ -71,12 +71,12 @@ interface WillInstructionsState {
 const initialState: WillInstructionsState = {
   subcategories: [
     {
-      id: '105-location',
+      id: '105B',
       title: 'Location',
       questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0
     },
     {
-      id: '105-legal',
+      id: '105A',
       title: 'Legal',
       questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0
     }
@@ -301,9 +301,9 @@ export const selectQuestionsBySubcategoryId = (subcategoryId: string) =>
   createSelector(
     [selectQuestions],
     (questions) => {
-      if (subcategoryId === '105-location') {
+      if (subcategoryId === '105B') {
         return questions['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B') || [];
-      } else if (subcategoryId === '105-legal') {
+      } else if (subcategoryId === '105A') {
         return questions['105']?.filter(q => q.sectionId === '105C') || [];
       }
       return [];

@@ -194,7 +194,7 @@ const FuneralNotification = () => {
             userData: {
               userId: user.id,
               categoryId: generateObjectId(),
-              originalCategoryId: '2', // Funeral Arrangements category ID
+              originalCategoryId: '3', // Funeral Arrangements category ID
               subCategoryId: generateObjectId(),
               originalSubCategoryId: '205D', // Notification subcategory ID
               answersBySection: sanitizedAnswersBySection
@@ -211,7 +211,7 @@ const FuneralNotification = () => {
               },
               body: JSON.stringify({
                 userId: user.id,
-                originalCategoryId: '2',
+                originalCategoryId: '3',
                 originalSubCategoryId: '205D',
                 answersBySection: sanitizedAnswersBySection
               }),
@@ -229,7 +229,7 @@ const FuneralNotification = () => {
         const userData: Omit<UserInput, '_id'> = {
           userId: user.id,
           categoryId: generateObjectId(),
-          originalCategoryId: '2', // Funeral Arrangements category ID
+          originalCategoryId: '3', // Funeral Arrangements category ID
           subCategoryId: generateObjectId(),
           originalSubCategoryId: '205D', // Notification subcategory ID
           answersBySection: sanitizedAnswersBySection
@@ -250,7 +250,7 @@ const FuneralNotification = () => {
               },
               body: JSON.stringify({
                 userId: user.id,
-                originalCategoryId: '2',
+                originalCategoryId: '3',
                 originalSubCategoryId: '205D',
                 answersBySection: sanitizedAnswersBySection
               }),

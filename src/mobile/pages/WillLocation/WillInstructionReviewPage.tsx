@@ -18,8 +18,8 @@ interface ReviewItem {
 
 // Map subcategory IDs to their routes
 // const subcategoryRoutes: Record<string, string> = {
-//   '105-location': '/category/willinstructions/location',
-//   '105-legal': '/category/willinstructions/legal',
+//   '105B': '/category/willinstructions/location',
+//   '105A': '/category/willinstructions/legal',
 // };
 
 // Map question IDs to their subcategory IDs
@@ -30,8 +30,8 @@ Object.entries(willInstructionsData).forEach(([_, questions]) => {
   questions.forEach(question => {
     // Map to our custom subcategory keys
     let subKey = '';
-    if (question.sectionId === '105A' || question.sectionId === '105B') subKey = '105-location';
-    if (question.sectionId === '105C') subKey = '105-legal';
+    if (question.sectionId === '105A' || question.sectionId === '105B') subKey = '105B';
+    if (question.sectionId === '105C') subKey = '105A';
     if (subKey) questionToSubcategoryMap[question.id] = subKey;
   });
 });

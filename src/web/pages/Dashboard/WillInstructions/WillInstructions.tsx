@@ -21,12 +21,12 @@ interface SubCategory {
 // Define subcategories for Will & Testament
 const subcategories: SubCategory[] = [
   {
-    id: '105-location',
+    id: '105B',
     title: 'Location',
     questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0
   },
   {
-    id: '105-legal',
+    id: '105A',
     title: 'Legal',
     questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0
   }

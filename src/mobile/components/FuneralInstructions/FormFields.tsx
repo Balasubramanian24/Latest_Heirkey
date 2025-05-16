@@ -1,7 +1,6 @@
 import React from 'react';
 import { Field } from 'formik';
 
-
 export interface Question {
   id: string;
   text: string;
@@ -76,17 +75,47 @@ export const calculateProgress = (questions: Question[], values: Record<string, 
   };
 };
 
+// This function handles cleaning up answers when a parent question's value changes
+export const handleDependentAnswers = (
+  values: Record<string, any>,
+  questions: Question[],
+  setValues: (values: Record<string, any>) => void
+) => {
+  let needsUpdate = false;
+  const newValues = { ...values };
+
+  // Find questions that depend on the changed answer
+  questions.forEach(question => {
+    if (question.dependsOn) {
+      const parentValue = values[question.dependsOn.questionId];
+      const shouldClear = parentValue !== question.dependsOn.value && values[question.id] !== '';
+
+      if (shouldClear) {
+        // If the parent value doesn't match the required condition, clear the dependent answer
+        newValues[question.id] = '';
+        needsUpdate = true;
+      }
+    }
+  });
+
+  // Only call setValues if we actually made changes
+  if (needsUpdate) {
+    setValues(newValues);
+  }
+};
+
 interface QuestionItemProps {
   question: Question;
   values: Record<string, any>;
 }
 
 export const QuestionItem: React.FC<QuestionItemProps> = ({ question, values }) => {
-  if (question.dependsOn) {
-    const dependentValue = values[question.dependsOn.questionId];
-    if (dependentValue !== question.dependsOn.value) {
-      return null;
-    }
+  // Check if this question should be shown based on dependencies
+  const shouldShow = !question.dependsOn ||
+    (values[question.dependsOn.questionId]?.toString().toLowerCase() === question.dependsOn.value.toLowerCase());
+
+  if (!shouldShow) {
+    return null;
   }
 
   return (

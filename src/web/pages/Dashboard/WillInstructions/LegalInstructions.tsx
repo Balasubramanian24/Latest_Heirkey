@@ -36,8 +36,8 @@ const LegalInstructions = () => {
   const dispatch = useAppDispatch();
 
   // Get questions and form values from Redux
-  const questions = useAppSelector(selectQuestionsBySubcategoryId('105-legal'));
-  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105-legal'));
+  const questions = useAppSelector(selectQuestionsBySubcategoryId('105A'));
+  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105A'));
   const formValues = useAppSelector(selectFormValues);
 
   const tabs = [
@@ -147,7 +147,7 @@ const LegalInstructions = () => {
                           categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                           originalCategoryId: '2', // Will Instructions category
                           subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-                          originalSubCategoryId: '105-legal',
+                          originalSubCategoryId: '105A',
                           answersBySection: formattedAnswersBySection
                         }
                       }));
@@ -162,7 +162,7 @@ const LegalInstructions = () => {
                         categoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
                         originalCategoryId: '2', // Our manual category ID for Will Instructions
                         subCategoryId: generateObjectId(), // Generate a valid MongoDB ObjectId
-                        originalSubCategoryId: '105-legal', // Our manual subcategory ID for legal
+                        originalSubCategoryId: '105A', // Our manual subcategory ID for legal
                         answersBySection: formattedAnswersBySection
                       };
 

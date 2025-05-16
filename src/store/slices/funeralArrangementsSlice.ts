@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import userInputService from '../../services/userInputService';
 import funeralArrangementsData from '../../data/funeralArrangements.json';
 
@@ -99,7 +99,7 @@ export const fetchUserInputs = createAsyncThunk<UserInput[], string>(
   'funeralArrangements/fetchUserInputs',
   async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await userInputService.getUserInputsByCategory(userId, '2'); // '2' is the category ID for Funeral Arrangements
+      const response = await userInputService.getUserInputsByCategory(userId, '3'); // '3' is the category ID for Funeral Arrangements
       return response as UserInput[];
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user inputs';
@@ -254,35 +254,58 @@ const funeralArrangementsSlice = createSlice({
 
 export const { updateProgressStats } = funeralArrangementsSlice.actions;
 
-// Selectors
-export const selectSubcategories = (state: { funeralArrangements: FuneralArrangementsState }) =>
-  state.funeralArrangements.subcategories;
+// Basic selector
+export const selectFuneralArrangementsState = (state: { funeralArrangements: FuneralArrangementsState }) =>
+  state.funeralArrangements;
 
-export const selectQuestions = (state: { funeralArrangements: FuneralArrangementsState }) =>
-  state.funeralArrangements.questions;
+// Memoized selectors
+export const selectSubcategories = createSelector(
+  [selectFuneralArrangementsState],
+  (funeralArrangements) => funeralArrangements.subcategories
+);
 
-export const selectUserInputs = (state: { funeralArrangements: FuneralArrangementsState }) =>
-  state.funeralArrangements.userInputs;
+export const selectQuestions = createSelector(
+  [selectFuneralArrangementsState],
+  (funeralArrangements) => funeralArrangements.questions
+);
 
-export const selectProgressStats = (state: { funeralArrangements: FuneralArrangementsState }) =>
-  state.funeralArrangements.progressStats;
+export const selectUserInputs = createSelector(
+  [selectFuneralArrangementsState],
+  (funeralArrangements) => funeralArrangements.userInputs
+);
 
-export const selectLoading = (state: { funeralArrangements: FuneralArrangementsState }) =>
-  state.funeralArrangements.loading;
+export const selectProgressStats = createSelector(
+  [selectFuneralArrangementsState],
+  (funeralArrangements) => funeralArrangements.progressStats
+);
 
-export const selectError = (state: { funeralArrangements: FuneralArrangementsState }) =>
-  state.funeralArrangements.error;
+export const selectLoading = createSelector(
+  [selectFuneralArrangementsState],
+  (funeralArrangements) => funeralArrangements.loading
+);
 
+export const selectError = createSelector(
+  [selectFuneralArrangementsState],
+  (funeralArrangements) => funeralArrangements.error
+);
+
+// Memoized selectors with parameters
 export const selectSubcategoryById = (subcategoryId: string) =>
-  (state: { funeralArrangements: FuneralArrangementsState }) =>
-    state.funeralArrangements.subcategories.find(subcategory => subcategory.id === subcategoryId);
+  createSelector(
+    [selectSubcategories],
+    (subcategories) => subcategories.find(subcategory => subcategory.id === subcategoryId)
+  );
 
 export const selectQuestionsBySubcategoryId = (subcategoryId: string) =>
-  (state: { funeralArrangements: FuneralArrangementsState }) =>
-    state.funeralArrangements.questions[subcategoryId] || [];
+  createSelector(
+    [selectQuestions],
+    (questions) => questions[subcategoryId] || []
+  );
 
 export const selectUserInputsBySubcategoryId = (subcategoryId: string) =>
-  (state: { funeralArrangements: FuneralArrangementsState }) =>
-    state.funeralArrangements.userInputs.filter(input => input.originalSubCategoryId === subcategoryId);
+  createSelector(
+    [selectUserInputs],
+    (userInputs) => userInputs.filter(input => input.originalSubCategoryId === subcategoryId)
+  );
 
-export default funeralArrangementsSlice.reducer; 
+export default funeralArrangementsSlice.reducer;

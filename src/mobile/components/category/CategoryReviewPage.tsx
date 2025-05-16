@@ -32,14 +32,15 @@ const CategoryReviewPage = ({
 
   return (
     <>
-      <GradiantHeader title="Current Category"
-       showAvatar={true}
+      <GradiantHeader
+        title={categoryTitle || "Current Category"}
+        showAvatar={true}
       />
 
       {/* Main Content */}
       <div className="px-4 py-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">My Category Details</h2>
+          <h2 className="text-xl font-bold">{categoryTitle ? `${categoryTitle} Details` : "My Category Details"}</h2>
           <Button
             variant="outline"
             size="sm"
@@ -58,8 +59,8 @@ const CategoryReviewPage = ({
               <div className="font-semibold text-[#4b4e7a] text-sm">{infoTitle}</div>
               <div className="text-[#555] text-xs">{infoDescription}</div>
             </div>
-            <button 
-              className="text-[#888] hover:text-[#222] text-lg" 
+            <button
+              className="text-[#888] hover:text-[#222] text-lg"
               onClick={() => setInfoVisible(false)}
             >
               ×
@@ -99,4 +100,4 @@ const CategoryReviewPage = ({
   );
 };
 
-export default CategoryReviewPage; 
+export default CategoryReviewPage;
