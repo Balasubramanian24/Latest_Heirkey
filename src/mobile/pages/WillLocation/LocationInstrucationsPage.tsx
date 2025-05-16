@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { categoryTabsConfig } from "@/data/categoryTabsConfig";
 import { CircularProgress } from "@/components/ui/CircularProgress";
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
 import {
   fetchUserInputs,
   saveUserInput,
@@ -21,6 +19,7 @@ import {
   selectError
 } from '@/store/slices/willInstructionsSlice';
 import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import { categoryTabsConfig } from '@/data/categoryTabsConfig';
 
 interface Question {
   id: string;
@@ -67,9 +66,9 @@ const LocationInstrucationsPage = () => {
   const [existingInputId, setExistingInputId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const hasSetInitialStep = useRef(false);
+  const location = useLocation();
 
   // Get questionId from URL query parameters
-  const location = window.location;
   const searchParams = new URLSearchParams(location.search);
   const targetQuestionId = searchParams.get('questionId');
 
@@ -79,9 +78,6 @@ const LocationInstrucationsPage = () => {
   const formValues = useAppSelector(selectFormValues);
   const loading = useAppSelector(selectLoading);
   const reduxError = useAppSelector(selectError);
-
-  const tabs = categoryTabsConfig[categoryName as keyof typeof categoryTabsConfig] || [];
-  const currentPath = `/category/${categoryName}/location`;
 
   // Fetch user inputs when component mounts
   useEffect(() => {
@@ -119,46 +115,38 @@ const LocationInstrucationsPage = () => {
     <div className="min-h-screen bg-white">
       <GradiantHeader
         showAvatar={true}
-        title="Will Location"
+        title="Will Instructions"
       />
       <div className="container mx-auto px-4 py-6">
+        <div className="flex mb-4 p-4">
+          {((categoryTabsConfig as Record<string, { label: string; path: string }[]>)[categoryName || "willinstructions"] || []).map((tab) => {
+            const isActive = tab.path === location.pathname;
+            return (
+              <button
+                key={tab.label}
+                type="button"
+                className={
+                  "flex-1 py-2 rounded-md font-medium bg-gray-100 " +
+                  (isActive
+                    ? "bg-white text-[#2BCFD5] border border-[#2BCFD5]"
+                    : "text-gray-500")
+                }
+                disabled={isActive}
+                onClick={() => {
+                  if (!isActive) navigate(tab.path);
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
         <div className="max-w-md mx-auto space-y-6">
-          <div className="flex gap-2 mb-4 bg-gray-50 rounded-md p-1">
-            {tabs.map(tab => {
-              const isActive = currentPath === tab.path;
-              return (
-                <button
-                  key={tab.label}
-                  type="button"
-                  className={
-                    "flex-1 py-2 rounded-md font-medium " +
-                    (isActive
-                      ? "bg-white text-[#2BCFD5] border border-[#2BCFD5] shadow"
-                      : "text-gray-500")
-                  }
-                  disabled={isActive}
-                  onClick={() => {
-                    if (!isActive) navigate(tab.path);
-                  }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-          {/* Stepper Tabs */}
           {/* Show error message if any */}
           {(error || reduxError) && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error || reduxError}</AlertDescription>
             </Alert>
-          )}
-
-          {/* Show loading indicator */}
-          {loading && (
-            <div className="flex justify-center my-4">
-              <Loader2 className="h-8 w-8 animate-spin text-[#2BCFD5]" />
-            </div>
           )}
 
           <Formik
