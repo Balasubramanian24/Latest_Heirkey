@@ -208,7 +208,7 @@ const LocationInstructions = () => {
                   }
                 }}
               >
-                {({ values, isSubmitting, setValues, isValid, dirty }) => {
+                {({ values, isSubmitting, setValues }) => {
                   // Function to handle field changes and clear dependent fields
                   const handleFieldChange = (fieldId: string, value: string) => {
                     // Create a new values object with the updated field
@@ -247,13 +247,13 @@ const LocationInstructions = () => {
                         </>
                       )}
                     </ScrollToQuestion>
-                    <div className="mt-8 flex justify-end">
+                    <div className="mt-8 flex justify-center">
                           <Button
                             type="submit"
-                            disabled={isSubmitting || !isValid || !dirty}
-                            className="bg-[#1ccfc9] hover:bg-[#19bbb5]"
+                            disabled={isSubmitting}
+                            className="bg-[#1ccfc9] hover:bg-[#19bbb5] text-white px-6 py-2 rounded-lg font-semibold w-full"
                           >
-                            Save & Continue
+                            {isSubmitting ? 'Saving...' : 'Save & Continue'}
                           </Button>
                     </div>
                     <GoodToKnowBox
