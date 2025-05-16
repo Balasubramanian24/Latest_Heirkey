@@ -1,52 +1,81 @@
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Input } from "@/components/ui/input";
+
 interface WebRegisterProps {
   onToggle: (mode: 'register' | 'login') => void;
 }
 
+// Define the registration form schema with zod
+const registerSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /[!@#$%^&*(),.?":{}|<>]/,
+      "Password must contain at least one special character"
+    ),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
 export default function WebRegister({ onToggle }: WebRegisterProps) {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-
-  const { register, isLoading } = useAuth();
+  const { register: registerUser, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const hasValidPassword = password.length >= 8 && /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  const passwordsMatch = password === confirmPassword && password !== '';
+  // Initialize react-hook-form with zod validation
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      confirmPassword: "",
+    },
+    mode: "onChange", // Validate on change for better UX with password requirements
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
+  const hasValidPassword = password.length >= 8 && /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const passwordsMatch = password === confirmPassword && password !== "";
+
+  const onSubmit = async (data: RegisterFormValues) => {
     setError(null);
 
-    if (!hasValidPassword || !passwordsMatch) {
-      setError("Please ensure your password meets all requirements.");
-      toast({
-        title: "Registration failed",
-        description: "Please ensure your password meets all requirements.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      await register({
-        username,
-        email,
-        password,
-        firstName: firstName || undefined,
-        lastName: lastName || undefined
+      await registerUser({
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName || undefined,
+        lastName: data.lastName || undefined,
       });
       toast({
         title: "Registration successful",
@@ -74,7 +103,7 @@ export default function WebRegister({ onToggle }: WebRegisterProps) {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -83,73 +112,75 @@ export default function WebRegister({ onToggle }: WebRegisterProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Username</label>
-        <input
+        <Input
           type="text"
           placeholder="Enter your username"
-          className="w-full mt-1 p-2 border rounded-md text-sm"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
+          className={`w-full mt-1 p-2 text-sm ${errors.username ? 'border-red-500' : ''}`}
+          {...register("username")}
         />
+        {errors.username && (
+          <p className="mt-1 text-sm text-red-500">{errors.username.message}</p>
+        )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Email</label>
-        <input
+        <Input
           type="email"
           placeholder="Enter your email"
-          className="w-full mt-1 p-2 border rounded-md text-sm"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          className={`w-full mt-1 p-2 text-sm ${errors.email ? 'border-red-500' : ''}`}
+          {...register("email")}
         />
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+        )}
       </div>
 
       <div className="flex gap-2">
         <div className="w-1/2">
           <label className="block text-sm font-medium text-gray-700">First Name</label>
-          <input
+          <Input
             type="text"
             placeholder="First name"
-            className="w-full mt-1 p-2 border rounded-md text-sm"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full mt-1 p-2 text-sm"
+            {...register("firstName")}
           />
         </div>
         <div className="w-1/2">
           <label className="block text-sm font-medium text-gray-700">Last Name</label>
-          <input
+          <Input
             type="text"
             placeholder="Last name"
-            className="w-full mt-1 p-2 border rounded-md text-sm"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            className="w-full mt-1 p-2 text-sm"
+            {...register("lastName")}
           />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Password</label>
-        <input
+        <Input
           type="password"
           placeholder="Create a password"
-          className="w-full mt-1 p-2 border rounded-md text-sm"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          className={`w-full mt-1 p-2 text-sm ${errors.password ? 'border-red-500' : ''}`}
+          {...register("password")}
         />
+        {errors.password && (
+          <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+        )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-        <input
+        <Input
           type="password"
           placeholder="Confirm your password"
-          className="w-full mt-1 p-2 border rounded-md text-sm"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
+          className={`w-full mt-1 p-2 text-sm ${errors.confirmPassword ? 'border-red-500' : ''}`}
+          {...register("confirmPassword")}
         />
+        {errors.confirmPassword && (
+          <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
+        )}
       </div>
 
       <div className="space-y-2 text-sm bg-gray-50 p-4 rounded-lg">
@@ -178,7 +209,7 @@ export default function WebRegister({ onToggle }: WebRegisterProps) {
       <Button
         type="submit"
         className="w-full bg-[#2BCFD5] hover:bg-[#25b6ba] text-white text-sm"
-        disabled={!hasValidPassword || !passwordsMatch || isLoading}
+        disabled={!isValid || isLoading}
       >
         {isLoading ? (
           <>
@@ -199,8 +230,9 @@ export default function WebRegister({ onToggle }: WebRegisterProps) {
 
       <p className="text-center text-sm mt-4">
         Already have an account?{" "}
-        <button 
-          onClick={() => onToggle('login')} 
+        <button
+          type="button"
+          onClick={() => onToggle('login')}
           className="text-[#2BCFD5] cursor-pointer hover:text-[#22BBCC]"
         >
           Log in

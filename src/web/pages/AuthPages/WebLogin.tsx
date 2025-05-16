@@ -1,40 +1,53 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Input } from "@/components/ui/input";
+
+// Define the login form schema with zod
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function WebLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
 
-  // Update form mode based on current route
-  const [isRegister, setIsRegister] = useState(false);
-
-  useEffect(() => {
-    const path = location.pathname;
-    setIsRegister(path.includes('/register'));
-  }, [location.pathname]);
+  // Initialize react-hook-form with zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onBlur", // Validate on blur for better UX
+  });
 
   const handleToggle = (mode: 'register' | 'login') => {
-    setIsRegister(mode === 'register');
     navigate(mode === 'register' ? '/auth/register' : '/auth/login');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormValues) => {
     setError(null);
 
     try {
-      await login({ email, password });
+      await login({ email: data.email, password: data.password });
       toast({
         title: "Login successful",
         description: "You have been logged in successfully",
@@ -61,7 +74,7 @@ export default function WebLogin() {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -70,26 +83,28 @@ export default function WebLogin() {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Email</label>
-        <input
+        <Input
           type="email"
           placeholder="Enter your email"
-          className="w-full mt-1 p-2 border rounded-md text-sm"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          className={`w-full mt-1 p-2 text-sm ${errors.email ? 'border-red-500' : ''}`}
+          {...register("email")}
         />
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+        )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Password</label>
-        <input
+        <Input
           type="password"
           placeholder="Enter your password"
-          className="w-full mt-1 p-2 border rounded-md text-sm"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          className={`w-full mt-1 p-2 text-sm ${errors.password ? 'border-red-500' : ''}`}
+          {...register("password")}
         />
+        {errors.password && (
+          <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
+        )}
         <div className="mt-2 text-right">
           <Link
             to="/auth/forgetpassword"
@@ -124,8 +139,9 @@ export default function WebLogin() {
 
       <p className="text-center text-sm mt-4">
         Don't have an account?{" "}
-        <button 
-          onClick={() => handleToggle('register')} 
+        <button
+          type="button"
+          onClick={() => handleToggle('register')}
           className="text-[#2BCFD5] cursor-pointer hover:text-[#22BBCC]"
         >
           Sign up
