@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage } from "formik";
 import { categoryTabsConfig } from "@/data/categoryTabsConfig";
 import { CircularProgress } from "@/components/ui/CircularProgress";
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,42 +21,15 @@ import {
   selectError
 } from '@/store/slices/willInstructionsSlice';
 import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import {
+  QuestionItem,
+  buildInitialValues,
+  validate,
+  isQuestionVisible
+} from '@/mobile/components/WillLocation/FormFields';
 
-interface Question {
-  id: string;
-  text: string;
-  type: string;
-  required: boolean;
-  sectionId: string;
-  order: number;
-  dependsOn?: { questionId: string; value: string };
-  placeholder?: string;
-  [key: string]: any;
-}
-
-const getLocationQuestions = (questions: Question[]) =>
-  questions
-    .filter(q => q.sectionId === "105A" || q.sectionId === "105B")
-    .sort((a, b) => a.order - b.order);
-
-const buildInitialValues = (questions: Question[]) =>
-  questions.reduce((acc, q) => ({ ...acc, [q.id]: "" }), {});
-
-const validate = (questions: Question[]) => (values: Record<string, string>) => {
-  const errors: Record<string, string> = {};
-  questions.forEach(q => {
-    // Only validate if the question is visible
-    if (isQuestionVisible(q, values) && q.required && !values[q.id]) {
-      errors[q.id] = "Required";
-    }
-  });
-  return errors;
-};
-
-function isQuestionVisible(q: Question, values: Record<string, string>) {
-  if (!q.dependsOn) return true;
-  return values[q.dependsOn.questionId] === q.dependsOn.value;
-}
+// Filter and sort location questions
+// This function is used by the Redux selector
 
 const LocationInstrucationsPage = () => {
   const { categoryName } = useParams();
@@ -97,10 +70,12 @@ const LocationInstrucationsPage = () => {
     }
   }, [userInputs.length]);
 
-  // Build initial values from existing user inputs or empty values
+  // Build initial values from existing user inputs, form values, or empty values
   const initialValues = userInputs.length > 0
     ? convertUserInputToFormValues(userInputs[0])
-    : buildInitialValues(locationQuestions);
+    : formValues && Object.keys(formValues).length > 0
+      ? { ...buildInitialValues(locationQuestions), ...formValues }
+      : buildInitialValues(locationQuestions);
 
   // Set the step to the target question if provided in URL - only once when component mounts
   useEffect(() => {
@@ -279,30 +254,7 @@ const LocationInstrucationsPage = () => {
                     className={`bg-gray-100 rounded-xl shadow-sm border p-4 ${targetQuestionId === currentQuestion.id ? 'border-[#2BCFD5] border-2' : ''}`}
                     id={`question-${currentQuestion.id}`}
                   >
-                    <label className="block font-medium text-gray-700 mb-2">
-                      {currentQuestion.text}{currentQuestion.required && " *"}
-                    </label>
-                    {currentQuestion.type === "boolean" ? (
-                      <div className="flex space-x-4">
-                        <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[currentQuestion.id] === 'yes' ? 'bg-[#2BCFD5] text-white' : ''}`}>
-                          <Field type="radio" name={currentQuestion.id} value="yes" className="hidden" />
-                          Yes
-                        </label>
-                        <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[currentQuestion.id] === 'no' ? 'bg-[#2BCFD5] text-white' : ''}`}>
-                          <Field type="radio" name={currentQuestion.id} value="no" className="hidden" />
-                          No
-                        </label>
-                      </div>
-                    ) : (
-                      <Field
-                        name={currentQuestion.id}
-                        as={currentQuestion.type === "text" ? "textarea" : "input"}
-                        type={currentQuestion.type === "number" ? "number" : "text"}
-                        className="w-full border rounded-lg px-3 py-2"
-                        rows={currentQuestion.type === "text" ? 3 : undefined}
-                        placeholder={currentQuestion.placeholder || ""}
-                      />
-                    )}
+                    <QuestionItem question={currentQuestion} values={values} />
                     <ErrorMessage name={currentQuestion.id} component="div" className="text-red-500 text-sm mt-1" />
                   </div>
                   {/* Navigation */}
