@@ -173,11 +173,13 @@ export const ButtonChoiceField = ({ question }: { question: ChoiceQuestion }) =>
 export const QuestionItem = ({
   question,
   formValues,
-  isGhosted = false
+  isGhosted = false,
+  onChange
 }: {
   question: Question;
   formValues: Record<string, any>;
   isGhosted?: boolean;
+  onChange?: (value: string) => void;
 }) => {
   // Check if this question depends on another question's answer
   const shouldShow = !question.dependsOn ||
@@ -186,31 +188,171 @@ export const QuestionItem = ({
   if (!shouldShow && isGhosted) {
     return (
       <div className="mb-6 opacity-50 pointer-events-none">
-        {renderQuestion(question)}
+        {renderQuestion(question, onChange)}
       </div>
     );
   } else if (!shouldShow) {
     return null;
   }
 
-  return renderQuestion(question);
+  return renderQuestion(question, onChange);
 };
 
-const renderQuestion = (question: Question) => {
-  switch (question.type) {
-    case 'text':
-      return <TextareaField question={question} />;
-    case 'textarea':
-      return <TextareaField question={question} />;
-    case 'number':
-      return <NumberField question={question as NumberQuestion} />;
-    case 'boolean':
-      return <BooleanField question={question as BooleanQuestion} />;
-    case 'choice':
-      return <ButtonChoiceField question={question as ChoiceQuestion} />;
-    default:
-      return null;
+const renderQuestion = (question: Question, onChange?: (value: string) => void) => {
+  // If onChange is provided, we need to wrap the field components to handle the change
+  if (onChange) {
+    switch (question.type) {
+      case 'text':
+      case 'textarea':
+        return <TextFieldWithOnChange question={question} onChange={onChange} />;
+      case 'number':
+        return <NumberFieldWithOnChange question={question as NumberQuestion} onChange={onChange} />;
+      case 'boolean':
+        return <BooleanFieldWithOnChange question={question as BooleanQuestion} onChange={onChange} />;
+      case 'choice':
+        return <ChoiceFieldWithOnChange question={question as ChoiceQuestion} onChange={onChange} />;
+      default:
+        return null;
+    }
+  } else {
+    // Original behavior without onChange
+    switch (question.type) {
+      case 'text':
+        return <TextareaField question={question} />;
+      case 'textarea':
+        return <TextareaField question={question} />;
+      case 'number':
+        return <NumberField question={question as NumberQuestion} />;
+      case 'boolean':
+        return <BooleanField question={question as BooleanQuestion} />;
+      case 'choice':
+        return <ButtonChoiceField question={question as ChoiceQuestion} />;
+      default:
+        return null;
+    }
   }
+};
+
+// Wrapper components that include onChange handling
+const TextFieldWithOnChange = ({ question, onChange }: { question: TextQuestion | TextareaQuestion, onChange: (value: string) => void }) => {
+  const [field, meta, helpers] = useField(question.id);
+
+  return (
+    <div className="mb-6">
+      <Label className="block mb-2 font-medium" htmlFor={question.id}>
+        {question.text} {question.required && <span className="text-red-500">*</span>}
+      </Label>
+      <Textarea
+        id={question.id}
+        placeholder={question.placeholder}
+        {...field}
+        onChange={(e) => {
+          field.onChange(e);
+          onChange(e.target.value);
+        }}
+        className={`w-full ${meta.touched && meta.error ? 'border-red-500' : ''}`}
+      />
+      {meta.touched && meta.error ? (
+        <div className="text-red-500 text-sm mt-1">{meta.error}</div>
+      ) : null}
+    </div>
+  );
+};
+
+const NumberFieldWithOnChange = ({ question, onChange }: { question: NumberQuestion, onChange: (value: string) => void }) => {
+  const [field, meta, helpers] = useField(question.id);
+
+  return (
+    <div className="mb-6">
+      <Label className="block mb-2 font-medium" htmlFor={question.id}>
+        {question.text} {question.required && <span className="text-red-500">*</span>}
+      </Label>
+      <Input
+        id={question.id}
+        type="tel"
+        placeholder={question.placeholder}
+        {...field}
+        onChange={(e) => {
+          field.onChange(e);
+          onChange(e.target.value);
+        }}
+        className={`w-full ${meta.touched && meta.error ? 'border-red-500' : ''}`}
+      />
+      {meta.touched && meta.error ? (
+        <div className="text-red-500 text-sm mt-1">{meta.error}</div>
+      ) : null}
+    </div>
+  );
+};
+
+const BooleanFieldWithOnChange = ({ question, onChange }: { question: BooleanQuestion, onChange: (value: string) => void }) => {
+  const [field, meta, helpers] = useField(question.id);
+
+  // Default options for boolean questions if not provided
+  const options = question.options || ['yes', 'no'];
+
+  return (
+    <div className="mb-6">
+      <Label className="block mb-2 font-medium">
+        {question.text} {question.required && <span className="text-red-500">*</span>}
+      </Label>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        {options.map((option) => (
+          <Button
+            key={option}
+            type="button"
+            onClick={() => {
+              helpers.setValue(option);
+              onChange(option);
+            }}
+            className={field.value === option
+              ? 'bg-[#1ccfc9] hover:bg-[#19bbb5]'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
+          >
+            {option}
+          </Button>
+        ))}
+      </div>
+      {meta.touched && meta.error ? (
+        <div className="text-red-500 text-sm mt-1">{meta.error}</div>
+      ) : null}
+    </div>
+  );
+};
+
+const ChoiceFieldWithOnChange = ({ question, onChange }: { question: ChoiceQuestion, onChange: (value: string) => void }) => {
+  const [field, meta, helpers] = useField(question.id);
+
+  // Default options for choice questions if not provided
+  const options = question.options || ['yes', 'no'];
+
+  return (
+    <div className="mb-6">
+      <Label className="block mb-2 font-medium">
+        {question.text} {question.required && <span className="text-red-500">*</span>}
+      </Label>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+        {options.map((option) => (
+          <Button
+            key={option}
+            type="button"
+            onClick={() => {
+              helpers.setValue(option);
+              onChange(option);
+            }}
+            className={field.value === option
+              ? 'bg-[#1ccfc9] hover:bg-[#19bbb5]'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
+          >
+            {option}
+          </Button>
+        ))}
+      </div>
+      {meta.touched && meta.error ? (
+        <div className="text-red-500 text-sm mt-1">{meta.error}</div>
+      ) : null}
+    </div>
+  );
 };
 
 // Fixed validation schema builder for WillInstructions
@@ -287,7 +429,7 @@ export const generateInitialValues = (questions: Question[]): Record<string, any
 // Helper function to handle dependent answers
 export const handleDependentAnswers = (
   values: Record<string, any>,
-  questions: Question[]
+  questions: any[]
 ): Record<string, any> => {
   const result = { ...values };
 

@@ -52,11 +52,7 @@
         "type": "boolean",
         "required": true,
         "sectionId": "105C",
-        "order": 5,
-        "dependsOn": {
-          "questionId": "w1",
-          "value": "yes"
-        }
+        "order": 5
       },
       {
         "id": "w6",
@@ -72,4 +68,3 @@
       }
     ]
   }
-  

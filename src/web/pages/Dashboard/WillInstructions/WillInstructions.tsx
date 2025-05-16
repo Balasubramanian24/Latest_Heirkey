@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
@@ -5,40 +6,40 @@ import { CheckCircle2 } from 'lucide-react';
 import AppHeader from '@/web/components/Layout/AppHeader';
 import Footer from '@/web/components/Layout/Footer';
 import avatar from '@/assets/global/defaultAvatar/defaultImage.jpg';
-import willInstructionsData from '@/data/willInstructions.json';
 import SearchPanel from '@/web/pages/Global/SearchPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams } from 'react-router-dom';
 import SubCategoryTabs from '@/web/components/Global/SubCategoryTabs';
 import { categoryTabsConfig } from '@/data/categoryTabsConfig';
+import { useAppDispatch, useAppSelector } from '@/store';
+import {
+  fetchUserInputs,
+  selectSubcategories,
+  selectProgressStats,
+  selectUserInputs,
+  UserInput
+} from '@/store/slices/willInstructionsSlice';
 
-interface SubCategory {
-  id: string;
-  title: string;
-  questionsCount: number;
-}
+// SubCategory interface is now imported from willInstructionsSlice
 
-// Define subcategories for Will & Testament
-const subcategories: SubCategory[] = [
-  {
-    id: '105B',
-    title: 'Location',
-    questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105A' || q.sectionId === '105B')?.length || 0
-  },
-  {
-    id: '105A',
-    title: 'Legal',
-    questionsCount: willInstructionsData['105']?.filter(q => q.sectionId === '105C')?.length || 0
-  }
-];
+const SubCategoryCard = ({ subcategory }: { subcategory: any }) => {
+  // Get the user inputs from Redux store
+  const userInputs = useAppSelector(selectUserInputs) as UserInput[];
 
-const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
-  // This would come from your user's data in a real implementation
-  const completedQuestions = 0;
-  const completionPercentage = subcategory.questionsCount > 0 
-    ? Math.round((completedQuestions / subcategory.questionsCount) * 100) 
+  // Calculate completed questions for this subcategory
+  const completedQuestions = userInputs.reduce((count: number, input: UserInput) => {
+    if (input.originalSubCategoryId === subcategory.id) {
+      return count + input.answersBySection.reduce(
+        (sectionCount: number, section) => sectionCount + section.answers.length, 0
+      );
+    }
+    return count;
+  }, 0);
+
+  const completionPercentage = subcategory.questionsCount > 0
+    ? Math.round((completedQuestions / subcategory.questionsCount) * 100)
     : 0;
-  
+
   return (
     <div className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md">
       <div className="p-4">
@@ -48,9 +49,9 @@ const SubCategoryCard = ({ subcategory }: { subcategory: SubCategory }) => {
             {completedQuestions}/{subcategory.questionsCount} questions
           </span>
         </div>
-        <Progress 
-          value={completionPercentage} 
-          className="h-1.5 mb-2" 
+        <Progress
+          value={completionPercentage}
+          className="h-1.5 mb-2"
         />
       </div>
     </div>
@@ -61,6 +62,18 @@ const WillInstructions = ({ category }: { category?: string }) => {
   const { user } = useAuth();
   const params = useParams();
   const categoryName = category || params.categoryName;
+  const dispatch = useAppDispatch();
+
+  // Get data from Redux store
+  const subcategories = useAppSelector(selectSubcategories);
+  const progressStats = useAppSelector(selectProgressStats);
+
+  // Fetch user inputs when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user]);
 
   // Fallback user info if not authenticated
   const userInfo = {
@@ -69,20 +82,7 @@ const WillInstructions = ({ category }: { category?: string }) => {
     avatar: user?.image || avatar
   };
 
-  // Calculate overall progress
-  const progressStats = (() => {
-    const totalQuestions = willInstructionsData['105']?.length || 0;
-    // In a real app, you'd get this from your backend
-    const answeredQuestions = 0;
-    const completionPercentage = totalQuestions > 0 
-      ? Math.round((answeredQuestions / totalQuestions) * 100) 
-      : 0;
-    return {
-      totalQuestions,
-      answeredQuestions,
-      completionPercentage
-    };
-  })();
+  // Progress stats are now fetched from Redux
 
   const tabs = categoryTabsConfig[categoryName as keyof typeof categoryTabsConfig] || categoryTabsConfig['willinstructions'];
 
@@ -105,9 +105,9 @@ const WillInstructions = ({ category }: { category?: string }) => {
                 <div className="text-sm opacity-80">{userInfo.email}</div>
               </div>
               <Avatar className="rounded-full w-14 h-14 bg-white overflow-hidden">
-                <img 
-                  src={userInfo.avatar} 
-                  alt={userInfo.name} 
+                <img
+                  src={userInfo.avatar}
+                  alt={userInfo.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -134,9 +134,9 @@ const WillInstructions = ({ category }: { category?: string }) => {
                     {progressStats.answeredQuestions}/{progressStats.totalQuestions} questions completed
                   </span>
                 </div>
-                <Progress 
-                  value={progressStats.completionPercentage} 
-                  className="h-2" 
+                <Progress
+                  value={progressStats.completionPercentage}
+                  className="h-2"
                 />
                 {progressStats.completionPercentage === 100 && (
                   <div className="mt-2 text-center">
@@ -148,7 +148,7 @@ const WillInstructions = ({ category }: { category?: string }) => {
               </div>
               <h2 className="text-xl font-semibold text-[#183153] mb-2">Good to Know: <span className="text-purple-600">How to Understand Topics</span></h2>
               <p className="text-gray-600 mb-6">
-                Each topic below is a part of your home documents, with questions to help you provide important 
+                Each topic below is a part of your home documents, with questions to help you provide important
                 information for you and your loved ones. Click any topic to answer the questions at your own pace—
                 we'll save everything for you.
               </p>

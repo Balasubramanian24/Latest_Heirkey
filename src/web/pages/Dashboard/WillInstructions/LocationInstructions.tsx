@@ -13,7 +13,8 @@ import SubCategoryFooterNav from '@/web/components/Global/SubCategoryFooterNav';
 import {
   QuestionItem,
   buildValidationSchema,
-  generateInitialValues
+  generateInitialValues,
+  handleDependentAnswers
 } from '@/web/components/WillInstructions/FormFields';
 import ScrollToQuestion from '@/web/components/WillInstructions/ScrollToQuestion';
 import SubCategoryHeader from '@/web/components/Global/SubCategoryHeader';
@@ -119,6 +120,7 @@ const LocationInstructions = () => {
               <Formik
                 initialValues={formValues || generateInitialValues(questions as any)}
                 validationSchema={Yup.object(buildValidationSchema(questions as any, Yup))}
+                enableReinitialize={true}
                 onSubmit={async (values) => {
                   try {
                     // Store form values in Redux for cross-page navigation
@@ -205,10 +207,26 @@ const LocationInstructions = () => {
                   }
                 }}
               >
-                {({ values, isSubmitting }) => (
-                  <Form>
-                    <ScrollToQuestion questions={questions}>
-                      {(refs) => (
+                {({ values, isSubmitting, setValues }) => {
+                  // Function to handle field changes and clear dependent fields
+                  const handleFieldChange = (fieldId: string, value: string) => {
+                    // Create a new values object with the updated field
+                    const newValues = { ...values, [fieldId]: value };
+
+                    // Process dependent answers - clear values of dependent questions if condition not met
+                    const updatedValues = handleDependentAnswers(newValues, questions);
+
+                    // Update form values
+                    setValues(updatedValues);
+
+                    // Update Redux store with the new values
+                    dispatch(updateFormValues(updatedValues));
+                  };
+
+                  return (
+                    <Form>
+                      <ScrollToQuestion questions={questions}>
+                        {(refs) => (
                         <>
                           {questions.map((question) => (
                             <div
@@ -218,7 +236,11 @@ const LocationInstructions = () => {
                                 refs[question.id] = el;
                               }}
                             >
-                              <QuestionItem question={question as any} formValues={values} />
+                              <QuestionItem
+                                question={question as any}
+                                formValues={values}
+                                onChange={(value: string) => handleFieldChange(question.id, value)}
+                              />
                             </div>
                           ))}
                         </>
@@ -244,7 +266,8 @@ const LocationInstructions = () => {
                       rightTo="/category/willinstructions/legal"
                     />
                   </Form>
-                )}
+                  );
+                }}
               </Formik>
             </div>
           </div>
