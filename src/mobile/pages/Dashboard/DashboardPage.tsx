@@ -168,7 +168,7 @@ export default function DashboardPage() {
           <div className="w-full max-w-md mx-auto px-4 py-6">
             <div className="flex justify-between items-center mb-1">
               <h1 className="text-xl font-bold text-secondary-900">Your Folders</h1>
-              <button
+              {/* <button
                 onClick={() => {
                   dataFetchedRef.current = false;
                   fetchDashboardStats();
@@ -184,7 +184,7 @@ export default function DashboardPage() {
                   </svg>
                 )}
                 Refresh
-              </button>
+              </button> */}
             </div>
             <p className="text-sm text-muted-foreground mb-6">
               Your information is organized in folders. Tap any section to explore the details.

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
 import Footer from '@/mobile/components/layout/Footer';
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage } from "formik";
 import { categoryTabsConfig } from "@/data/categoryTabsConfig";
 import { CircularProgress } from "@/components/ui/CircularProgress";
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,43 +21,15 @@ import {
   selectError
 } from '@/store/slices/willInstructionsSlice';
 import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
+import {
+  QuestionItem,
+  buildInitialValues,
+  validate,
+  isQuestionVisible
+} from '@/mobile/components/WillLocation/FormFields';
 
-interface Question {
-  id: string;
-  text: string;
-  type: string;
-  required: boolean;
-  sectionId: string;
-  order: number;
-  dependsOn?: { questionId: string; value: string };
-  placeholder?: string;
-  [key: string]: any;
-}
-
-const getLegalQuestions = (questions: Question[]) =>
-  questions
-    .filter(q => q.sectionId === "105C")
-    .sort((a, b) => a.order - b.order);
-
-const buildInitialValues = (questions: Question[]) =>
-  questions.reduce((acc, q) => ({ ...acc, [q.id]: "" }), {});
-
-const validate = (questions: Question[]) => (values: Record<string, string>) => {
-  const errors: Record<string, string> = {};
-  questions.forEach(q => {
-    if (isQuestionVisible(q, values, questions) && q.required && !values[q.id]) {
-      errors[q.id] = "Required";
-    }
-  });
-  return errors;
-};
-
-function isQuestionVisible(q: Question, values: Record<string, string>, sectionQuestions: Question[]) {
-  if (!q.dependsOn) return true;
-  // If the dependency is not in the current section, ignore the dependency
-  if (!sectionQuestions.some(lq => lq.id === q.dependsOn?.questionId)) return true;
-  return values[q.dependsOn.questionId] === q.dependsOn.value;
-}
+// Filter and sort legal questions
+// This function is used by the Redux selector
 
 const LegalInstructionsPage = () => {
   const { categoryName } = useParams();
@@ -97,10 +69,12 @@ const LegalInstructionsPage = () => {
     }
   }, [userInputs.length]);
 
-  // Build initial values from existing user inputs or empty values
+  // Build initial values from existing user inputs, form values, or empty values
   const initialValues = userInputs.length > 0
     ? convertUserInputToFormValues(userInputs[0])
-    : buildInitialValues(legalQuestions);
+    : formValues && Object.keys(formValues).length > 0
+      ? { ...buildInitialValues(legalQuestions), ...formValues }
+      : buildInitialValues(legalQuestions);
 
   return (
     <div className="min-h-screen bg-white">
@@ -231,8 +205,8 @@ const LegalInstructionsPage = () => {
           >
             {({ values, isSubmitting }: { values: Record<string, string>; isSubmitting: boolean }) => {
               // Progress calculation
-              const answeredCount = legalQuestions.filter(q => values[q.id] && isQuestionVisible(q, values, legalQuestions)).length;
-              const totalCount = legalQuestions.filter(q => isQuestionVisible(q, values, legalQuestions)).length;
+              const answeredCount = legalQuestions.filter(q => values[q.id] && isQuestionVisible(q, values)).length;
+              const totalCount = legalQuestions.filter(q => isQuestionVisible(q, values)).length;
               return (
                 <Form className="space-y-4">
                   {/* Progress */}
@@ -244,7 +218,7 @@ const LegalInstructionsPage = () => {
                   </div>
                   {/* Questions */}
                   {legalQuestions.map((q) =>
-                    isQuestionVisible(q, values, legalQuestions) && (
+                    isQuestionVisible(q, values) && (
                       <div
                         key={q.id}
                         id={`question-${q.id}`}
@@ -260,30 +234,7 @@ const LegalInstructionsPage = () => {
                           }
                         }}
                       >
-                        <label className="block font-medium text-gray-700 mb-2">
-                          {q.text}{q.required && " *"}
-                        </label>
-                        {q.type === "boolean" ? (
-                          <div className="flex space-x-4">
-                            <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[q.id] === 'yes' ? 'bg-[#2BCFD5] text-white' : ''}`}>
-                              <Field type="radio" name={q.id} value="yes" className="hidden" />
-                              Yes
-                            </label>
-                            <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[q.id] === 'no' ? 'bg-[#2BCFD5] text-white' : ''}`}>
-                              <Field type="radio" name={q.id} value="no" className="hidden" />
-                              No
-                            </label>
-                          </div>
-                        ) : (
-                          <Field
-                            name={q.id}
-                            as={q.type === "text" ? "textarea" : "input"}
-                            type={q.type === "number" ? "number" : "text"}
-                            className="w-full border rounded-lg px-3 py-2"
-                            rows={q.type === "text" ? 3 : undefined}
-                            placeholder={q.placeholder || ""}
-                          />
-                        )}
+                        <QuestionItem question={q} values={values} />
                         <ErrorMessage name={q.id} component="div" className="text-red-500 text-sm mt-1" />
                       </div>
                     )

@@ -448,7 +448,7 @@ export default function PetsInstructionsPage() {
               </div>
 
               {/* Success message */}
-              {showSuccessMessage && (
+              {/* {showSuccessMessage && (
                 <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-lg flex justify-between items-center">
                   <div>
                     <p className="font-semibold">Data saved successfully!</p>
@@ -462,7 +462,7 @@ export default function PetsInstructionsPage() {
                     Continue to Trash →
                   </button>
                 </div>
-              )}
+              )} */}
 
               <div className="mt-6 flex justify-between items-center">
                 <button
@@ -485,7 +485,7 @@ export default function PetsInstructionsPage() {
                       // Force move to the next step
                       setStep(prevStep => {
                         const newStep = prevStep + 1;
-                        console.log('Setting step to:', newStep);
+                        // console.log('Setting step to:', newStep);
                         return newStep;
                       });
                     }}
@@ -499,12 +499,13 @@ export default function PetsInstructionsPage() {
                     type="submit"
                     disabled={isSubmitting}
                     className="bg-[#2BCFD5] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#25b6bb]"
-                    onClick={() => {
+                    // onClick={() => {
                       // console.log('Save button clicked, current step:', step, 'of', steps.length);
                       // console.log('Current visible questions:', visibleQuestions.map(q => q.id));
                       // console.log('Current steps:', steps.map(s => s.map(q => q.id)));
                       // console.log('Current step questions:', currentStepQuestions.map(q => q.id));
-                    }}
+                    // }}
+                    onClick={() => navigate(`/category/${categoryName}/trash`)}
                   >
                     {step < 2 ? 'Save & Continue' : 'Save & Finish'}
                   </button>
