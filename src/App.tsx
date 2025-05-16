@@ -22,10 +22,10 @@ import TrashInstructionsPage from '@/mobile/pages/HomeInstructions/TrashInstruct
 import OtherInstructionsPage from "./mobile/pages/HomeInstructions/OtherInstructionsPage";
 import SecurityInstructionsPage from "./mobile/pages/HomeInstructions/SecurityInstructionsPage";
 import HomeInstructionsReviewPage from "./mobile/pages/HomeInstructions/HomeInstructionsReviewPage";
-import LocationInstrucationsPage from "./mobile/pages/WillLoacation/LocationInstrucationsPage";
-import LegalInstructionsPage from "./mobile/pages/WillLoacation/LegalInstructionsPage";
-import WillInstructionsPage from "./mobile/pages/WillLoacation/WillInstructionsPage";
-import WillInstructionsReviewPage from "./mobile/pages/WillLoacation/WillInstructionReviewPage";
+import LocationInstrucationsPage from "./mobile/pages/WillLocation/LocationInstrucationsPage";
+import LegalInstructionsPage from "./mobile/pages/WillLocation/LegalInstructionsPage";
+import WillInstructionsPage from "./mobile/pages/WillLocation/WillInstructionsPage";
+import WillInstructionsReviewPage from "./mobile/pages/WillLocation/WillInstructionReviewPage";
 import FuneralArrangementsPage from '@/mobile/pages/FuneralArrangements/FuneralArrangementsPage';
 import FuneralDetailsPage from '@/mobile/pages/FuneralArrangements/FuneralDetailsPage';
 import CeremonyLocationPage from '@/mobile/pages/FuneralArrangements/CeremonyLocationPage';
