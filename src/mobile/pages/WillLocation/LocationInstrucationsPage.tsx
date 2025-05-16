@@ -1,12 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, CardContent } from "@/components/ui/card";
 import GradiantHeader from '@/mobile/components/header/gradiantHeader';
-import willInstructionsData from "@/data/willInstructions.json";
 import Footer from '@/mobile/components/layout/Footer';
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { categoryTabsConfig } from "@/data/categoryTabsConfig";
 import { CircularProgress } from "@/components/ui/CircularProgress";
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
+import {
+  fetchUserInputs,
+  saveUserInput,
+  updateUserInput,
+  updateFormValues,
+  selectQuestionsBySubcategoryId,
+  selectUserInputsBySubcategoryId,
+  selectFormValues,
+  selectLoading,
+  selectError
+} from '@/store/slices/willInstructionsSlice';
+import { generateObjectId, convertUserInputToFormValues } from '@/services/userInputService';
 
 interface Question {
   id: string;
@@ -28,7 +42,7 @@ const getLocationQuestions = (questions: Question[]) =>
 const buildInitialValues = (questions: Question[]) =>
   questions.reduce((acc, q) => ({ ...acc, [q.id]: "" }), {});
 
-const validate = (questions: Question[]) => (values: Record<string, any>) => {
+const validate = (questions: Question[]) => (values: Record<string, string>) => {
   const errors: Record<string, string> = {};
   questions.forEach(q => {
     // Only validate if the question is visible
@@ -39,7 +53,7 @@ const validate = (questions: Question[]) => (values: Record<string, any>) => {
   return errors;
 };
 
-function isQuestionVisible(q: Question, values: Record<string, any>) {
+function isQuestionVisible(q: Question, values: Record<string, string>) {
   if (!q.dependsOn) return true;
   return values[q.dependsOn.questionId] === q.dependsOn.value;
 }
@@ -47,21 +61,63 @@ function isQuestionVisible(q: Question, values: Record<string, any>) {
 const LocationInstrucationsPage = () => {
   const { categoryName } = useParams();
   const navigate = useNavigate();
-  const allQuestions: Question[] = willInstructionsData["105"];
-  const locationQuestions = getLocationQuestions(allQuestions);
-  const initialValues = buildInitialValues(locationQuestions);
+  const dispatch = useAppDispatch();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
+  const [existingInputId, setExistingInputId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const hasSetInitialStep = useRef(false);
+
+  // Get questionId from URL query parameters
+  const location = window.location;
+  const searchParams = new URLSearchParams(location.search);
+  const targetQuestionId = searchParams.get('questionId');
+
+  // Get data from Redux store
+  const locationQuestions = useAppSelector(selectQuestionsBySubcategoryId('105-location'));
+  const userInputs = useAppSelector(selectUserInputsBySubcategoryId('105-location'));
+  const formValues = useAppSelector(selectFormValues);
+  const loading = useAppSelector(selectLoading);
+  const reduxError = useAppSelector(selectError);
+
   const tabs = categoryTabsConfig[categoryName as keyof typeof categoryTabsConfig] || [];
   const currentPath = `/category/${categoryName}/location`;
 
-  // Get the visible questions up to the current step
-  const visibleQuestions = locationQuestions.filter((q, idx) =>
-    idx <= step && isQuestionVisible(q, initialValues)
-  );
+  // Fetch user inputs when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchUserInputs(user.id));
+    }
+  }, [dispatch, user?.id]);
+
+  // Set existing input ID if we have saved data
+  useEffect(() => {
+    if (userInputs.length > 0 && userInputs[0]._id) {
+      setExistingInputId(userInputs[0]._id);
+    }
+  }, [userInputs.length]);
+
+  // Build initial values from existing user inputs or empty values
+  const initialValues = userInputs.length > 0
+    ? convertUserInputToFormValues(userInputs[0])
+    : buildInitialValues(locationQuestions);
+
+  // Set the step to the target question if provided in URL - only once when component mounts
+  useEffect(() => {
+    // Only set the step once to avoid infinite loops
+    if (targetQuestionId && locationQuestions.length > 0 && !hasSetInitialStep.current) {
+      const questionIndex = locationQuestions.findIndex(q => q.id === targetQuestionId);
+      if (questionIndex !== -1) {
+        setStep(questionIndex);
+        // Mark that we've set the initial step
+        hasSetInitialStep.current = true;
+      }
+    }
+  }, [targetQuestionId, locationQuestions]);
 
   return (
     <div className="min-h-screen bg-white">
-      <GradiantHeader 
+      <GradiantHeader
         showAvatar={true}
         title="Will Location"
       />
@@ -91,15 +147,117 @@ const LocationInstrucationsPage = () => {
             })}
           </div>
           {/* Stepper Tabs */}
+          {/* Show error message if any */}
+          {(error || reduxError) && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error || reduxError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Show loading indicator */}
+          {loading && (
+            <div className="flex justify-center my-4">
+              <Loader2 className="h-8 w-8 animate-spin text-[#2BCFD5]" />
+            </div>
+          )}
+
           <Formik
             initialValues={initialValues}
             validate={validate(locationQuestions)}
-            onSubmit={(values) => {
-              // Save or submit logic here (optionally store values)
-              navigate(`/category/${categoryName}/legal`);
+            enableReinitialize={true}
+            onSubmit={async (values: Record<string, string>) => {
+              try {
+                setError(null);
+
+                // Store form values in Redux for cross-page navigation
+                dispatch(updateFormValues(values));
+
+                // Prepare data for saving to backend
+                const answersBySection: any[] = [];
+
+                // Group answers by section
+                const sectionA: any = {
+                  originalSectionId: '105A',
+                  isCompleted: true,
+                  answers: []
+                };
+
+                const sectionB: any = {
+                  originalSectionId: '105B',
+                  isCompleted: true,
+                  answers: []
+                };
+
+                // Process all questions and their answers
+                locationQuestions.forEach((question, index) => {
+                  const answer = values[question.id];
+                  if (answer) {
+                    const answerObj = {
+                      index,
+                      questionId: generateObjectId(), // Generate a MongoDB compatible ID
+                      originalQuestionId: question.id,
+                      question: question.text,
+                      type: question.type,
+                      answer
+                    };
+
+                    // Add to appropriate section
+                    if (question.sectionId === '105A') {
+                      sectionA.answers.push(answerObj);
+                    } else if (question.sectionId === '105B') {
+                      sectionB.answers.push(answerObj);
+                    }
+                  }
+                });
+
+                // Add non-empty sections to the array
+                if (sectionA.answers.length > 0) {
+                  answersBySection.push(sectionA);
+                }
+
+                if (sectionB.answers.length > 0) {
+                  answersBySection.push(sectionB);
+                }
+
+                // Create user input data object
+                const userData = {
+                  userId: user?.id || '',
+                  categoryId: generateObjectId(), // Generate a MongoDB compatible ID
+                  originalCategoryId: '2', // Will Instructions category ID
+                  subCategoryId: generateObjectId(), // Generate a MongoDB compatible ID
+                  originalSubCategoryId: '105-location',
+                  answersBySection
+                };
+
+                // Update or create based on whether we have an existing record
+                if (existingInputId) {
+                  await dispatch(updateUserInput({
+                    id: existingInputId,
+                    userData
+                  }));
+                } else {
+                  // Save to backend using Redux action
+                  const result = await dispatch(saveUserInput(userData));
+
+                  // Store the new record ID for future updates
+                  const payload = result.payload as any;
+                  if (payload && payload._id) {
+                    setExistingInputId(payload._id);
+                  }
+                }
+
+                // Navigate to next page with a slight delay to ensure Redux state is updated
+                setTimeout(() => {
+                  // Use willinstructions as default if categoryName is undefined
+                  navigate(`/category/${categoryName || 'willinstructions'}/legal`);
+                }, 100);
+              } catch (err: any) {
+                console.error('Error saving data:', err);
+                setError(err.message || 'Failed to save data. Please try again.');
+              }
             }}
           >
-            {({ values, isSubmitting, setFieldValue }: { values: Record<string, any>; isSubmitting: boolean; setFieldValue: any }) => {
+            {({ values, isSubmitting }: { values: Record<string, string>; isSubmitting: boolean; setFieldValue?: any }) => {
               // Find the current question to display
               const currentQuestion = locationQuestions[step];
               if (!isQuestionVisible(currentQuestion, values)) {
@@ -117,17 +275,20 @@ const LocationInstrucationsPage = () => {
                     </span>
                   </div>
                   {/* Question Card */}
-                  <div className="bg-gray-100 rounded-xl shadow-sm border p-4">
+                  <div
+                    className={`bg-gray-100 rounded-xl shadow-sm border p-4 ${targetQuestionId === currentQuestion.id ? 'border-[#2BCFD5] border-2' : ''}`}
+                    id={`question-${currentQuestion.id}`}
+                  >
                     <label className="block font-medium text-gray-700 mb-2">
                       {currentQuestion.text}{currentQuestion.required && " *"}
                     </label>
                     {currentQuestion.type === "boolean" ? (
                       <div className="flex space-x-4">
-                        <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[currentQuestion.id] === 'yes' ? 'bg-[#2BCFD5] text-white' : ''}`}> 
+                        <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[currentQuestion.id] === 'yes' ? 'bg-[#2BCFD5] text-white' : ''}`}>
                           <Field type="radio" name={currentQuestion.id} value="yes" className="hidden" />
                           Yes
                         </label>
-                        <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[currentQuestion.id] === 'no' ? 'bg-[#2BCFD5] text-white' : ''}`}> 
+                        <label className={`flex-1 py-2 px-4 border rounded-xl text-center cursor-pointer bg-gray-50 hover:bg-[#25b6bb] hover:text-white ${values[currentQuestion.id] === 'no' ? 'bg-[#2BCFD5] text-white' : ''}`}>
                           <Field type="radio" name={currentQuestion.id} value="no" className="hidden" />
                           No
                         </label>

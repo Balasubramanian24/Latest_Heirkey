@@ -105,19 +105,20 @@ export default function App() {
             <Route path="/auth/google/callback" element={<GoogleAuthCallback />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
-            
+
             <Route path="/category/:categoryName" element={<Layout><CategoryConfirmPage /></Layout>} />
             <Route path="/category/:categoryName/info" element={<Layout><InfoPageWrapper /></Layout>} />
             <Route path="/category/:categoryName/pets" element={<Layout><PetsInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/trash" element={<Layout><TrashInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/other" element={<Layout><OtherInstructionsPage /></Layout>} />
             <Route path="/category/:categoryName/security" element={<Layout><SecurityInstructionsPage /></Layout>} />
-            <Route path="/category/:categoryName/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
+            {/* Home Instructions Review Route */}
+            <Route path="/category/homeinstructions/review" element={<Layout><HomeInstructionsReviewPage /></Layout>} />
 
-
-            <Route path="/category/:categoryName/location" element={<Layout><LocationInstrucationsPage /></Layout>} />
-            <Route path="/category/:categoryName/legal" element={<Layout><LegalInstructionsPage /></Layout>} />
-            <Route path="/category/:categoryName/review" element={<Layout><WillInstructionsReviewPage /></Layout>} />
+            {/* Will Instructions Routes */}
+            <Route path="/category/willinstructions/location" element={<Layout><LocationInstrucationsPage /></Layout>} />
+            <Route path="/category/willinstructions/legal" element={<Layout><LegalInstructionsPage /></Layout>} />
+            <Route path="/category/willinstructions/review" element={<Layout><WillInstructionsReviewPage /></Layout>} />
           </>
         ) : (
           // Web routes
@@ -133,7 +134,7 @@ export default function App() {
             <Route path="/auth/user-profile" element={<ProtectedRoute><WebLayout><WebUserProfile /></WebLayout></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><WebLayout><Dashboard /></WebLayout></ProtectedRoute>} />
 
-            
+
             <Route path="/category/:categoryName" element={<CategoryStartupWrapper />} />
             <Route path="/category/:categoryName/info" element={<CategoryInfoWrapper />} />
             <Route path="/category/:categoryName/pets" element={<PetsInstructions />} />
@@ -142,7 +143,7 @@ export default function App() {
             <Route path="/category/:categoryName/security" element={<SecurityInstructions />} />
             <Route path="/category/homeinstructions/review" element={<HomeInstructionsReview />} />
 
-            
+
             <Route path="/category/:categoryName/location" element={<LocationInstructions />} />
             <Route path="/category/:categoryName/legal" element={<LegalInstructions />} />
             <Route path="/category/willinstructions/review" element={<WillInstructionsReview />} />
