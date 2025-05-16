@@ -26,7 +26,7 @@ interface ReviewItem {
 const questionToSubcategoryMap: Record<string, string> = {};
 
 // Initialize the question to subcategory mapping
-Object.entries(willInstructionsData).forEach(([categoryId, questions]) => {
+Object.entries(willInstructionsData).forEach(([_, questions]) => {
   questions.forEach(question => {
     // Map to our custom subcategory keys
     let subKey = '';
@@ -64,8 +64,20 @@ const WillInstructionReviewPage = () => {
         console.log("DIRECT API RESPONSE FOR WILL INSTRUCTIONS:", data);
 
         // Ensure we're only working with Will Instructions data (category ID 2)
+        // Add more explicit filtering to exclude funeral arrangements data
         const willInstructionsData = Array.isArray(data)
-          ? data.filter(item => item.originalCategoryId === '2')
+          ? data.filter(item => {
+              // Only include items with originalCategoryId === '2'
+              if (item.originalCategoryId !== '2') return false;
+
+              // Exclude any items that might be related to funeral arrangements
+              // Check if any section IDs start with '106' (funeral arrangements)
+              const hasFuneralSections = item.answersBySection?.some(
+                (section: any) => section.originalSectionId?.startsWith('106')
+              );
+
+              return !hasFuneralSections;
+            })
           : [];
 
         console.log("FILTERED WILL INSTRUCTIONS DATA:", willInstructionsData);
@@ -77,9 +89,15 @@ const WillInstructionReviewPage = () => {
         willInstructionsData.forEach((userInput: any) => {
           console.log("Processing userInput:", userInput);
 
-          // Process answers by section
+          // Process answers by section - only include Will Instructions sections (105A, 105B, 105C)
           userInput.answersBySection.forEach((section: any) => {
             console.log("Processing section:", section);
+
+            // Skip sections that aren't part of Will Instructions
+            if (!section.originalSectionId?.startsWith('105')) {
+              console.log("Skipping non-Will Instructions section:", section.originalSectionId);
+              return;
+            }
 
             section.answers.forEach((answer: any) => {
               console.log("Processing answer:", answer);
